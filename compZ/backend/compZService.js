@@ -5,20 +5,7 @@ const mySql = require("mysql-ssh");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-var db = mySql.connect(
-  {
-    host: "bluenose.cs.dal.ca",
-    user: "meganathan",
-    password: "B00851418",
-    Port: 3306,
-  },
-  {
-    host: "db.cs.dal.ca",
-    user: "meganathan",
-    password: "B00851418",
-    database: "meganathan",
-  }
-);
+var db = mySql.connect();
 
 port = process.env.Port || 3000;
 app.listen(port, () => {
