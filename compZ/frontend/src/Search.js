@@ -21,6 +21,7 @@ class Search extends Component {
   };
 
   onSearch = (e) => {
+    e.preventDefault();
     let obj = {};
     obj = jobparts.filter((c) =>
       c.jobname.toLowerCase().includes(this.state.search.toLowerCase())
@@ -45,21 +46,19 @@ class Search extends Component {
                 <thead className="thead">
                   <tr>
                     <th>Jobname</th>
-                    <th>Parid</th>
+                    <th>Partid</th>
                     <th>Quantity</th>
-                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {this.state.jobpart.map((data) => {
                     return (
-                      <tr key={data.id}>
+                      <tr key={Math.random()}>
                         <th>
-                          <a href={`/login/${data.id}`}>{data.jobname}</a>
+                          <a href={`/login/${data.jobname}`}>{data.jobname}</a>
                         </th>
                         <td>{data.partid}</td>
                         <td>{data.quantity}</td>
-                        <td></td>
                       </tr>
                     );
                   })}
@@ -84,7 +83,7 @@ class Search extends Component {
           >
             Search page
           </h4>
-          <div className="border rounded pt-1 ml-3" style={{ width: "40%" }}>
+          <div className="border rounded pt-1 ml-3" style={{ width: "20%" }}>
             <form>
               <input
                 type="text"
@@ -93,43 +92,21 @@ class Search extends Component {
                 name="search"
                 value={this.state.search}
                 onChange={this.onChange}
+                style={{
+                  border: "2px solid red",
+                  borderRadius: "4px",
+                }}
               />
-              <Button variant="outline-success" onClick={this.onSearch}>
+              <Button
+                type="submit"
+                variant="outline-success"
+                onClick={this.onSearch}
+              >
                 Search
               </Button>
             </form>
           </div>
           {this.searchResults()}
-          {/* <div>
-            {this.state.jobpart.length > 0 ? (
-              <div>
-                <div className="col-12 col-sm-12 pt-4">
-                  <table className="table table-hover">
-                    <thead className="thead">
-                      <tr>
-                        <th>Jobname</th>
-                        <th>Parid</th>
-                        <th>Quantity</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {this.state.jobpart.map((data) => {
-                        return (
-                          <tr>
-                            <th>{data.jobname}</th>
-                            <td>{data.partid}</td>
-                            <td>{data.quantity}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            ) : (
-              <div></div>
-            )}
-          </div> */}
         </div>
       </div>
     );

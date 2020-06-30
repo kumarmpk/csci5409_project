@@ -5,6 +5,7 @@ import Header from "./Header";
 import Search from "./Search";
 import GetAll from "./GetAll";
 import Login from "./Login";
+import OrderPage from "./OrderPage";
 import NotFound from "./NotFound";
 
 class App extends Component {
@@ -27,8 +28,12 @@ class App extends Component {
               render={(props) => <GetAll {...props}></GetAll>}
             />
             <Route
-              path="/login/:id"
+              path="/login/:jobname"
               render={(props) => <Login {...props}></Login>}
+            />
+            <Route
+              path="/orderpage/:jobname"
+              render={(props) => <OrderPage {...props}></OrderPage>}
             />
             <Route
               path="/not-found"
