@@ -2,6 +2,7 @@ import {Component, OnDestroy, OnInit} from '@angular/core';
 import { JobService } from '../../shared/services/job.service';
 import { Subscription } from 'rxjs';
 import { Job } from '../../shared/models/job.model';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-job-item',
@@ -13,7 +14,8 @@ export class JobItemComponent implements OnInit, OnDestroy {
   error = null;
   jobSub: Subscription;
 
-  constructor(private jobService: JobService) { }
+  constructor(private jobService: JobService,
+              private router: Router) { }
 
   ngOnInit() {
     this.onFetchJobs();
@@ -32,5 +34,9 @@ export class JobItemComponent implements OnInit, OnDestroy {
           this.error = error.message;
         }
     );
+  }
+
+  onShowOrders() {
+    this.router.navigate(['orders']);
   }
 }

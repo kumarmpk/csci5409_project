@@ -14,8 +14,7 @@ export class CreateEditJobComponent implements OnInit, OnDestroy {
 
   jobForm: FormGroup;
   jobFormSub: Subscription;
-  jobServiceSub: Subscription;
-  partSub: Subscription;
+  // jobServiceSub: Subscription;
   parts: FormArray;
   formInvalid = false;
   error = null;
@@ -55,8 +54,7 @@ export class CreateEditJobComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.jobFormSub.unsubscribe();
-    this.jobServiceSub.unsubscribe();
-    this.partSub.unsubscribe();
+    // this.jobServiceSub.unsubscribe();
   }
 
   /* parts */
