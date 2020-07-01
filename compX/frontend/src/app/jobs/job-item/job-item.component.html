@@ -1,1 +1,47 @@
-<p>job-item works!</p>
+<h2>Jobs</h2>
+<div class="row mt-5">
+    <div class="col">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Job name</th>
+                <th>Part ID</th>
+                <th>Quantity</th>
+            </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let job of jobs">
+                    <td>{{ job.jobName }}</td>
+                    <td>{{ job.partId }}</td>
+                    <td>{{ job.qty }}</td>
+                    <td>
+                        <a class="btn btn-info">Edit</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="col">
+        <form method="POST" action="/api960">
+            <div class="form-group">
+                <label for="jobName960">Job name</label>
+                <input type="text" name="jobName960" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="partId960">Part ID</label>
+                <input type="text" name="partId960" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for="qty960">Quantity</label>
+                <input type="text" name="qty960" class="form-control" />
+            </div>
+            <hr />
+            <input
+                    type="submit"
+                    value="Create Job"
+                    class="btn btn-primary btn-block"
+            />
+        </form>
+    </div>
+</div>
+
