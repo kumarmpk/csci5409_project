@@ -159,6 +159,25 @@ app.get('/api/users/:username/:password', (req, res) => {
   }
 })
 
+//method to insert the order in JobParts table
+app.post('/api/updateOrder', (req, res) => {
+  let insertQuery = 'Insert into JobParts values(?,?,?,?,?,?,?)'
+  if (req.body) {
+    values = [req.body.partId, req.body.jobName, req.body.userId, req.body.qty, (new Date()), (new Date()).getHours(),
+    req.body.result]
+    db.then(client => {
+      client.query(insertQuery, values, (err, results) => {
+        if (err) {
+          return res.status(404).send(err)
+        }
+        res.send('Jobparts inserted successfully')
+      }
+      )
+    }
+    )
+  }
+})
+
 
 
 //Invalid url handling
