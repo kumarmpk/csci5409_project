@@ -29,10 +29,47 @@ app.get('/jobs',(req,res)=>{
         if(result.length==0){
             res.send('Jobs table does not have any records'); 
         }else{
-        console.log(result);
         res.send(result); 
         }   
     });    
 });
+
+app.get('/jobById',(req,res,next)=>{
+    if(!req.query.jobName || !req.query.partId){
+        res.status(400).send('Check the query parameters');
+    }
+    else{
+        let sql = "select * from Jobs where jobName = " +req.query.jobName+" and partId="+ req.query.partId;
+        let query=db.query(sql,(err,result)=>{
+        if(err){
+            throw err;
+        }
+        if(result.length==0) {
+            res.status(404).send('Job with jobName '+req.query.jobName+ ' and partId ' +req.query.partId +' was not found');
+        }else
+            res.send(result);   
+    });
+    }
+});
+
+app.get('/jobList',(req,res)=>{
+    if(!req.query.jobName){
+        res.status(400).send('Include the query parameter in the request');
+    }
+    else{
+        let sql = "select * from Jobs where jobName = " +req.query.jobName;
+        let query=db.query(sql,(err,result)=>{
+        if(err){
+            throw err;
+        }
+        if(result.length==0) {
+            res.status(404).send('Job with jobName '+req.query.jobName+' was not found');
+        }else
+            res.send(result);   
+    });
+    }
+});
+
+
 
 module.exports = app;
