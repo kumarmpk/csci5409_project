@@ -5,7 +5,7 @@ app.use(express.json());
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
-
+const jsonParser = bodyParser.json();
 const db =mysql.createConnection({
     host: 'localhost',
     user: 'root',
@@ -70,6 +70,22 @@ app.get('/jobList',(req,res)=>{
     }
 });
 
-
+app.post('/jobs',jsonParser,(req,res)=>{
+    let select = "select * from Jobs where jobName = '" +req.body.jobName+ "' and partId = " + req.body.partId;
+    let sql= 'insert into Jobs SET ?';
+    let insertData = {jobName:req.body.jobName,partId:req.body.partId,qty:req.body.qty};
+    let selQuery = db.query(select,(error,result)=>{
+        if(result.length==0){
+            let insertQuery = db.query(sql,insertData,(err,insertResult)=>{
+                if(err){
+                    throw err;
+                }
+                res.send('Record {' + insertData.jobName + ',' + insertData.partId + ',' + insertData.qty + '} is inserted in Jobs table');
+            });
+        }else{
+            res.status(404).send('Jobs table with jobName ' +insertData.jobName +'and partId ' +insertData.partId +' already exists');
+        }
+    });
+});
 
 module.exports = app;
