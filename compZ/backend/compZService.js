@@ -9,18 +9,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 var db = mySql.connect(
   //Connection string for the db
-  {
-    host: 'bluenose.cs.dal.ca',
-    user: 'meganathan',
-    password: 'B00851418',
-    Port: 3306
-  },
-  {
-    host: 'db.cs.dal.ca',
-    user: 'meganathan',
-    password: 'B00851418',
-    database: 'meganathan'
-  }
+ 
 );
 
 port = process.env.Port || 3000;
