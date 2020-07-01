@@ -1,4 +1,9 @@
-<h2>Jobs</h2>
+<div class="d-flex justify-content-sm-between">
+    <h2>Jobs</h2>
+    <button (click)="addPart()"
+            type="button"
+            class="btn btn-lg btn-outline-info">View Orders</button>
+</div>
 <div class="row mt-5">
     <div class="col">
         <table class="table table-striped">
@@ -16,6 +21,9 @@
                     <td>{{ job.qty }}</td>
                     <td>
                         <div class="btn btn-info">Edit</div>
+                    </td>
+                    <td>
+                        <div class="btn btn-danger">Delete</div>
                     </td>
                 </tr>
             </tbody>
