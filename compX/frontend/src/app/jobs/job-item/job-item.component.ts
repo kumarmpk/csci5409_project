@@ -10,7 +10,7 @@ import {Router} from '@angular/router';
 })
 export class JobItemComponent implements OnInit, OnDestroy {
 
-  jobs = [];
+  jobs: Job[] = [];
   error = null;
   jobSub: Subscription;
 

@@ -1,10 +1,10 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import { Subscription } from 'rxjs';
-import {FormArray, FormGroup} from '@angular/forms';
-import {JobFormService} from '../../shared/services/job-form.service';
-import {JobService} from '../../shared/services/job.service';
-import {JobShort} from '../../shared/models/job-short.model';
-import {PartService} from '../../shared/services/part.service';
+import { FormArray, FormGroup } from '@angular/forms';
+import { JobFormService } from '../../shared/services/job-form.service';
+import { JobService } from '../../shared/services/job.service';
+import { JobShort } from '../../shared/models/job-short.model';
+import { PartService } from '../../shared/services/part.service';
 
 @Component({
   selector: 'app-create-edit-job',
@@ -12,6 +12,8 @@ import {PartService} from '../../shared/services/part.service';
 })
 export class CreateEditJobComponent implements OnInit, OnDestroy {
 
+  @Input()
+  isEdit = false;
   jobForm: FormGroup;
   jobFormSub: Subscription;
   // jobServiceSub: Subscription;

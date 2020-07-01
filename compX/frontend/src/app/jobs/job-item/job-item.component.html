@@ -23,7 +23,8 @@
                         <div class="btn btn-danger">Delete</div>
                     </td>
                     <td>
-                        <div class="btn btn-info">Edit</div>
+                        <a class="btn btn-info"
+                           [routerLink]="['edit', job.jobName]">Edit</a>
                     </td>
                 </tr>
             </tbody>

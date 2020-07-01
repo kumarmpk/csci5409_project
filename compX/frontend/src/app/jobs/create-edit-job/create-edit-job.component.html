@@ -24,7 +24,7 @@
     <hr />
     <input
             type="submit"
-            value="Create Job"
+            [value]="isEdit ? 'Update job' : 'Create Job'"
             class="btn btn-primary btn-block"
     />
 </form>

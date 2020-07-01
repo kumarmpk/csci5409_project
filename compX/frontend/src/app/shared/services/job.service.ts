@@ -46,6 +46,34 @@ export class JobService {
         //     );
     }
 
+    fetchJob(name: string) {
+
+        const jobs = [
+            new Job('new item', 342, 234),
+            new Job('new item', 342, 234),
+        ];
+
+        // return jobs;
+
+        return new Observable<Job[]>(observer => {
+            observer.next(jobs);
+        });
+
+        // return this.http
+        //     .get(this.baseURL + 'recipe/' + id)
+        //     .pipe(
+        //         map(responseData => {
+        //             const key = 'data';
+        //             if (responseData.hasOwnProperty(key)) {
+        //                 return plainToClass(Recipe, responseData[key]);
+        //             }
+        //         }),
+        //         catchError(errorRes => {
+        //             return throwError(errorRes);
+        //         })
+        //     );
+    }
+
     createJob(job: JobShort) {
 
         // enter units for preselected items in steps

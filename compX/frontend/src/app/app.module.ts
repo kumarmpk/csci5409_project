@@ -9,6 +9,7 @@ import { CreateEditJobComponent } from './jobs/create-edit-job/create-edit-job.c
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CreateEditPartComponent } from './jobs/create-edit-job/create-edit-part/create-edit-part.component';
 import { OrdersComponent } from './orders/orders.component';
+import { UpdateJobComponent } from './jobs/update-job/update-job.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { OrdersComponent } from './orders/orders.component';
     JobItemComponent,
     CreateEditJobComponent,
     CreateEditPartComponent,
-    OrdersComponent
+    OrdersComponent,
+    UpdateJobComponent
   ],
   imports: [
     BrowserModule,
