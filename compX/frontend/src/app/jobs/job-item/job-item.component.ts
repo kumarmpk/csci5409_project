@@ -5,8 +5,7 @@ import { Job } from '../../shared/models/job.model';
 
 @Component({
   selector: 'app-job-item',
-  templateUrl: './job-item.component.html',
-  styleUrls: ['./job-item.component.scss']
+  templateUrl: './job-item.component.html'
 })
 export class JobItemComponent implements OnInit, OnDestroy {
 

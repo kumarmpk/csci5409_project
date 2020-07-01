@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, map } from 'rxjs/operators';
 import { Observable, throwError  } from 'rxjs';
 import { Job } from '../models/job.model';
 import { plainToClass } from 'class-transformer';
+import {JobShort} from '../models/job-short.model';
 
 @Injectable({
   providedIn: 'root',
@@ -42,4 +43,34 @@ export class JobService {
     //         })
     //     );
   }
+
+    createJob(job: JobShort) {
+
+        // enter units for preselected items in steps
+        // const ingredients = recipe.ingredients;
+        // recipe.instruction.forEach(item => {
+        //     item.ingredients.forEach(ing => {
+        //         const ingredient = ingredients.find(x => x.name === ing.name);
+        //         ing.units = ingredient.units;
+        //     });
+        // });
+        //
+        // return this.http
+        //     .post(`${this.baseURL}recipe/`,
+        //         JSON.stringify(recipe),
+        //         {
+        //             headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+        //         })
+        //     .pipe(
+        //         map((responseData) => {
+        //             const key = 'data.id';
+        //             if (responseData.hasOwnProperty(key)) {
+        //                 return plainToClass(Recipe, responseData[key]);
+        //             }
+        //         }),
+        //         catchError(errorRes => {
+        //             return throwError(errorRes);
+        //         })
+        //     );
+    }
 }

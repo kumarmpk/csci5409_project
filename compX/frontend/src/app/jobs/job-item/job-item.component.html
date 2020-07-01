@@ -15,33 +15,14 @@
                     <td>{{ job.partId }}</td>
                     <td>{{ job.qty }}</td>
                     <td>
-                        <a class="btn btn-info">Edit</a>
+                        <div class="btn btn-info">Edit</div>
                     </td>
                 </tr>
             </tbody>
         </table>
     </div>
     <div class="col">
-        <form method="POST" action="/api960">
-            <div class="form-group">
-                <label for="jobName960">Job name</label>
-                <input type="text" name="jobName960" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label for="partId960">Part ID</label>
-                <input type="text" name="partId960" class="form-control" />
-            </div>
-            <div class="form-group">
-                <label for="qty960">Quantity</label>
-                <input type="text" name="qty960" class="form-control" />
-            </div>
-            <hr />
-            <input
-                    type="submit"
-                    value="Create Job"
-                    class="btn btn-primary btn-block"
-            />
-        </form>
+        <app-create-edit-job></app-create-edit-job>
     </div>
 </div>
 
