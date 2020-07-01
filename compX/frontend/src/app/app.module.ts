@@ -8,13 +8,15 @@ import { HttpClientModule } from '@angular/common/http';
 import { CreateEditJobComponent } from './jobs/create-edit-job/create-edit-job.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CreateEditPartComponent } from './jobs/create-edit-job/create-edit-part/create-edit-part.component';
+import { OrdersComponent } from './orders/orders.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     JobItemComponent,
     CreateEditJobComponent,
-    CreateEditPartComponent
+    CreateEditPartComponent,
+    OrdersComponent
   ],
   imports: [
     BrowserModule,

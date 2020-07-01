@@ -5,8 +5,9 @@
                 class="form-control"
                 formControlName="partName">
             <option selected>Choose...</option>
-            <option>Petia</option>
-            <option>Misha</option>
+            <option *ngFor="let part of parts">
+                {{ part.partName }}
+            </option>
         </select>
     </div>
     <div class="form-group col-md-3">

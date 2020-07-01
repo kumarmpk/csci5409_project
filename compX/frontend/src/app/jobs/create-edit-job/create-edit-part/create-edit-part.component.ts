@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormGroup } from '@angular/forms';
+import { PartService } from '../../../shared/services/part.service';
 
 @Component({
   selector: 'app-create-edit-part',
@@ -7,13 +8,15 @@ import { FormGroup } from '@angular/forms';
 })
 export class CreateEditPartComponent implements OnInit {
 
+  parts = [];
   @Input() partForm: FormGroup;
   @Input() index: number;
   @Output() deletePart: EventEmitter<number> = new EventEmitter();
 
-  constructor() { }
+  constructor(private partService: PartService) { }
 
   ngOnInit() {
+    this.parts = this.partService.parts;
   }
 
   onDelete() {

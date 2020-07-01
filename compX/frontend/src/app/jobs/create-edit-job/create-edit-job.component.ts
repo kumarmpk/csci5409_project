@@ -4,6 +4,7 @@ import {FormArray, FormGroup} from '@angular/forms';
 import {JobFormService} from '../../shared/services/job-form.service';
 import {JobService} from '../../shared/services/job.service';
 import {JobShort} from '../../shared/models/job-short.model';
+import {PartService} from '../../shared/services/part.service';
 
 @Component({
   selector: 'app-create-edit-job',
@@ -14,12 +15,14 @@ export class CreateEditJobComponent implements OnInit, OnDestroy {
   jobForm: FormGroup;
   jobFormSub: Subscription;
   jobServiceSub: Subscription;
+  partSub: Subscription;
   parts: FormArray;
   formInvalid = false;
   error = null;
 
   constructor(private jobFormService: JobFormService,
-              private jobService: JobService) { }
+              private jobService: JobService,
+              private partService: PartService) { }
 
   ngOnInit() {
     this.jobFormSub = this.jobFormService.jobForm$
@@ -27,6 +30,8 @@ export class CreateEditJobComponent implements OnInit, OnDestroy {
           this.jobForm = job;
           this.parts = this.jobForm.get('parts') as FormArray;
         });
+
+    this.partService.fetchParts();
   }
 
   onSubmit() {
@@ -51,6 +56,7 @@ export class CreateEditJobComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.jobFormSub.unsubscribe();
     this.jobServiceSub.unsubscribe();
+    this.partSub.unsubscribe();
   }
 
   /* parts */
