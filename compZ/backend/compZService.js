@@ -2,10 +2,26 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
 const mySql = require("mysql-ssh");
+const { query } = require("express");
+const jwt = require('jsonwebtoken')
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-var db = mySql.connect();
+var db = mySql.connect(
+  //Connection string for the db
+  {
+    host: 'bluenose.cs.dal.ca',
+    user: 'meganathan',
+    password: 'B00851418',
+    Port: 3306
+  },
+  {
+    host: 'db.cs.dal.ca',
+    user: 'meganathan',
+    password: 'B00851418',
+    database: 'meganathan'
+  }
+);
 
 port = process.env.Port || 3000;
 app.listen(port, () => {
@@ -40,11 +56,12 @@ app.get("/api/jobs", (_req, res) => {
   });
 });
 
-//fetching a specific job details
+//fetching a specific job details based on the value entered in the textbox
 app.get("/api/jobs/:jobName/", (req, res) => {
+  let insertQuery = "Insert into Search values(?,?,?)"
   var callback = (jobToFetch, error) => {
     if (error) {
-      return res418
+      res
         .status(404)
         .send("error occurred while fetching job from the database");
     }
@@ -53,6 +70,16 @@ app.get("/api/jobs/:jobName/", (req, res) => {
         .status(404)
         .send("job not found, please enter another job name");
     }
+    values = [req.params.jobName.trim().toLowerCase(), new Date(), (new Date()).getHours()]
+    db.then((insertClient) => {
+      insertClient.query(insertQuery, values, (err, records) => {
+        if (err) {
+          res.status(404).send('error occurred while inserting record in the database');
+        }
+      });
+    }).catch(error => {
+      console.log(error)
+    })
     res.send(JSON.stringify(jobToFetch, undefined, 4));
   };
   checkIfJobExists(req.params.jobName, callback);
@@ -83,6 +110,57 @@ app.get("/api/parts/:jobName/", (req, res) => {
   }
 });
 
+//Fetching all the parts details for a job with jobName and partId
+app.get('/api/parts/:jobName/:partId/', (req, res) => {
+  if (req.params.jobName && req.params.partId) {
+    let sqlQuery = 'select * from Jobs j inner join Parts p  on j.PartId = p.PartId where j.JobName=? and j.PartId=?'
+    values = [req.params.jobName.trim().toLowerCase(), req.params.partId];
+    db.then(client => {
+      client.query(sqlQuery, values, (err, partDetails) => {
+        if (err) {
+          console.log(err)
+          return res.status(404).send('error occurred while fetching jobs in the database');
+        }
+        if (Object.keys(partDetails).length === 0) {
+
+          return res.status(404).send('No jobs or parts present in the database');
+        }
+        res.send(JSON.stringify(partDetails, undefined, 4));
+      })
+    })
+  }
+  else {
+    res.status(404).send('something wrong with the input')
+  }
+});
+
+//authenticating the user
+process.env.SECRETKEY = 'secret'
+app.get('/api/users/:username/:password', (req, res) => {
+  if (req.params.username && req.params.password) {
+    let sqlQuery = 'select * from Users where email=? and password=?'
+    let values = [req.params.username, req.params.password];
+    db.then(client => {
+      client.query(sqlQuery, values, (err, results) => {
+        console.log(results)
+        if (err) {
+          return res.status(404).send('credentials are wrong')
+        }
+        if (results) {
+          let token = jwt.sign(req.params.username.trim().toLowerCase(), process.env.SECRETKEY)
+          return res.send(`Login successful ` + token)
+        }
+        else {
+          return res.send(`credentials are wrong`)
+        }
+      })
+    })
+
+  }
+})
+
+
+
 //Invalid url handling
 app.get("*", (_req, res) => {
   res.send("Invalid url, please enter valid url path");
@@ -90,21 +168,21 @@ app.get("*", (_req, res) => {
 
 function checkIfJobExists(jobName, callback) {
   if (jobName) {
-    let query = "select * from Jobs where JobName = ?";
-    if (jobName) {
-      values = [jobName.trim().toLowerCase()];
-      db.then((client) => {
-        client.query(query, values, (err, results) => {
-          if (err) {
-            callback("error occured while checking for data in the database");
-          }
-          callback(results, err);
-        });
+    let query = "select * from Jobs where JobName like '%" + jobName.trim().toLowerCase() + "%'";
+
+    db.then((client) => {
+      client.query(query, (err, results) => {
+        if (err) {
+          callback("error occured while checking for data in the database");
+        }
+        callback(results, err);
       }).catch((err) => {
         console.log(err);
       });
-    } else {
-      callback("invalid JobName and partID");
     }
+    )
+  } else {
+    callback("invalid JobName");
   }
+
 }
