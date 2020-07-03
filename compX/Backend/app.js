@@ -75,6 +75,7 @@ app.post('/jobs',jsonParser,(req,res)=>{
     let sql= 'insert into Jobs SET ?';
     let insertData = {jobName:req.body.jobName,partId:req.body.partId,qty:req.body.qty};
     let selQuery = db.query(select,(error,result)=>{
+        console.log(result);
         if(result.length==0){
             let insertQuery = db.query(sql,insertData,(err,insertResult)=>{
                 if(err){
@@ -122,5 +123,25 @@ app.delete('/jobs',(req,res)=>{
         res.send('Jobs table with jobName ' +req.query.jobName +'and partId ' +req.query.partId +' is deleted');
         });
     }
+});
+
+app.post('/orders',jsonParser,(req,res)=>{
+    console.log("entered");
+    let select = " select * from partorders where jobName = '" +req.body.jobName+ "' and partId = " + req.body.partId + " and userId = '"+req.body.userId +"'";
+    let sql= 'insert into partorders SET ?';
+    let insertData = {jobName:req.body.jobName,partId:req.body.partId,userId:req.body.userId,qty:req.body.qty};
+    let selQuery = db.query(select,(error,result)=>{
+        console.log(result);
+        if(result.length==0){
+            let insertQuery = db.query(sql,insertData,(err,insertResult)=>{
+                if(err){
+                    throw err;
+                }
+                res.send('Record {' + insertData.jobName + ',' + insertData.partId + ',' + insertData.userId + ','+ insertData.qty + '} is inserted in partorders table');
+            });
+        }else{
+            res.status(404).send('partorders table with jobName ' +insertData.jobName +'and partId ' +insertData.partId  +'and userId ' +insertData.userId+' already exists');
+        }
+    });
 });
 module.exports = app;
