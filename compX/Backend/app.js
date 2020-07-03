@@ -34,7 +34,7 @@ app.get('/jobs',(req,res)=>{
     });    
 });
 
-app.get('/jobById',(req,res,next)=>{
+app.get('/jobById',(req,res)=>{
     if(!req.query.jobName || !req.query.partId){
         res.status(400).send('Check the query parameters');
     }
@@ -88,4 +88,39 @@ app.post('/jobs',jsonParser,(req,res)=>{
     });
 });
 
+app.put('/jobs',jsonParser,(req,res)=>{
+    let select = "select * from Jobs where jobName = '" +req.body.jobName+ "' and partId =" + req.body.partId;
+    let sql ="Update Jobs SET ? where jobName = '" + req.body.jobName+ "'";
+    let updateData = {qty:req.body.qty};
+    let selQuery = db.query(select,(err,result)=>{
+        if(result.length!=0){
+            let updateQuery = db.query(sql,updateData,(err,result)=>{
+                if(err){
+                    throw err;
+                }
+                res.send('Record with JobName ' + req.body.jobName + ' and partId '+ req.body.partId +' is updated');    
+            });
+        }else{
+            res.status(404).send('JobName '+req.body.jobName+' and partId '+ req.body.partId +' does not exist');  
+        }
+    });
+});
+
+app.delete('/jobs',(req,res)=>{
+    if(!req.query.jobName || !req.query.partId){
+        res.status(400).send('Check the query parameters');
+    }
+    else{
+        let sql = "Delete from Jobs where jobName =" +req.query.jobName+" and partId="+ req.query.partId;
+        let query=db.query(sql,(err,result)=>{
+        if(err){
+            throw err;
+        }
+        if(result.length==0) {
+            res.status(404).send('Job with jobName '+req.query.jobName+ ' and partId ' +req.query.partId +' was not found');
+        }else
+        res.send('Jobs table with jobName ' +req.query.jobName +'and partId ' +req.query.partId +' is deleted');
+        });
+    }
+});
 module.exports = app;
