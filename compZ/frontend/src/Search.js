@@ -1,15 +1,15 @@
 import React, { Component } from "react";
-import jobparts from "./dummydata";
 import { Button } from "react-bootstrap";
+import axios from "axios";
 
 class Search extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      jobparts: jobparts,
       jobpart: [],
       search: "",
       tableFlag: false,
+      errorMsg: "",
     };
   }
 
@@ -20,16 +20,36 @@ class Search extends Component {
     });
   };
 
+  async apiCall() {
+    var config = {
+      headers: { "Content-Type": "application/json" },
+    };
+    const url = `http://localhost:4000/api/jobs/${this.state.search}`;
+    console.log(url);
+    await axios
+      .get(`http://localhost:4000/api/jobs/${this.state.search}`)
+      .then((res) => {
+        let obj = {};
+        obj = res.data;
+        this.setState({
+          jobpart: obj,
+          tableFlag: true,
+          errorMsg: "",
+        });
+      })
+      .catch((err) => {
+        this.setState({
+          tableFlag: false,
+          errorMsg: err.response.data,
+        });
+      });
+  }
+
   onSearch = (e) => {
     e.preventDefault();
-    let obj = {};
-    obj = jobparts.filter((c) =>
-      c.jobname.toLowerCase().includes(this.state.search.toLowerCase())
-    );
-    this.setState({
-      jobpart: obj,
-      tableFlag: true,
-    });
+    if (this.state.search) {
+      this.apiCall();
+    }
   };
 
   placeOrder(data) {
@@ -46,8 +66,6 @@ class Search extends Component {
                 <thead className="thead">
                   <tr>
                     <th>Jobname</th>
-                    <th>Partid</th>
-                    <th>Quantity</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -55,10 +73,8 @@ class Search extends Component {
                     return (
                       <tr key={Math.random()}>
                         <th>
-                          <a href={`/login/${data.jobname}`}>{data.jobname}</a>
+                          <a href={`/login/${data.jobName}`}>{data.jobName}</a>
                         </th>
-                        <td>{data.partid}</td>
-                        <td>{data.quantity}</td>
                       </tr>
                     );
                   })}
@@ -77,6 +93,9 @@ class Search extends Component {
     return (
       <div>
         <div className="search pt-3 ml-3">
+          <p className="error-msg" style={{ color: "red" }}>
+            {this.state.errorMsg ? this.state.errorMsg : null}
+          </p>
           <h4
             className="search pt-3 ml-3 text-dark font-weight-bold"
             style={{ fontFamily: "Sans" }}
