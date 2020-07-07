@@ -27,9 +27,13 @@ app.get('/jobs',(req,res)=>{
             throw err;
         }
         if(result.length==0){
-            res.send('jobs table does not have any records'); 
+            res.send({
+                error:'jobs table does not have any records'
+            }); 
         }else{
-        res.send(result); 
+            res.send({
+                result:result
+            }); 
         }   
     });    
 });
@@ -45,9 +49,13 @@ app.get('/jobById',(req,res)=>{
             throw err;
         }
         if(result.length==0) {
-            res.status(404).send('Job with jobName '+req.query.jobName+ ' and partId ' +req.query.partId +' was not found');
+            res.status(404).send({
+                error: 'Job with jobName '+req.query.jobName+ ' and partId ' +req.query.partId +' was not found'
+            });
         }else
-            res.send(result);   
+            res.send({
+                result: result
+            });   
     });
     }
 });
@@ -63,10 +71,14 @@ app.get('/jobList',(req,res)=>{
             throw err;
         }
         if(result.length==0) {
-            res.status(404).send('Job with jobName '+req.query.jobName+' was not found');
+            res.status(404).send({
+                error: 'Job with jobName '+req.query.jobName+' was not found'
+            });
         }else
-            res.send(result);   
-    });
+            res.send({
+                result: result
+            });   
+        });
     }
 });
 
@@ -80,10 +92,14 @@ app.post('/jobs',jsonParser,(req,res)=>{
                 if(err){
                     throw err;
                 }
-                res.send('Record {' + insertData.jobName + ',' + insertData.partId + ',' + insertData.qty + '} is inserted in jobs table');
+                res.send({
+                    result: 'Record {' + insertData.jobName + ',' + insertData.partId + ',' + insertData.qty + '} is inserted in jobs table'
+                });
             });
         }else{
-            res.status(404).send('jobs table with jobName ' +insertData.jobName +'and partId ' +insertData.partId +' already exists');
+            res.status(404).send({
+                error: 'jobs table with jobName ' +insertData.jobName +'and partId ' +insertData.partId +' already exists'
+            });
         }
     });
 });
@@ -98,10 +114,14 @@ app.put('/jobs',jsonParser,(req,res)=>{
                 if(err){
                     throw err;
                 }
-                res.send('Record with JobName ' + req.body.jobName + ' and partId '+ req.body.partId +' is updated');    
+                res.send({
+                    message:'Record with JobName ' + req.body.jobName + ' and partId '+ req.body.partId +' is updated'
+                });    
             });
         }else{
-            res.status(404).send('JobName '+req.body.jobName+' and partId '+ req.body.partId +' does not exist');  
+            res.status(404).send({
+                error: 'JobName '+req.body.jobName+' and partId '+ req.body.partId +' does not exist'
+            });  
         }
     });
 });
@@ -117,9 +137,13 @@ app.delete('/jobs',(req,res)=>{
             throw err;
         }
         if(result.length==0) {
-            res.status(404).send('Job with jobName '+req.query.jobName+ ' and partId ' +req.query.partId +' was not found');
+            res.status(404).send({
+                error: 'Job with jobName '+req.query.jobName+ ' and partId ' +req.query.partId +' was not found'
+            });
         }else
-        res.send('jobs table with jobName ' +req.query.jobName +'and partId ' +req.query.partId +' is deleted');
+            res.send({
+                message: 'jobs table with jobName ' +req.query.jobName +'and partId ' +req.query.partId +' is deleted'
+            });
         });
     }
 });
@@ -131,13 +155,17 @@ app.post('/orders',jsonParser,(req,res)=>{
     let selQuery = db.query(select,(error,result)=>{
         if(result.length==0){
             let insertQuery = db.query(sql,insertData,(err,insertResult)=>{
-                if(err){
-                    throw err;
-                }
-                res.send('Record {' + insertData.jobName + ',' + insertData.partId + ',' + insertData.userId + ','+ insertData.qty + '} is inserted in partorders table');
+            if(err){
+                throw err;
+            }
+            res.send({
+                result: 'Record {' + insertData.jobName + ',' + insertData.partId + ',' + insertData.userId + ','+ insertData.qty + '} is inserted in partorders table'
+            });
             });
         }else{
-            res.status(404).send('partorders table with jobName ' +insertData.jobName +'and partId ' +insertData.partId  +'and userId ' +insertData.userId+' already exists');
+            res.status(404).send({
+                error:'partorders table with jobName ' +insertData.jobName +'and partId ' +insertData.partId  +'and userId ' +insertData.userId+' already exists'
+            });
         }
     });
 });
