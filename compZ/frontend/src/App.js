@@ -28,11 +28,11 @@ class App extends Component {
               render={(props) => <GetAll {...props}></GetAll>}
             />
             <Route
-              path="/login/:jobname"
+              path="/login/:jobName"
               render={(props) => <Login {...props}></Login>}
             />
             <Route
-              path="/orderpage/:jobname"
+              path="/orderpage/:jobName"
               render={(props) => <OrderPage {...props}></OrderPage>}
             />
             <Route

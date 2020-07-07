@@ -24,8 +24,6 @@ class Search extends Component {
     var config = {
       headers: { "Content-Type": "application/json" },
     };
-    const url = `http://localhost:4000/api/jobs/${this.state.search}`;
-    console.log(url);
     await axios
       .get(`http://localhost:4000/api/jobs/${this.state.search}`)
       .then((res) => {
@@ -65,7 +63,7 @@ class Search extends Component {
               <table className="table table-hover">
                 <thead className="thead">
                   <tr>
-                    <th>Jobname</th>
+                    <th>JobName</th>
                   </tr>
                 </thead>
                 <tbody>

@@ -1,4 +1,7 @@
 const jobparts = [
+  { jobname: "j1", partid: 11, quantity: 21 },
+  { jobname: "j2", partid: 11, quantity: 21 },
+  { jobname: "jobname1", partid: 11, quantity: 21 },
   { jobname: "jobname1", partid: 11, quantity: 21 },
   { jobname: "jobname2", partid: 12, quantity: 31 },
   { jobname: "jobname2", partid: 13, quantity: 41 },

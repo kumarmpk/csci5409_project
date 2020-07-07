@@ -5,14 +5,12 @@ import axios from "axios";
 class Login extends Component {
   constructor(props) {
     super(props);
-    const { jobname } = this.props.match.params;
-    console.log("this.props.match.params", this.props.match.params);
-    console.log("jobname", jobname);
+    const { jobName } = this.props.match.params;
     this.state = {
       email: "",
       password: "",
       errorMsg: "",
-      jobname: jobname,
+      jobName: jobName,
     };
   }
 
@@ -24,35 +22,32 @@ class Login extends Component {
   };
 
   async apiCall() {
-    /* var config = {
-      headers: { "Content-Type": "application/json" },
-    };
- */
     try {
-      /* const res = await axios.post(
-        "http://localhost:4000/login",
-        JSON.stringify(this.state),
-        config
-      );
-      let mess = res.data; */
+      await axios
+        .get(
+          `http://localhost:4000/api/users/${this.state.email}/${this.state.password}`
+        )
+        .then((res) => {
+          console.log("res", res);
+          if (res.status === 200) {
+            this.props.history.push(`/orderpage/${this.state.jobName}`);
 
-      /*  if (mess === 8) {
-        this.setState({
-          email: "",
-          password: "",
-        }); */
-
-      this.props.history.push(`/orderpage/${this.state.jobname}`);
-      /* } else {
-        this.setState({
-          validationErrorFlag: true,
-          errorMsg: errMsg[mess],
+            this.setState({
+              email: "",
+              password: "",
+              errorMsg: "",
+            });
+          }
+        })
+        .catch((err) => {
+          console.log("err", err);
+          this.setState({
+            //errorMsg: err.response.data,
+          });
         });
-      } */
     } catch (err) {
       this.setState({
-        validationErrorFlag: true,
-        errorMsg: errMsg["11"],
+        errorMsg: err,
       });
     }
   }
@@ -107,7 +102,7 @@ class Login extends Component {
                   {this.state.errorMsg ? this.state.errorMsg : null}
                 </p>
                 <div className="form-group">
-                  <label for="email"> Email Address </label>
+                  <label htmlFor="email"> Email Address </label>
                   <input
                     type="email"
                     className="form-control"
@@ -121,7 +116,7 @@ class Login extends Component {
                 </div>
 
                 <div className="form-group">
-                  <label for="password">Password</label>
+                  <label htmlFor="password">Password</label>
                   <input
                     type="password"
                     className="form-control"

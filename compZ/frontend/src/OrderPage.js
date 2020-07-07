@@ -7,12 +7,10 @@ class OrderPage extends Component {
     let { jobname } = this.props.match.params;
 
     let obj = {};
-    obj = jobparts.filter(
-      (c) => c.jobname.toLowerCase() === jobname.toLowerCase()
-    );
+    obj = jobparts.filter((c) => c.jobname === jobname);
     this.state = {
       jobpart: obj,
-      jobname: jobname,
+      jobName: jobname,
       selected: {},
     };
   }
@@ -40,8 +38,8 @@ class OrderPage extends Component {
                 <thead className="thead">
                   <tr>
                     <th></th>
-                    <th>Jobname</th>
-                    <th>Partid</th>
+                    <th>JobName</th>
+                    <th>PartId</th>
                     <th>Quantity</th>
                   </tr>
                 </thead>
@@ -57,9 +55,9 @@ class OrderPage extends Component {
                             checked={this.state.selected[data.partid] === true}
                           />
                         </td>
-                        <td>{data.jobname}</td>
-                        <td>{data.partid}</td>
-                        <td>{data.quantity}</td>
+                        <td>{data.jobName}</td>
+                        <td>{data.partId}</td>
+                        <td>{data.qty}</td>
                       </tr>
                     );
                   })}
