@@ -7,11 +7,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 const jsonParser = bodyParser.json();
 const db =mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
+    host: 'groupassignmentsdb.cibsusss4zqs.us-east-1.rds.amazonaws.com',
+    user: 'team_db',
     port: '3306',
-    password : 'password',
-    database: 'csci5409'
+    password : '4A98d8Gx',
+    database: 'companies'
 });
 db.connect((err)=>{
     if(err){
@@ -21,13 +21,13 @@ db.connect((err)=>{
 });
 
 app.get('/jobs',(req,res)=>{
-    let sql = 'select * from Jobs';
+    let sql = 'select * from jobs';
     let query = db.query(sql,(err,result)=>{
         if(err){
             throw err;
         }
         if(result.length==0){
-            res.send('Jobs table does not have any records'); 
+            res.send('jobs table does not have any records'); 
         }else{
         res.send(result); 
         }   
@@ -39,7 +39,7 @@ app.get('/jobById',(req,res)=>{
         res.status(400).send('Check the query parameters');
     }
     else{
-        let sql = "select * from Jobs where jobName = " +req.query.jobName+" and partId="+ req.query.partId;
+        let sql = "select * from jobs where jobName = " +req.query.jobName+" and partId="+ req.query.partId;
         let query=db.query(sql,(err,result)=>{
         if(err){
             throw err;
@@ -57,7 +57,7 @@ app.get('/jobList',(req,res)=>{
         res.status(400).send('Include the query parameter in the request');
     }
     else{
-        let sql = "select * from Jobs where jobName = " +req.query.jobName;
+        let sql = "select * from jobs where jobName = " +req.query.jobName;
         let query=db.query(sql,(err,result)=>{
         if(err){
             throw err;
@@ -71,27 +71,26 @@ app.get('/jobList',(req,res)=>{
 });
 
 app.post('/jobs',jsonParser,(req,res)=>{
-    let select = "select * from Jobs where jobName = '" +req.body.jobName+ "' and partId = " + req.body.partId;
-    let sql= 'insert into Jobs SET ?';
+    let select = "select * from jobs where jobName = '" +req.body.jobName+ "' and partId = " + req.body.partId;
+    let sql= 'insert into jobs SET ?';
     let insertData = {jobName:req.body.jobName,partId:req.body.partId,qty:req.body.qty};
     let selQuery = db.query(select,(error,result)=>{
-        console.log(result);
         if(result.length==0){
             let insertQuery = db.query(sql,insertData,(err,insertResult)=>{
                 if(err){
                     throw err;
                 }
-                res.send('Record {' + insertData.jobName + ',' + insertData.partId + ',' + insertData.qty + '} is inserted in Jobs table');
+                res.send('Record {' + insertData.jobName + ',' + insertData.partId + ',' + insertData.qty + '} is inserted in jobs table');
             });
         }else{
-            res.status(404).send('Jobs table with jobName ' +insertData.jobName +'and partId ' +insertData.partId +' already exists');
+            res.status(404).send('jobs table with jobName ' +insertData.jobName +'and partId ' +insertData.partId +' already exists');
         }
     });
 });
 
 app.put('/jobs',jsonParser,(req,res)=>{
-    let select = "select * from Jobs where jobName = '" +req.body.jobName+ "' and partId =" + req.body.partId;
-    let sql ="Update Jobs SET ? where jobName = '" + req.body.jobName+ "'";
+    let select = "select * from jobs where jobName = '" +req.body.jobName+ "' and partId =" + req.body.partId;
+    let sql ="Update jobs SET ? where jobName = '" + req.body.jobName+ "'";
     let updateData = {qty:req.body.qty};
     let selQuery = db.query(select,(err,result)=>{
         if(result.length!=0){
@@ -112,7 +111,7 @@ app.delete('/jobs',(req,res)=>{
         res.status(400).send('Check the query parameters');
     }
     else{
-        let sql = "Delete from Jobs where jobName =" +req.query.jobName+" and partId="+ req.query.partId;
+        let sql = "Delete from jobs where jobName =" +req.query.jobName+" and partId="+ req.query.partId;
         let query=db.query(sql,(err,result)=>{
         if(err){
             throw err;
@@ -120,18 +119,16 @@ app.delete('/jobs',(req,res)=>{
         if(result.length==0) {
             res.status(404).send('Job with jobName '+req.query.jobName+ ' and partId ' +req.query.partId +' was not found');
         }else
-        res.send('Jobs table with jobName ' +req.query.jobName +'and partId ' +req.query.partId +' is deleted');
+        res.send('jobs table with jobName ' +req.query.jobName +'and partId ' +req.query.partId +' is deleted');
         });
     }
 });
 
 app.post('/orders',jsonParser,(req,res)=>{
-    console.log("entered");
     let select = " select * from partorders where jobName = '" +req.body.jobName+ "' and partId = " + req.body.partId + " and userId = '"+req.body.userId +"'";
     let sql= 'insert into partorders SET ?';
     let insertData = {jobName:req.body.jobName,partId:req.body.partId,userId:req.body.userId,qty:req.body.qty};
     let selQuery = db.query(select,(error,result)=>{
-        console.log(result);
         if(result.length==0){
             let insertQuery = db.query(sql,insertData,(err,insertResult)=>{
                 if(err){
