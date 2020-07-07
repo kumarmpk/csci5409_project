@@ -247,4 +247,22 @@ app.post('/orders', jsonParser, (req, res) => {
     }
   });
 });
+
+app.get('/orders',(req,res)=>{
+    let sql = 'select * from partorders';
+    let query = db.query(sql,(err,result)=>{
+        if(err){
+            throw err;
+        }
+        if(result.length==0){
+            res.send({
+                error:'partorders table does not have any records'
+            }); 
+        }else{
+            res.send({
+                result:result
+            }); 
+        }   
+    });    
+});
 module.exports = app;
