@@ -12,38 +12,22 @@ import {OrderItem} from '../models/order-item.model';
 })
 export class JobService {
 
-    baseURL = 'http://localhost:4000/';
+    baseURL = 'http://localhost:3000/';
 
     constructor(private http: HttpClient) {
     }
 
     fetchJobs() {
-
-        const jobs = [
-            new Job('new item', 342, 234),
-            new Job('new item', 342, 234),
-            new Job('new item', 342, 234),
-        ];
-
-        // return jobs;
-
-        return new Observable<Job[]>(observer => {
-            observer.next(jobs);
-        });
-
-        // return this.http
-        //     .get(this.baseURL + 'recipe/all')
-        //     .pipe(
-        //         map(responseData => {
-        //           const key = 'data';
-        //           if (responseData.hasOwnProperty(key)) {
-        //             return plainToClass(Job, responseData[key]) as unknown as Array<Job>;
-        //           }
-        //         }),
-        //         catchError(errorRes => {
-        //           return throwError(errorRes);
-        //         })
-        //     );
+        return this.http
+            .get(this.baseURL + 'jobs')
+            .pipe(
+                map(responseData => {
+                    return plainToClass(Job, responseData) as unknown as Array<Job>;
+                }),
+                catchError(errorRes => {
+                  return throwError(errorRes);
+                })
+            );
     }
 
     fetchJob(name: string) {
@@ -131,5 +115,24 @@ export class JobService {
         //           return throwError(errorRes);
         //         })
         //     );
+    }
+
+    deleteJob(name, partID) {
+        return this.http
+            .delete(this.baseURL + 'jobs',
+                {
+                    params: {
+                        jobName: name,
+                        partId: partID
+                    }
+                })
+            .pipe(
+                map(responseData => {
+                    return responseData;
+                }),
+                catchError(errorRes => {
+                    return throwError(errorRes);
+                })
+            );
     }
 }

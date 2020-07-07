@@ -13,6 +13,7 @@ export class JobItemComponent implements OnInit, OnDestroy {
   jobs: Job[] = [];
   error = null;
   jobSub: Subscription;
+  delSub: Subscription;
 
   constructor(private jobService: JobService,
               private router: Router) { }
@@ -23,12 +24,26 @@ export class JobItemComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.jobSub.unsubscribe();
+    if (this.delSub) {
+      this.delSub.unsubscribe();
+    }
   }
 
   onFetchJobs() {
     this.jobSub = this.jobService.fetchJobs().subscribe(
         jobs => {
           this.jobs = jobs;
+        },
+        error => {
+          this.error = error.message;
+        }
+    );
+  }
+
+  onDeleteJob(jobName, partID) {
+    this.delSub = this.jobService.deleteJob(jobName, partID).subscribe(
+        res => {
+          this.jobs.splice( this.jobs.findIndex(j => j.jobName === jobName && j.partId === partID), 1 );
         },
         error => {
           this.error = error.message;
