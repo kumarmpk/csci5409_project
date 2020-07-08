@@ -5,6 +5,7 @@ import {JobShort} from '../models/job-short.model';
 import {JobForm} from '../../jobs/create-edit-job/models/job-form.model';
 import {PartForm} from '../../jobs/create-edit-job/create-edit-part/models/part-form.model';
 import {Part} from '../models/part.model';
+import {PartService} from './part.service';
 
 @Injectable({
   providedIn: 'root'
@@ -17,21 +18,30 @@ export class JobFormService {
       )));
   jobForm$: Observable<FormGroup> = this.jobForm.asObservable();
 
-  constructor(private fb: FormBuilder) { }
+  constructor(private fb: FormBuilder, private partService: PartService) { }
 
-  resetForm(job) {
-    this.jobForm.next(this.fb.group(new JobForm(job)));
+  resetForm(job = new JobShort('', [])) {
+    if (job) {
+      this.jobForm.next(this.fb.group(new JobForm(job)));
+      this.jobForm.value.patchValue({
+        jobName: job.jobName,
+      });
+      job.parts.forEach(value => {
+        const part = this.partService.dataSource.value.find(x => x.partId === value.partId);
+        this.addPart(part.partName, value.partId, value.qty);
+      });
+    }
   }
 
   /* jobs */
 
-  addPart() {
+  addPart(partName = 'Choose...', partID = 0, quantity = 0) {
     const currentJob = this.jobForm.getValue();
     const currentParts = currentJob.get('parts') as FormArray;
 
     currentParts.push(
         this.fb.group(
-            new PartForm(new Part('Choose...', 3, 0))
+            new PartForm(new Part(partName, partID, quantity))
         )
     );
 

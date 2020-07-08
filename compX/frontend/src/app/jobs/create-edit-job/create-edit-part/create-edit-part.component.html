@@ -4,13 +4,14 @@
         <select id="partName"
                 class="form-control"
                 formControlName="partName">
-            <option selected>Choose...</option>
-            <option *ngFor="let part of parts">
+            <option [class.d-none]="isEdit" selected>Choose...</option>
+            <option [attr.selected]="isEdit && part.partName === selectedValue ? 'selected' : null" *ngFor="let part of parts">
                 {{ part.partName }}
             </option>
         </select>
     </div>
-    <div class="form-group col-md-3">
+    <div [ngClass]="isEdit ? 'col-md-4' : 'col-md-3'"
+            class="form-group">
         <label for="qty">Quantity</label>
         <input id="qty"
                type="number"
@@ -19,7 +20,8 @@
                class="form-control" />
 
     </div>
-    <div class="form-group col-md-1">
+    <div [class.d-none] = "isEdit"
+         class="form-group col-md-1">
         <button (click)="onDelete()"
                 type="button"
                 class="btn btn-danger align-bottom">-</button>

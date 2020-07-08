@@ -16,6 +16,7 @@
                         class="btn btn-success">Add Part</button>
         </div>
         <app-create-edit-part *ngFor="let part of parts?.controls; let i = index"
+                              [isEdit]="isEdit"
                               [index]="i"
                               [partForm]="part"
                               (deletePart)="deletePart($event)">

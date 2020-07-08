@@ -11,8 +11,10 @@ import { first } from 'rxjs/operators';
 export class CreateEditPartComponent implements OnInit, OnDestroy {
 
   parts = [];
+  selectedValue = '';
   partsSub: Subscription;
 
+  @Input() isEdit = false;
   @Input() partForm: FormGroup;
   @Input() index: number;
   @Output() deletePart: EventEmitter<number> = new EventEmitter();
@@ -23,6 +25,7 @@ export class CreateEditPartComponent implements OnInit, OnDestroy {
     this.partsSub = this.partService.data.pipe(first()).subscribe(
         parts => {
           this.parts = parts;
+          this.selectedValue = this.partForm.controls['partName'].value;
         },
     );
     this.partService.fetchParts();

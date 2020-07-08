@@ -14,6 +14,16 @@ export class CreateEditJobComponent implements OnInit, OnDestroy {
 
   @Input()
   isEdit = false;
+
+  // tslint:disable-next-line:variable-name
+  _initialForm: JobShort = new JobShort('', []);
+  @Input()
+  set initialForm(initialForm: JobShort) {
+    this._initialForm = initialForm;
+    this.jobFormService.resetForm(initialForm);
+  }
+  get initialForm() { return this._initialForm; }
+
   jobForm: FormGroup;
   jobFormSub: Subscription;
   jobServiceSub: Subscription;
@@ -33,10 +43,28 @@ export class CreateEditJobComponent implements OnInit, OnDestroy {
         });
 
     this.partService.fetchParts();
+    this.jobForm.reset();
+    this.jobFormService.resetForm();
   }
 
   onSubmit() {
+    this.isEdit ? this.onEditJob() : this.onCreateJob();
+  }
 
+  ngOnDestroy() {
+    this.jobFormSub.unsubscribe();
+    if (this.jobServiceSub) {
+      this.jobServiceSub.unsubscribe();
+    }
+  }
+
+  /* network */
+
+  onEditJob() {
+
+  }
+
+  onCreateJob() {
     const job = this.jobForm.value as JobShort;
     const jobName = job.jobName;
 
@@ -45,17 +73,10 @@ export class CreateEditJobComponent implements OnInit, OnDestroy {
         console.log(value);
         this.jobService.fetchJobs();
         this.jobForm.reset();
-        this.jobFormService.resetForm(new JobShort('', []));
+        this.jobFormService.resetForm();
       });
     } else {
       alert('Job form has to have a name provided and at least one part');
-    }
-  }
-
-  ngOnDestroy() {
-    this.jobFormSub.unsubscribe();
-    if (this.jobServiceSub) {
-      this.jobServiceSub.unsubscribe();
     }
   }
 

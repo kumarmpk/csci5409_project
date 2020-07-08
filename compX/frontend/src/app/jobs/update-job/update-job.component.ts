@@ -3,6 +3,8 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { JobShort } from '../../shared/models/job-short.model';
 import { JobService } from '../../shared/services/job.service';
 import {Subscription} from 'rxjs';
+import {PartService} from '../../shared/services/part.service';
+import {Part} from '../../shared/models/part.model';
 
 @Component({
     selector: 'app-update-job',
@@ -16,6 +18,7 @@ export class UpdateJobComponent implements OnInit, OnDestroy {
     error = null;
 
     constructor(private jobService: JobService,
+                private partService: PartService,
                 private route: ActivatedRoute) {
     }
 
@@ -33,7 +36,8 @@ export class UpdateJobComponent implements OnInit, OnDestroy {
     onFetchJob() {
       this.jobSub = this.jobService.fetchJob(this.jobName).subscribe(
           jobItems => {
-              console.log(jobItems);
+              const parts = jobItems.map(x => new Part(x.jobName, x.partId, x.qty));
+              this.jobShort = new JobShort(jobItems[0].jobName, parts);
           },
           error => {
               this.error = error.message;
