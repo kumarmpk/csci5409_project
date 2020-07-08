@@ -22,18 +22,22 @@ db.connect((err) => {
   console.log('Connection successful');
 });
 
-app.get('/jobs', (req, res) => {
-  let sql = 'select * from jobs';
-  let query = db.query(sql, (err, result) => {
-    if (err) {
-      throw err;
-    }
-    if (result.length == 0) {
-      res.send('jobs table does not have any records');
-    } else {
-      res.send(result);
-    }
-  });
+app.get('/jobs',(req,res)=>{
+    let sql = 'select * from jobs';
+    let query = db.query(sql,(err,result)=>{
+        if(err){
+            throw err;
+        }
+        if(result.length==0){
+            res.send({
+                error:'jobs table does not have any records'
+            }); 
+        }else{
+            res.send({
+                result:result
+            }); 
+        }   
+    });    
 });
 
 app.get('/jobById', (req, res) => {
@@ -48,14 +52,19 @@ app.get('/jobById', (req, res) => {
       if (result.length == 0) {
         res
           .status(404)
-          .send(
+          .send({
+            error:
             'Job with jobName ' +
               req.query.jobName +
               ' and partId ' +
               req.query.partId +
               ' was not found'
-          );
-      } else res.send(result);
+          });
+      } else {
+          res.send({
+              result:result
+          });
+        }
     });
   }
 });
@@ -64,7 +73,7 @@ app.get('/jobList', (req, res) => {
   if (!req.query.jobName) {
     res.status(400).send('Include the query parameter in the request');
   } else {
-    let sql = 'select * from jobs where jobName = ' + req.query.jobName;
+    let sql = `select * from jobs where jobName = '${req.query.jobName}'`;
     let query = db.query(sql, (err, result) => {
       if (err) {
         throw err;
@@ -72,8 +81,14 @@ app.get('/jobList', (req, res) => {
       if (result.length == 0) {
         res
           .status(404)
-          .send('Job with jobName ' + req.query.jobName + ' was not found');
-      } else res.send(result);
+          .send({
+            error:`Job with jobName '${req.query.jobName} ' was not found`
+          });
+      } else{
+            res.send({
+                result:result
+            });
+      } 
     });
   }
 });
@@ -96,26 +111,28 @@ app.post('/jobs', jsonParser, (req, res) => {
         if (err) {
           throw err;
         }
-        res.send(
-          'Record {' +
+        res.send({
+            result:
+            'Record {' +
             insertData.jobName +
             ',' +
             insertData.partId +
             ',' +
             insertData.qty +
             '} is inserted in jobs table'
-        );
+        });
       });
     } else {
       res
         .status(404)
-        .send(
-          'jobs table with jobName ' +
+        .send({
+            error:
+            'jobs table with jobName ' +
             insertData.jobName +
             'and partId ' +
             insertData.partId +
             ' already exists'
-        );
+        });
     }
   });
 });
@@ -134,24 +151,26 @@ app.put('/jobs', jsonParser, (req, res) => {
         if (err) {
           throw err;
         }
-        res.send(
-          'Record with JobName ' +
+        res.send({
+            message:
+            'Record with JobName ' +
             req.body.jobName +
             ' and partId ' +
             req.body.partId +
             ' is updated'
-        );
+        });
       });
     } else {
       res
         .status(404)
-        .send(
-          'JobName ' +
+        .send({
+            error:
+            'JobName ' +
             req.body.jobName +
             ' and partId ' +
             req.body.partId +
             ' does not exist'
-        );
+        });
     }
   });
 });
@@ -199,8 +218,9 @@ app.post('/orders', jsonParser, (req, res) => {
         if (err) {
           throw err;
         }
-        res.send(
-          'Record {' +
+        res.send({
+            result:
+            'Record {' +
             insertData.jobName +
             ',' +
             insertData.partId +
@@ -209,21 +229,40 @@ app.post('/orders', jsonParser, (req, res) => {
             ',' +
             insertData.qty +
             '} is inserted in partorders table'
-        );
+        });
       });
     } else {
       res
         .status(404)
-        .send(
-          'partorders table with jobName ' +
+        .send({
+            error:
+            'partorders table with jobName ' +
             insertData.jobName +
             'and partId ' +
             insertData.partId +
             'and userId ' +
             insertData.userId +
             ' already exists'
-        );
+        });
     }
   });
+});
+
+app.get('/orders',(req,res)=>{
+    let sql = 'select * from partorders';
+    let query = db.query(sql,(err,result)=>{
+        if(err){
+            throw err;
+        }
+        if(result.length==0){
+            res.send({
+                error:'partorders table does not have any records'
+            }); 
+        }else{
+            res.send({
+                result:result
+            }); 
+        }   
+    });    
 });
 module.exports = app;
