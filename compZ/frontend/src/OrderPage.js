@@ -1,31 +1,70 @@
 import React, { Component } from "react";
-import jobparts from "./dummydata";
+import axios from "axios";
+import errMsg from "./errormessages";
 
 class OrderPage extends Component {
   constructor(props) {
     super(props);
-    let { jobname } = this.props.match.params;
+    let { jobName } = this.props.match.params;
+    let userId = this.props.location.state.userId;
 
-    let obj = {};
-    obj = jobparts.filter((c) => c.jobname === jobname);
     this.state = {
-      jobpart: obj,
-      jobName: jobname,
+      jobpart: [],
+      jobName: jobName,
       selected: {},
+      errorMsg: "",
+      userId: userId,
     };
   }
 
-  handleCheckbox(partid) {
+  async componentDidMount() {
+    let jobName = this.state.jobName;
+
+    await axios
+      .get(`http://localhost:4000/api/parts/${jobName}`)
+      .then((res) => {
+        this.setState({
+          jobpart: res.data,
+        });
+      })
+      .catch((err) => console.log(err));
+  }
+
+  handleCheckbox(partId) {
     const newSelected = Object.assign({}, this.state.selected);
-    newSelected[partid] = !this.state.selected[partid];
+    newSelected[partId] = !this.state.selected[partId];
     this.setState({
       selected: newSelected,
+      errorMsg: "",
     });
+  }
+
+  async orderBackendCall() {
+    let selectedList = this.state.selected;
+    let selectedPartIdList = [];
+    Object.keys(selectedList).forEach((key) => {
+      selectedPartIdList.push(key);
+    });
+    let obj = {
+      partId: selectedPartIdList,
+      jobName: this.state.jobName,
+      userId: this.state.userId,
+    };
+    console.log(obj);
+    //await axios.post("http://localhost:4000/api/updateOrder").then();
   }
 
   onOrder = (e) => {
     e.preventDefault();
-    console.log(this.state);
+
+    let checkboxSelected = Object.keys(this.state.selected).length;
+    if (checkboxSelected) {
+      this.orderBackendCall();
+    } else {
+      this.setState({
+        errorMsg: errMsg["3"],
+      });
+    }
   };
 
   render() {
@@ -34,6 +73,9 @@ class OrderPage extends Component {
         <div>
           <div className="col-12 col-sm-12 pt-4">
             <form>
+              <p className="error-msg" style={{ color: "red" }}>
+                {this.state.errorMsg ? this.state.errorMsg : null}
+              </p>
               <table className="table table-hover">
                 <thead className="thead">
                   <tr>
@@ -51,8 +93,8 @@ class OrderPage extends Component {
                           <input
                             name="checkbox"
                             type="checkbox"
-                            onChange={() => this.handleCheckbox(data.partid)}
-                            checked={this.state.selected[data.partid] === true}
+                            onChange={() => this.handleCheckbox(data.partId)}
+                            checked={this.state.selected[data.partId] === true}
                           />
                         </td>
                         <td>{data.jobName}</td>

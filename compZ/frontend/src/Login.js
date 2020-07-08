@@ -14,6 +14,8 @@ class Login extends Component {
     };
   }
 
+  componentDidMount() {}
+
   handleChange = (e) => {
     this.setState({
       [e.target.name]: e.target.value,
@@ -23,6 +25,7 @@ class Login extends Component {
 
   async apiCall() {
     try {
+      //this.props.userId = this.state.email;
       await axios
         .get(
           `http://localhost:4000/api/users/${this.state.email}/${this.state.password}`
@@ -30,7 +33,10 @@ class Login extends Component {
         .then((res) => {
           console.log("res", res);
           if (res.status === 200) {
-            this.props.history.push(`/orderpage/${this.state.jobName}`);
+            this.props.history.push({
+              pathname: `/orderpage/${this.state.jobName}`,
+              state: { userId: this.state.email },
+            });
 
             this.setState({
               email: "",
