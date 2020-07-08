@@ -22,7 +22,7 @@ db.connect((err) => {
   console.log('Connection successful');
 });
 
-app.get('/jobs', (req, res) => {
+app.get('/api/jobs', (req, res) => {
   let sql = 'select * from jobs';
   let query = db.query(sql, (err, result) => {
     if (err) {
@@ -40,7 +40,7 @@ app.get('/jobs', (req, res) => {
   });
 });
 
-app.get('/jobById', (req, res) => {
+app.get('/api/jobById', (req, res) => {
   if (!req.query.jobName || !req.query.partId) {
     res.status(400).send('Check the query parameters');
   } else {
@@ -67,7 +67,7 @@ app.get('/jobById', (req, res) => {
   }
 });
 
-app.get('/jobList', (req, res) => {
+app.get('/api/jobList', (req, res) => {
   if (!req.query.jobName) {
     res.status(400).send('Include the query parameter in the request');
   } else {
@@ -89,7 +89,7 @@ app.get('/jobList', (req, res) => {
   }
 });
 
-app.post('/jobs', jsonParser, (req, res) => {
+app.post('/api/jobs', jsonParser, (req, res) => {
   let select =
     "select * from jobs where jobName = '" +
     req.body.jobName +
@@ -131,7 +131,7 @@ app.post('/jobs', jsonParser, (req, res) => {
   });
 });
 
-app.put('/jobs', jsonParser, (req, res) => {
+app.put('/api/jobs', jsonParser, (req, res) => {
   const jobName = req.body.jobName;
   const partID = req.body.partId;
   const qty = req.body.qty;
@@ -160,7 +160,7 @@ app.put('/jobs', jsonParser, (req, res) => {
   });
 });
 
-app.delete('/jobs', (req, res) => {
+app.delete('/api/jobs', (req, res) => {
   if (!req.query.jobName || !req.query.partId) {
     res.status(400).send('Check the query parameters');
   } else {
@@ -181,7 +181,7 @@ app.delete('/jobs', (req, res) => {
   }
 });
 
-app.post('/orders', jsonParser, (req, res) => {
+app.post('/api/orders', jsonParser, (req, res) => {
   let select =
     " select * from partordersX where jobName = '" +
     req.body.jobName +
@@ -231,7 +231,7 @@ app.post('/orders', jsonParser, (req, res) => {
   });
 });
 
-app.get('/orders', (req, res) => {
+app.get('/api/orders', (req, res) => {
   let sql = 'select * from partordersX';
   let query = db.query(sql, (err, result) => {
     if (err) {
