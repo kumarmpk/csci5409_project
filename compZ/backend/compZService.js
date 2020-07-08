@@ -10,18 +10,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
 var db = mySql.connect(
-  {
-    host: 'bluenose.cs.dal.ca',
-    user: 'meganathan',
-    password: 'B00851418',
-    Port: 3306
-  },
-  {
-    host: 'db.cs.dal.ca',
-    user: 'meganathan',
-    password: 'B00851418',
-    database: 'meganathan'
-  }
+ 
 
 );
 
