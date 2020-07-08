@@ -48,7 +48,7 @@ export class CreateEditJobComponent implements OnInit, OnDestroy {
         this.jobFormService.resetForm(new JobShort('', []));
       });
     } else {
-      alert('Job form data is incomplete');
+      alert('Job form has to have a name provided and at least one part');
     }
   }
 
