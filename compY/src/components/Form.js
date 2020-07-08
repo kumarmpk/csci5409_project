@@ -16,7 +16,7 @@ class Form extends Component {
     const { usage } = this.props
 
     if (usage === "create" && partId !== '' && partName !== '' && qoh !== '') {
-      await axios.post('http://localhost:5000/parts/create', this.state)
+      await axios.post('http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/parts/create', this.state)
         .then((res) => {
           this.setState({
             message: res.data
@@ -25,7 +25,7 @@ class Form extends Component {
     }
 
     if (usage === "update") {
-      await axios.put('http://localhost:5000/parts/update', this.state)
+      await axios.put('http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/parts/update', this.state)
         .then((res) => {
           this.setState({
             message: res.data
