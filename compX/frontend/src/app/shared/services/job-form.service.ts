@@ -27,7 +27,7 @@ export class JobFormService {
 
     currentParts.push(
         this.fb.group(
-            new PartForm(new Part('Choose...', 0, 0))
+            new PartForm(new Part('Choose...', 3, 0))
         )
     );
 

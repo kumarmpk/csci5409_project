@@ -1,33 +1,44 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {catchError, map} from 'rxjs/operators';
-import {Observable, throwError} from 'rxjs';
+import {BehaviorSubject, Observable, throwError} from 'rxjs';
 import {Job} from '../models/job.model';
 import {plainToClass} from 'class-transformer';
 import {JobShort} from '../models/job-short.model';
 import {OrderItem} from '../models/order-item.model';
+import {PartService} from './part.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class JobService {
 
+    private dataSource = new BehaviorSubject<Job[]>([]);
+    data = this.dataSource.asObservable();
+
     baseURL = 'http://localhost:3000/';
 
-    constructor(private http: HttpClient) {
+    constructor(private http: HttpClient, private partService: PartService) {
     }
 
     fetchJobs() {
-        return this.http
+        const jobSub = this.http
             .get(this.baseURL + 'jobs')
             .pipe(
                 map(responseData => {
-                    return plainToClass(Job, responseData) as unknown as Array<Job>;
+                    const key = 'result';
+                    if (responseData.hasOwnProperty(key)) {
+                        return plainToClass(Job, responseData[key]) as unknown as Array<Job>;
+                    }
                 }),
                 catchError(errorRes => {
-                  return throwError(errorRes);
+                    return throwError(errorRes);
                 })
             );
+
+        jobSub.subscribe(jobs => {
+            this.dataSource.next(jobs);
+        });
     }
 
     fetchJob(name: string) {
@@ -60,8 +71,15 @@ export class JobService {
 
     createJob(job: JobShort) {
 
-        // enter units for preselected items in steps
-        // const ingredients = recipe.ingredients;
+        const name = job.jobName;
+        // tslint:disable-next-line:only-arrow-functions no-shadowed-variable
+        const partDict = this.partService.dataSource.value.reduce(function(map, item) {
+            map[item.partName] = item.partId;
+            return map;
+        }, {});
+        const jobItems = job.parts.map(x => new Job(name, partDict[x.partName], x.qty));
+        console.log(jobItems);
+
         // recipe.instruction.forEach(item => {
         //     item.ingredients.forEach(ing => {
         //         const ingredient = ingredients.find(x => x.name === ing.name);
@@ -88,35 +106,6 @@ export class JobService {
         //     );
     }
 
-    /* orders */
-
-    fetchOrders() {
-
-        const orders = [
-            new OrderItem('job name one', 23, 'first user', 4),
-            new OrderItem('job name two', 32, 'first user', 10),
-            new OrderItem('job name one', 10, 'first user', 15),
-        ];
-
-        return new Observable<OrderItem[]>(observer => {
-            observer.next(orders);
-        });
-
-        // return this.http
-        //     .get(this.baseURL + 'recipe/all')
-        //     .pipe(
-        //         map(responseData => {
-        //           const key = 'data';
-        //           if (responseData.hasOwnProperty(key)) {
-        //             return plainToClass(Job, responseData[key]) as unknown as Array<Job>;
-        //           }
-        //         }),
-        //         catchError(errorRes => {
-        //           return throwError(errorRes);
-        //         })
-        //     );
-    }
-
     deleteJob(name, partID) {
         return this.http
             .delete(this.baseURL + 'jobs',
@@ -129,6 +118,24 @@ export class JobService {
             .pipe(
                 map(responseData => {
                     return responseData;
+                }),
+                catchError(errorRes => {
+                    return throwError(errorRes);
+                })
+            );
+    }
+
+    /* orders */
+
+    fetchOrders() {
+        return this.http
+            .get(this.baseURL + 'orders')
+            .pipe(
+                map(responseData => {
+                    const key = 'result';
+                    if (responseData.hasOwnProperty(key)) {
+                        return plainToClass(OrderItem, responseData[key]) as unknown as Array<OrderItem>;
+                    }
                 }),
                 catchError(errorRes => {
                     return throwError(errorRes);

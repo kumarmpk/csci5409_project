@@ -30,7 +30,7 @@ export class JobItemComponent implements OnInit, OnDestroy {
   }
 
   onFetchJobs() {
-    this.jobSub = this.jobService.fetchJobs().subscribe(
+    this.jobSub = this.jobService.data.subscribe(
         jobs => {
           this.jobs = jobs;
         },
@@ -38,6 +38,7 @@ export class JobItemComponent implements OnInit, OnDestroy {
           this.error = error.message;
         }
     );
+    this.jobService.fetchJobs();
   }
 
   onDeleteJob(jobName, partID) {

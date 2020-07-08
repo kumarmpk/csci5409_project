@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Part } from '../models/part.model';
 
 @Injectable({
@@ -8,9 +8,11 @@ import { Part } from '../models/part.model';
 })
 export class PartService {
 
-  baseURL = 'http://localhost:4000/';
-  parts: Part[] = [];
+  dataSource = new BehaviorSubject<Part[]>([]);
+  data = this.dataSource.asObservable();
   error = null;
+
+  baseURL = 'http://localhost:3000/';
 
   constructor(private http: HttpClient) {
   }
@@ -18,22 +20,14 @@ export class PartService {
   fetchParts() {
 
     const mockParts = [
-      new Part('name one', 4, 5),
+      new Part('name one', 3, 5),
       new Part('name two', 4, 5),
-      new Part('name three', 4, 5),
+      new Part('name three', 8, 5),
     ];
 
     // return jobs;
 
-    return new Observable<Part[]>(observer => {
-      observer.next(mockParts);
-    }).subscribe(newParts => {
-          this.parts = newParts;
-        },
-        error => {
-          this.error = error.message;
-        }
-    );
+    this.dataSource.next(mockParts);
 
     // return this.http
     //     .get(this.baseURL + 'recipe/all')

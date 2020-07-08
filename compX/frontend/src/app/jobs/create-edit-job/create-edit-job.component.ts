@@ -16,7 +16,7 @@ export class CreateEditJobComponent implements OnInit, OnDestroy {
   isEdit = false;
   jobForm: FormGroup;
   jobFormSub: Subscription;
-  // jobServiceSub: Subscription;
+  jobServiceSub: Subscription;
   parts: FormArray;
   formInvalid = false;
   error = null;
@@ -36,27 +36,22 @@ export class CreateEditJobComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
-    console.log('Job saved!');
-    console.log(this.jobForm.value as JobShort);
 
     const job = this.jobForm.value as JobShort;
-    // recipe.authorId = sessionStorage.getItem('id');
+    const jobName = job.jobName;
 
-    // this.jobServiceSub = this.jobService.createJob(job).subscribe(
-    //     jobItem => {
-    //       console.log(jobItem);
-    //       this.jobForm.reset();
-    //       // this.router.navigate(['profile', 'myrecipes']);
-    //     },
-    //     error => {
-    //       this.error = error.message;
-    //     }
-    // );
+    if (jobName && jobName !== '' && job.parts.length > 0) {
+      this.jobService.createJob(job);
+    } else {
+      alert('Job form data is incomplete');
+    }
   }
 
   ngOnDestroy() {
     this.jobFormSub.unsubscribe();
-    // this.jobServiceSub.unsubscribe();
+    if (this.jobServiceSub) {
+      this.jobServiceSub.unsubscribe();
+    }
   }
 
   /* parts */

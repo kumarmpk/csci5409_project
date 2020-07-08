@@ -1,14 +1,18 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { PartService } from '../../../shared/services/part.service';
+import { Subscription } from 'rxjs';
+import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'app-create-edit-part',
   templateUrl: './create-edit-part.component.html',
 })
-export class CreateEditPartComponent implements OnInit {
+export class CreateEditPartComponent implements OnInit, OnDestroy {
 
   parts = [];
+  partsSub: Subscription;
+
   @Input() partForm: FormGroup;
   @Input() index: number;
   @Output() deletePart: EventEmitter<number> = new EventEmitter();
@@ -16,7 +20,16 @@ export class CreateEditPartComponent implements OnInit {
   constructor(private partService: PartService) { }
 
   ngOnInit() {
-    this.parts = this.partService.parts;
+    this.partsSub = this.partService.data.pipe(first()).subscribe(
+        parts => {
+          this.parts = parts;
+        },
+    );
+    this.partService.fetchParts();
+  }
+
+  ngOnDestroy() {
+    this.partsSub.unsubscribe();
   }
 
   onDelete() {
