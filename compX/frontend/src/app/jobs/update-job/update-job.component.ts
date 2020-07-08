@@ -19,6 +19,7 @@ export class UpdateJobComponent implements OnInit, OnDestroy {
 
     constructor(private jobService: JobService,
                 private partService: PartService,
+                private router: Router,
                 private route: ActivatedRoute) {
     }
 
@@ -43,5 +44,9 @@ export class UpdateJobComponent implements OnInit, OnDestroy {
               this.error = error.message;
           }
       );
+    }
+
+    onUpdatedJob() {
+        this.router.navigate(['/']);
     }
 }

@@ -3,7 +3,8 @@
         <label for="partName">Part Name</label>
         <select id="partName"
                 class="form-control"
-                formControlName="partName">
+                formControlName="partName"
+                [attr.disabled]="isEdit ? 'disabled' : null">
             <option [class.d-none]="isEdit" selected>Choose...</option>
             <option [attr.selected]="isEdit && part.partName === selectedValue ? 'selected' : null" *ngFor="let part of parts">
                 {{ part.partName }}

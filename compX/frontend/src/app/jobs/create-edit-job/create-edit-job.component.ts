@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FormArray, FormGroup } from '@angular/forms';
 import { JobFormService } from '../../shared/services/job-form.service';
@@ -14,6 +14,9 @@ export class CreateEditJobComponent implements OnInit, OnDestroy {
 
   @Input()
   isEdit = false;
+  // tslint:disable-next-line:no-output-on-prefix
+  @Output()
+  onDidUpdateJob = new EventEmitter();
 
   // tslint:disable-next-line:variable-name
   _initialForm: JobShort = new JobShort('', []);
@@ -61,7 +64,10 @@ export class CreateEditJobComponent implements OnInit, OnDestroy {
   /* network */
 
   onEditJob() {
-
+    const job = this.jobForm.value as JobShort;
+    this.jobService.updateJob(job).subscribe(value => {
+      this.onDidUpdateJob.emit();
+    });
   }
 
   onCreateJob() {

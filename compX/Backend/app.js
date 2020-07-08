@@ -22,22 +22,22 @@ db.connect((err) => {
   console.log('Connection successful');
 });
 
-app.get('/jobs',(req,res)=>{
-    let sql = 'select * from jobs';
-    let query = db.query(sql,(err,result)=>{
-        if(err){
-            throw err;
-        }
-        if(result.length==0){
-            res.send({
-                error:'jobs table does not have any records'
-            }); 
-        }else{
-            res.send({
-                result:result
-            }); 
-        }   
-    });    
+app.get('/jobs', (req, res) => {
+  let sql = 'select * from jobs';
+  let query = db.query(sql, (err, result) => {
+    if (err) {
+      throw err;
+    }
+    if (result.length == 0) {
+      res.send({
+        error: 'jobs table does not have any records',
+      });
+    } else {
+      res.send({
+        result: result,
+      });
+    }
+  });
 });
 
 app.get('/jobById', (req, res) => {
@@ -50,21 +50,19 @@ app.get('/jobById', (req, res) => {
         throw err;
       }
       if (result.length == 0) {
-        res
-          .status(404)
-          .send({
-            error:
+        res.status(404).send({
+          error:
             'Job with jobName ' +
-              req.query.jobName +
-              ' and partId ' +
-              req.query.partId +
-              ' was not found'
-          });
+            req.query.jobName +
+            ' and partId ' +
+            req.query.partId +
+            ' was not found',
+        });
       } else {
-          res.send({
-              result:result
-          });
-        }
+        res.send({
+          result: result,
+        });
+      }
     });
   }
 });
@@ -79,16 +77,14 @@ app.get('/jobList', (req, res) => {
         throw err;
       }
       if (result.length == 0) {
-        res
-          .status(404)
-          .send({
-            error:`Job with jobName '${req.query.jobName} ' was not found`
-          });
-      } else{
-            res.send({
-                result:result
-            });
-      } 
+        res.status(404).send({
+          error: `Job with jobName '${req.query.jobName} ' was not found`,
+        });
+      } else {
+        res.send({
+          result: result,
+        });
+      }
     });
   }
 });
@@ -112,65 +108,54 @@ app.post('/jobs', jsonParser, (req, res) => {
           throw err;
         }
         res.send({
-            result:
+          result:
             'Record {' +
             insertData.jobName +
             ',' +
             insertData.partId +
             ',' +
             insertData.qty +
-            '} is inserted in jobs table'
+            '} is inserted in jobs table',
         });
       });
     } else {
-      res
-        .status(404)
-        .send({
-            error:
-            'jobs table with jobName ' +
-            insertData.jobName +
-            'and partId ' +
-            insertData.partId +
-            ' already exists'
-        });
+      res.status(404).send({
+        error:
+          'jobs table with jobName ' +
+          insertData.jobName +
+          'and partId ' +
+          insertData.partId +
+          ' already exists',
+      });
     }
   });
 });
 
 app.put('/jobs', jsonParser, (req, res) => {
-  let select =
-    "select * from jobs where jobName = '" +
-    req.body.jobName +
-    "' and partId =" +
-    req.body.partId;
-  let sql = "Update jobs SET ? where jobName = '" + req.body.jobName + "'";
-  let updateData = { qty: req.body.qty };
-  let selQuery = db.query(select, (err, result) => {
+  const jobName = req.body.jobName;
+  const partID = req.body.partId;
+  const qty = req.body.qty;
+
+  const selectQuery = `SELECT * FROM jobs WHERE jobName = '${jobName}' and partId =${partID}`;
+
+  const updateQuery = `UPDATE jobs
+                       SET qty=${qty}
+                       WHERE jobName='${jobName}' AND partId=${partID};`;
+
+  db.query(selectQuery, (err, result) => {
     if (result.length != 0) {
-      let updateQuery = db.query(sql, updateData, (err, result) => {
+      db.query(updateQuery, (err, result) => {
         if (err) {
           throw err;
         }
         res.send({
-            message:
-            'Record with JobName ' +
-            req.body.jobName +
-            ' and partId ' +
-            req.body.partId +
-            ' is updated'
+          message: `Record with JobName ${jobName} and partId ${partID} is updated`,
         });
       });
     } else {
-      res
-        .status(404)
-        .send({
-            error:
-            'JobName ' +
-            req.body.jobName +
-            ' and partId ' +
-            req.body.partId +
-            ' does not exist'
-        });
+      res.status(404).send({
+        error: `JobName ${jobName} and partId ${partID} does not exist`,
+      });
     }
   });
 });
@@ -219,7 +204,7 @@ app.post('/orders', jsonParser, (req, res) => {
           throw err;
         }
         res.send({
-            result:
+          result:
             'Record {' +
             insertData.jobName +
             ',' +
@@ -228,41 +213,39 @@ app.post('/orders', jsonParser, (req, res) => {
             insertData.userId +
             ',' +
             insertData.qty +
-            '} is inserted in partorders table'
+            '} is inserted in partorders table',
         });
       });
     } else {
-      res
-        .status(404)
-        .send({
-            error:
-            'partorders table with jobName ' +
-            insertData.jobName +
-            'and partId ' +
-            insertData.partId +
-            'and userId ' +
-            insertData.userId +
-            ' already exists'
-        });
+      res.status(404).send({
+        error:
+          'partorders table with jobName ' +
+          insertData.jobName +
+          'and partId ' +
+          insertData.partId +
+          'and userId ' +
+          insertData.userId +
+          ' already exists',
+      });
     }
   });
 });
 
-app.get('/orders',(req,res)=>{
-    let sql = 'select * from partorders';
-    let query = db.query(sql,(err,result)=>{
-        if(err){
-            throw err;
-        }
-        if(result.length==0){
-            res.send({
-                error:'partorders table does not have any records'
-            }); 
-        }else{
-            res.send({
-                result:result
-            }); 
-        }   
-    });    
+app.get('/orders', (req, res) => {
+  let sql = 'select * from partorders';
+  let query = db.query(sql, (err, result) => {
+    if (err) {
+      throw err;
+    }
+    if (result.length == 0) {
+      res.send({
+        error: 'partorders table does not have any records',
+      });
+    } else {
+      res.send({
+        result: result,
+      });
+    }
+  });
 });
 module.exports = app;

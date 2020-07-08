@@ -61,21 +61,39 @@ export class JobService {
     }
 
     createJob(job: JobShort) {
-
-        const name = job.jobName;
-        // tslint:disable-next-line:only-arrow-functions no-shadowed-variable
-        const partDict = this.partService.dataSource.value.reduce(function(map, item) {
-            map[item.partName] = item.partId;
-            return map;
-        }, {});
-        const jobItems = job.parts.map(x => new Job(name, partDict[x.partName], x.qty));
-        console.log(jobItems);
+        const jobItems = this.convertToJobItems(job);
 
         return from(jobItems).pipe(
             // tslint:disable-next-line:no-shadowed-variable
             flatMap(job => {
                 return this.http
                     .post(this.baseURL + 'jobs',
+                        JSON.stringify(job),
+                        {
+                            headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+                        })
+                    .pipe(
+                        map((responseData) => {
+                            return responseData;
+                        }),
+                        catchError(errorRes => {
+                            return throwError(errorRes);
+                        })
+                    );
+            }),
+            skip(jobItems.length - 1)
+        );
+    }
+
+    updateJob(job: JobShort) {
+        const jobItems = this.convertToJobItems(job);
+        console.log(jobItems);
+
+        return from(jobItems).pipe(
+            // tslint:disable-next-line:no-shadowed-variable
+            flatMap(job => {
+                return this.http
+                    .put(this.baseURL + 'jobs',
                         JSON.stringify(job),
                         {
                             headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -110,6 +128,18 @@ export class JobService {
                     return throwError(errorRes);
                 })
             );
+    }
+
+    /* helper */
+
+    private convertToJobItems(job: JobShort) {
+        const name = job.jobName;
+        // tslint:disable-next-line:only-arrow-functions no-shadowed-variable
+        const partDict = this.partService.dataSource.value.reduce(function(map, item) {
+            map[item.partName] = item.partId;
+            return map;
+        }, {});
+        return job.parts.map(x => new Job(name, partDict[x.partName], x.qty));
     }
 
     /* orders */
