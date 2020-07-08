@@ -183,14 +183,14 @@ app.delete('/jobs', (req, res) => {
 
 app.post('/orders', jsonParser, (req, res) => {
   let select =
-    " select * from partorders where jobName = '" +
+    " select * from partordersX where jobName = '" +
     req.body.jobName +
     "' and partId = " +
     req.body.partId +
     " and userId = '" +
     req.body.userId +
     "'";
-  let sql = 'insert into partorders SET ?';
+  let sql = 'insert into partordersX SET ?';
   let insertData = {
     jobName: req.body.jobName,
     partId: req.body.partId,
@@ -232,7 +232,7 @@ app.post('/orders', jsonParser, (req, res) => {
 });
 
 app.get('/orders', (req, res) => {
-  let sql = 'select * from partorders';
+  let sql = 'select * from partordersX';
   let query = db.query(sql, (err, result) => {
     if (err) {
       throw err;

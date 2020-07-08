@@ -1,47 +1,36 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { Part } from '../models/part.model';
+import {Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {BehaviorSubject, Observable, throwError} from 'rxjs';
+import {Part} from '../models/part.model';
+import {plainToClass} from 'class-transformer';
+import {catchError, map} from 'rxjs/operators';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class PartService {
 
-  dataSource = new BehaviorSubject<Part[]>([]);
-  data = this.dataSource.asObservable();
-  error = null;
+    dataSource = new BehaviorSubject<Part[]>([]);
+    data = this.dataSource.asObservable();
+    error = null;
 
-  baseURL = 'http://localhost:3000/';
+    baseURL = 'http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/';
 
-  constructor(private http: HttpClient) {
-  }
+    constructor(private http: HttpClient) {
+    }
 
-  fetchParts() {
-
-    const mockParts = [
-      new Part('name one', 3, 5),
-      new Part('name two', 4, 5),
-      new Part('name three', 8, 5),
-    ];
-
-    // return jobs;
-
-    this.dataSource.next(mockParts);
-
-    // return this.http
-    //     .get(this.baseURL + 'recipe/all')
-    //     .pipe(
-    //         map(responseData => {
-    //           const key = 'data';
-    //           if (responseData.hasOwnProperty(key)) {
-    //             return plainToClass(Job, responseData[key]) as unknown as Array<Job>;
-    //           }
-    //         }),
-    //         catchError(errorRes => {
-    //           return throwError(errorRes);
-    //         })
-    //     );
-  }
-
+    fetchParts() {
+        this.http
+            .get(this.baseURL + 'parts')
+            .pipe(
+                map(responseData => {
+                    return plainToClass(Part, responseData) as unknown as Array<Part>;
+                }),
+                catchError(errorRes => {
+                    return throwError(errorRes);
+                })
+            ).subscribe(parts => {
+          this.dataSource.next(parts);
+        });
+    }
 }

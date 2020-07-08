@@ -62,6 +62,7 @@ export class JobService {
 
     createJob(job: JobShort) {
         const jobItems = this.convertToJobItems(job);
+        console.log(job);
 
         return from(jobItems).pipe(
             // tslint:disable-next-line:no-shadowed-variable
@@ -139,7 +140,7 @@ export class JobService {
             map[item.partName] = item.partId;
             return map;
         }, {});
-        return job.parts.map(x => new Job(name, partDict[x.partName], x.qty));
+        return job.parts.map(x => new Job(name, partDict[x.partName], x.qoh));
     }
 
     /* orders */

@@ -28,7 +28,7 @@ export class JobFormService {
       });
       job.parts.forEach(value => {
         const part = this.partService.dataSource.value.find(x => x.partId === value.partId);
-        this.addPart(part.partName, value.partId, value.qty);
+        this.addPart(part.partName, value.partId, value.qoh);
       });
     }
   }
