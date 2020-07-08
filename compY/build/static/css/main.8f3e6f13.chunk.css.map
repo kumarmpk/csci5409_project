@@ -1,0 +1,1 @@
+{"version":3,"sources":["App.css"],"names":[],"mappings":"AAAA,WACE,eACF,CACA,SACE,eACF,CACA,KACE,SACF,CACA,OACE,WACF","file":"main.8f3e6f13.chunk.css","sourcesContent":[".container {\n  margin-top: 50px;\n}\n.message {\n  margin-top: 10px;\n}\n.red {\n  color: red;\n}\n.green {\n  color: green;\n}\n"]}
