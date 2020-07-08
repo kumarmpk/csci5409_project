@@ -3,17 +3,29 @@ const bodyParser = require("body-parser");
 const app = express();
 const mySql = require("mysql-ssh");
 const { query } = require("express");
+const cors = require("cors");
 const jwt = require('jsonwebtoken')
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
 var db = mySql.connect(
-  //Connection string for the db
-  
+  {
+    host: 'bluenose.cs.dal.ca',
+    user: 'meganathan',
+    password: 'B00851418',
+    Port: 3306
+  },
+  {
+    host: 'db.cs.dal.ca',
+    user: 'meganathan',
+    password: 'B00851418',
+    database: 'meganathan'
+  }
+
 );
 
-port = process.env.Port || 3000;
+port = process.env.Port || 4000;
 app.listen(port, () => {
   console.log(`listening on ${port}`);
 });
@@ -135,9 +147,9 @@ app.get('/api/users/:username/:password', (req, res) => {
         if (err) {
           return res.status(404).send('credentials are wrong')
         }
-        if (Object.keys(results).length==0) {
+        if (Object.keys(results).length == 0) {
           let token = jwt.sign(req.params.username.trim().toLowerCase(), process.env.SECRETKEY)
-          return res.send(`Login successful ` + token)
+          return res.send(token)
         }
         else {
           return res.send(`credentials are wrong`)
@@ -148,9 +160,10 @@ app.get('/api/users/:username/:password', (req, res) => {
   }
 })
 
-//method to insert the order in JobParts table
+//method to insert the order and  in JobParts table
 app.post('/api/updateOrder', (req, res) => {
   let insertQuery = 'Insert into JobParts values(?,?,?,?,?,?,?)'
+  let updatePartsQuery = ' update Parts set qoh = case when qoh-? >0 Then qoh-? else qoh end where partId = ?'
   if (req.body) {
     values = [req.body.partId, req.body.jobName, req.body.userId, req.body.qty, (new Date()), (new Date()).toLocaleTimeString(),
     req.body.result]
@@ -159,13 +172,46 @@ app.post('/api/updateOrder', (req, res) => {
         if (err) {
           return res.status(404).send(err)
         }
-        res.send('Jobparts inserted successfully')
+
+        let updateValues = [req.body.qty, req.body.qty, req.body.partId]
+        db.then(client => {
+          client.query(updatePartsQuery, updateValues, (err, results) => {
+            if (err) {
+              return res.status(404).send(err)
+            }
+            console.log(results)
+            res.send('Jobparts and parts inserted successfully')
+          }
+          )
+        })
       }
       )
     }
     )
+
+
   }
 })
+
+//searching all the jobs present
+app.get("/api/searchhistory", (_req, res) => {
+  let sqlQuery = "Select * from Search";
+  db.then((client) => {
+    client.query(sqlQuery, (err, allSearchHistory) => {
+      if (err) {
+        return res
+          .status(404)
+          .send("error occurred while fetching jobs in the database");
+      }
+      if (Object.keys(allSearchHistory).length === 0) {
+        return res.status(404).send("No jobs present in the database");
+      }
+      res.send(JSON.stringify(allSearchHistory, undefined, 4));
+    });
+  }).catch((err) => {
+    console.log(err);
+  });
+});
 
 
 
