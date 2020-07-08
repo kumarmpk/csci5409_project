@@ -12,11 +12,11 @@ app.use(express.json());
 app.use(express.static(__dirname + '/build/'));
 
 const db = mysql.createConnection({
-  host: 'localhost',
-  port: '3306',
-  user: 'root',
-  password: process.env.PASSWORD,
-  database: process.env.DATABASE
+ host: 'groupassignmentsdb.cibsusss4zqs.us-east-1.rds.amazonaws.com',
+ user:'team_db',
+ password: '4A98d8Gx',
+ port: 3306,
+ database: 'companies',
 });
 
 db.connect((err) => {
