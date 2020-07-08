@@ -29,7 +29,7 @@ class App extends Component {
   }
 
   getOrderDetail = async () => {
-    await axios.get('http://localhost:5002/order')
+    await axios.get('http://localhost:5000/order')
       .then((res) => {
         this.setState({
           orders: res.data
