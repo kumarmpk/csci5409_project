@@ -41,7 +41,12 @@ export class CreateEditJobComponent implements OnInit, OnDestroy {
     const jobName = job.jobName;
 
     if (jobName && jobName !== '' && job.parts.length > 0) {
-      this.jobService.createJob(job);
+      this.jobService.createJob(job).subscribe(value => {
+        console.log(value);
+        this.jobService.fetchJobs();
+        this.jobForm.reset();
+        this.jobFormService.resetForm(new JobShort('', []));
+      });
     } else {
       alert('Job form data is incomplete');
     }

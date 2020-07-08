@@ -12,7 +12,6 @@ export class UpdateJobComponent implements OnInit {
     jobName: string;
     jobShort: JobShort;
 
-
     constructor(private jobService: JobService,
                 private route: ActivatedRoute) {
     }

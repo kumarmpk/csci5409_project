@@ -19,6 +19,10 @@ export class JobFormService {
 
   constructor(private fb: FormBuilder) { }
 
+  resetForm(job) {
+    this.jobForm.next(this.fb.group(new JobForm(job)));
+  }
+
   /* jobs */
 
   addPart() {

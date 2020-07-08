@@ -1,12 +1,13 @@
-import {Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {catchError, map} from 'rxjs/operators';
-import {BehaviorSubject, Observable, throwError} from 'rxjs';
-import {Job} from '../models/job.model';
-import {plainToClass} from 'class-transformer';
-import {JobShort} from '../models/job-short.model';
-import {OrderItem} from '../models/order-item.model';
-import {PartService} from './part.service';
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { catchError, map, skip } from 'rxjs/operators';
+import { BehaviorSubject, from, Observable, throwError } from 'rxjs';
+import { Job } from '../models/job.model';
+import { plainToClass} from 'class-transformer';
+import { JobShort} from '../models/job-short.model';
+import { OrderItem } from '../models/order-item.model';
+import { PartService } from './part.service';
+import { flatMap } from 'rxjs/internal/operators';
 
 @Injectable({
     providedIn: 'root',
@@ -22,7 +23,7 @@ export class JobService {
     }
 
     fetchJobs() {
-        const jobSub = this.http
+        this.http
             .get(this.baseURL + 'jobs')
             .pipe(
                 map(responseData => {
@@ -34,9 +35,7 @@ export class JobService {
                 catchError(errorRes => {
                     return throwError(errorRes);
                 })
-            );
-
-        jobSub.subscribe(jobs => {
+            ).subscribe(jobs => {
             this.dataSource.next(jobs);
         });
     }
@@ -80,30 +79,26 @@ export class JobService {
         const jobItems = job.parts.map(x => new Job(name, partDict[x.partName], x.qty));
         console.log(jobItems);
 
-        // recipe.instruction.forEach(item => {
-        //     item.ingredients.forEach(ing => {
-        //         const ingredient = ingredients.find(x => x.name === ing.name);
-        //         ing.units = ingredient.units;
-        //     });
-        // });
-        //
-        // return this.http
-        //     .post(`${this.baseURL}recipe/`,
-        //         JSON.stringify(recipe),
-        //         {
-        //             headers: new HttpHeaders({ 'Content-Type': 'application/json' })
-        //         })
-        //     .pipe(
-        //         map((responseData) => {
-        //             const key = 'data.id';
-        //             if (responseData.hasOwnProperty(key)) {
-        //                 return plainToClass(Recipe, responseData[key]);
-        //             }
-        //         }),
-        //         catchError(errorRes => {
-        //             return throwError(errorRes);
-        //         })
-        //     );
+        return from(jobItems).pipe(
+            // tslint:disable-next-line:no-shadowed-variable
+            flatMap(job => {
+                return this.http
+                    .post(this.baseURL + 'jobs',
+                        JSON.stringify(job),
+                        {
+                            headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+                        })
+                    .pipe(
+                        map((responseData) => {
+                            return responseData;
+                        }),
+                        catchError(errorRes => {
+                            return throwError(errorRes);
+                        })
+                    );
+            }),
+            skip(jobItems.length - 1)
+        );
     }
 
     deleteJob(name, partID) {
