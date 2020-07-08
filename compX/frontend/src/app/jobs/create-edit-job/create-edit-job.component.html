@@ -2,6 +2,7 @@
     <div class="form-group">
         <label for="name">Job name</label>
         <input id="name"
+               [attr.readonly]="isEdit ? 'readonly' : null"
                type="text"
                formControlName="jobName"
                name="name"
