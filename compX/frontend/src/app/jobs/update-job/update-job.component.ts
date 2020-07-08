@@ -1,16 +1,19 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Params, Router} from '@angular/router';
-import {JobShort} from '../../shared/models/job-short.model';
-import {JobService} from '../../shared/services/job.service';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { JobShort } from '../../shared/models/job-short.model';
+import { JobService } from '../../shared/services/job.service';
+import {Subscription} from 'rxjs';
 
 @Component({
     selector: 'app-update-job',
     templateUrl: './update-job.component.html'
 })
-export class UpdateJobComponent implements OnInit {
+export class UpdateJobComponent implements OnInit, OnDestroy {
 
     jobName: string;
     jobShort: JobShort;
+    jobSub: Subscription;
+    error = null;
 
     constructor(private jobService: JobService,
                 private route: ActivatedRoute) {
@@ -23,8 +26,18 @@ export class UpdateJobComponent implements OnInit {
         });
     }
 
-    onFetchJob() {
-      console.log(this.jobName);
+    ngOnDestroy() {
+        this.jobSub.unsubscribe();
+    }
 
+    onFetchJob() {
+      this.jobSub = this.jobService.fetchJob(this.jobName).subscribe(
+          jobItems => {
+              console.log(jobItems);
+          },
+          error => {
+              this.error = error.message;
+          }
+      );
     }
 }
