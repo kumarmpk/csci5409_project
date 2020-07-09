@@ -1,13 +1,13 @@
 # inspired by https://medium.com/bb-tutorials-and-thoughts/dockerizing-angular-app-with-nodejs-backend-85e9d332335d
 
-FROM node:10 AS angular_ui
-WORKDIR /usr/src/app
+FROM node:alpine AS angular_ui
+WORKDIR /app
 COPY frontend/ ./companyX
 RUN cd companyX && npm install @angular/cli && npm install && npm run build
 
-FROM node:10
+FROM node:alpine
 WORKDIR /root/
-COPY --from=angular_ui /usr/src/app/companyX/dist ./companyX/dist
+COPY --from=angular_ui /app/companyX/dist ./companyX/dist
 
 COPY /Backend/package*.json ./
 RUN npm install

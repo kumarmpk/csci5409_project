@@ -17,7 +17,7 @@ export class JobService {
     private dataSource = new BehaviorSubject<Job[]>([]);
     data = this.dataSource.asObservable();
 
-    baseURL = 'http://localhost:3000/api/';
+    baseURL = 'https://company-x-ms.azurewebsites.net/api/';
 
     constructor(private http: HttpClient, private partService: PartService) {
     }
