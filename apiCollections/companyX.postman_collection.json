@@ -1,0 +1,231 @@
+{
+	"info": {
+		"_postman_id": "64c20a6e-f2a6-4387-8040-bad9dc042e8e",
+		"name": "companyX",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "all jobs",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://company-x-ms.azurewebsites.net/api/jobs",
+					"protocol": "https",
+					"host": [
+						"company-x-ms",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"api",
+						"jobs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update job",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n   \"jobName\": \"job1\",\n   \"partId\": 1,\n   \"qty\": 200\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://company-x-ms.azurewebsites.net/api/jobs",
+					"protocol": "https",
+					"host": [
+						"company-x-ms",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"api",
+						"jobs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "new job",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n   \"jobName\": \"job9\",\n   \"partId\": 4,\n   \"qty\": 2\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://company-x-ms.azurewebsites.net/api/jobs",
+					"protocol": "https",
+					"host": [
+						"company-x-ms",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"api",
+						"jobs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "new order",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n   \"jobName\": \"job9\",\n   \"partId\": 2,\n   \"userId\": \"userTwo\",\n   \"qty\": 7\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://company-x-ms.azurewebsites.net/api/orders",
+					"protocol": "https",
+					"host": [
+						"company-x-ms",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"api",
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete job",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "https://company-x-ms.azurewebsites.net/api/jobs?jobName=job6&partId=4",
+					"protocol": "https",
+					"host": [
+						"company-x-ms",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"api",
+						"jobs"
+					],
+					"query": [
+						{
+							"key": "jobName",
+							"value": "job6"
+						},
+						{
+							"key": "partId",
+							"value": "4"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get job by name",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://company-x-ms.azurewebsites.net/api/jobList?jobName=job4",
+					"protocol": "https",
+					"host": [
+						"company-x-ms",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"api",
+						"jobList"
+					],
+					"query": [
+						{
+							"key": "jobName",
+							"value": "job4"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get orders",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://company-x-ms.azurewebsites.net/api/orders",
+					"protocol": "https",
+					"host": [
+						"company-x-ms",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"api",
+						"orders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get job by id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://company-x-ms.azurewebsites.net/api/jobById?jobName=job5&partId=4",
+					"protocol": "https",
+					"host": [
+						"company-x-ms",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"api",
+						"jobById"
+					],
+					"query": [
+						{
+							"key": "jobName",
+							"value": "job5"
+						},
+						{
+							"key": "partId",
+							"value": "4"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
