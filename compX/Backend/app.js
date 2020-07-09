@@ -9,19 +9,42 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(process.cwd() + '/companyX/dist/companyX/'));
 const jsonParser = bodyParser.json();
-const db = mysql.createConnection({
-  host: 'groupassignmentsdb.cibsusss4zqs.us-east-1.rds.amazonaws.com',
-  user: 'team_db',
-  port: '3306',
-  password: '4A98d8Gx',
-  database: 'companies',
-});
-db.connect((err) => {
-  if (err) {
-    throw err;
-  }
-  console.log('Connection successful');
-});
+
+/* Inspired by https://stackoverflow.com/a/20211143 */
+var db;
+
+function connectToDB() {
+  db = mysql.createConnection({
+    host: 'groupassignmentsdb.cibsusss4zqs.us-east-1.rds.amazonaws.com',
+    user: 'team_db',
+    port: '3306',
+    password: '4A98d8Gx',
+    database: 'companies',
+  });
+
+  db.connect((err) => {
+    if (err) {
+      console.log(
+        'Error while connection, will try to reconnect after 1.5 sec',
+        err
+      );
+      setTimeout(connectToDB, 1500);
+    }
+    console.log('Connection successful');
+  });
+
+  db.on('error', function (err) {
+    console.log('Disconnected from the database', err);
+    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+      connectToDB();
+    } else {
+      throw err;
+    }
+  });
+}
+
+connectToDB();
+/* ---------------- */
 
 app.get('/api/jobs', (req, res) => {
   let sql = 'select * from jobs';
