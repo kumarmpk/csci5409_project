@@ -1,15 +1,27 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
-const mySql = require("mysql-ssh");
-const { query } = require("express");
+const mySql = require("mysql");
 const cors = require("cors");
+const http = require("http");
 const jwt = require("jsonwebtoken");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
-var db = mySql.connect();
+var db = mySql.createConnection({
+  host: 'groupassignmentsdb.cibsusss4zqs.us-east-1.rds.amazonaws.com',
+  user: 'team_db',
+  password: '4A98d8Gx',
+  port: '3306', database: 'companies'
+});
+
+db.connect((err) => {
+  if (err) {
+    return console.log(err);
+  }
+  console.log('MySql Connected');
+});
 
 port = process.env.Port || 4000;
 app.listen(port, () => {
@@ -26,21 +38,17 @@ app.get("/", (_req, res) => {
 
 //fetching all the jobs present
 app.get("/api/jobs", (_req, res) => {
-  let sqlQuery = "Select * from Jobs";
-  db.then((client) => {
-    client.query(sqlQuery, (err, allJobs) => {
-      if (err) {
-        return res
-          .status(404)
-          .send("error occurred while fetching jobs in the database");
-      }
-      if (Object.keys(allJobs).length === 0) {
-        return res.status(404).send("No jobs present in the database");
-      }
-      res.send(JSON.stringify(allJobs, undefined, 4));
-    });
-  }).catch((err) => {
-    console.log(err);
+  let sqlQuery = "Select * from jobs";
+  db.query(sqlQuery, (err, allJobs) => {
+    if (err) {
+      return res
+        .status(404)
+        .send("error occurred while fetching jobs in the database");
+    }
+    if (Object.keys(allJobs).length === 0) {
+      return res.status(404).send("No jobs present in the database");
+    }
+    res.send(JSON.stringify(allJobs, undefined, 4));
   });
 });
 
@@ -63,16 +71,12 @@ app.get("/api/jobs/:jobName/", (req, res) => {
       new Date(),
       new Date().toLocaleTimeString(),
     ];
-    db.then((insertClient) => {
-      insertClient.query(insertQuery, values, (err, records) => {
-        if (err) {
-          res
-            .status(404)
-            .send("error occurred while inserting record in the database");
-        }
-      });
-    }).catch((error) => {
-      console.log(error);
+    db.query(insertQuery, values, (err, records) => {
+      if (err) {
+        res
+          .status(404)
+          .send("error occurred while inserting record in the database");
+      }
     });
     res.send(JSON.stringify(jobToFetch, undefined, 4));
   };
@@ -83,21 +87,19 @@ app.get("/api/jobs/:jobName/", (req, res) => {
 app.get("/api/parts/:jobName/", (req, res) => {
   if (req.params.jobName) {
     let sqlQuery =
-      "select * from Jobs j inner join Parts p  on j.PartId = p.PartId where j.JobName=?";
+      "select * from jobs j inner join parts p  on j.partId = p.partId where j.jobName=?";
     values = [req.params.jobName.trim().toLowerCase()];
-    db.then((client) => {
-      client.query(sqlQuery, values, (err, allJobs) => {
-        if (err) {
-          console.log(err);
-          return res
-            .status(404)
-            .send("error occurred while fetching jobs in the database");
-        }
-        if (Object.keys(allJobs).length === 0) {
-          return res.status(404).send("No jobs present in the database");
-        }
-        res.send(JSON.stringify(allJobs, undefined, 4));
-      });
+    db.query(sqlQuery, values, (err, allJobs) => {
+      if (err) {
+        console.log(err);
+        return res
+          .status(404)
+          .send("error occurred while fetching jobs in the database");
+      }
+      if (Object.keys(allJobs).length === 0) {
+        return res.status(404).send("No jobs present in the database");
+      }
+      res.send(JSON.stringify(allJobs, undefined, 4));
     });
   } else {
     res.status(404).send("something wrong with the input");
@@ -108,23 +110,21 @@ app.get("/api/parts/:jobName/", (req, res) => {
 app.get("/api/parts/:jobName/:partId/", (req, res) => {
   if (req.params.jobName && req.params.partId) {
     let sqlQuery =
-      "select * from Jobs j inner join Parts p  on j.PartId = p.PartId where j.JobName=? and j.PartId=?";
+      "select * from jobs j inner join parts p  on j.partId = p.partId where j.jobName=? and j.partId=?";
     values = [req.params.jobName.trim().toLowerCase(), req.params.partId];
-    db.then((client) => {
-      client.query(sqlQuery, values, (err, partDetails) => {
-        if (err) {
-          console.log(err);
-          return res
-            .status(404)
-            .send("error occurred while fetching jobs in the database");
-        }
-        if (Object.keys(partDetails).length === 0) {
-          return res
-            .status(404)
-            .send("No jobs or parts present in the database");
-        }
-        res.send(JSON.stringify(partDetails, undefined, 4));
-      });
+    db.query(sqlQuery, values, (err, partDetails) => {
+      if (err) {
+        console.log(err);
+        return res
+          .status(404)
+          .send("error occurred while fetching jobs in the database");
+      }
+      if (Object.keys(partDetails).length === 0) {
+        return res
+          .status(404)
+          .send("No jobs or parts present in the database");
+      }
+      res.send(JSON.stringify(partDetails, undefined, 4));
     });
   } else {
     res.status(404).send("something wrong with the input");
@@ -137,21 +137,19 @@ app.get("/api/users/:username/:password", (req, res) => {
   if (req.params.username && req.params.password) {
     let sqlQuery = "select * from Users where email=? and password=?";
     let values = [req.params.username, req.params.password];
-    db.then((client) => {
-      client.query(sqlQuery, values, (err, results) => {
-        if (err) {
-          return res.status(404).send("credentials are wrong");
-        }
-        if (Object.keys(results).length == 0) {
-          let token = jwt.sign(
-            req.params.username.trim().toLowerCase(),
-            process.env.SECRETKEY
-          );
-          return res.send(token);
-        } else {
-          return res.send(`credentials are wrong`);
-        }
-      });
+    db.query(sqlQuery, values, (err, results) => {
+      if (err) {
+        return res.status(404).send("credentials are wrong");
+      }
+      if (results) {
+        let token = jwt.sign(
+          req.params.username.trim().toLowerCase(),
+          process.env.SECRETKEY
+        );
+        return res.send(token);
+      } else {
+        return res.send(`credentials are wrong`);
+      }
     });
   }
 });
@@ -160,7 +158,7 @@ app.get("/api/users/:username/:password", (req, res) => {
 app.post("/api/updateOrder", (req, res) => {
   let insertQuery = "Insert into JobParts values(?,?,?,?,?,?,?)";
   let updatePartsQuery =
-    " update Parts set qoh = case when qoh-? >0 Then qoh-? else qoh end where partId = ?";
+    " update parts set qoh = case when qoh-? >=0 Then qoh-? else qoh end where partId = ?";
   if (req.body) {
     values = [
       req.body.partId,
@@ -171,22 +169,18 @@ app.post("/api/updateOrder", (req, res) => {
       new Date().toLocaleTimeString(),
       req.body.result,
     ];
-    db.then((client) => {
-      client.query(insertQuery, values, (err, results) => {
+    db.query(insertQuery, values, (err, results) => {
+      if (err) {
+        return res.status(404).send(err);
+      }
+
+      let updateValues = [req.body.qty, req.body.qty, req.body.partId];
+      db.query(updatePartsQuery, updateValues, (err, results) => {
         if (err) {
           return res.status(404).send(err);
         }
-
-        let updateValues = [req.body.qty, req.body.qty, req.body.partId];
-        db.then((client) => {
-          client.query(updatePartsQuery, updateValues, (err, results) => {
-            if (err) {
-              return res.status(404).send(err);
-            }
-            console.log(results);
-            res.send("Jobparts and parts inserted successfully");
-          });
-        });
+        console.log(results);
+        res.send("Jobparts and parts inserted successfully");
       });
     });
   }
@@ -195,20 +189,16 @@ app.post("/api/updateOrder", (req, res) => {
 //searching all the jobs present
 app.get("/api/searchhistory", (_req, res) => {
   let sqlQuery = "Select * from Search";
-  db.then((client) => {
-    client.query(sqlQuery, (err, allSearchHistory) => {
-      if (err) {
-        return res
-          .status(404)
-          .send("error occurred while fetching jobs in the database");
-      }
-      if (Object.keys(allSearchHistory).length === 0) {
-        return res.status(404).send("No jobs present in the database");
-      }
-      res.send(JSON.stringify(allSearchHistory, undefined, 4));
-    });
-  }).catch((err) => {
-    console.log(err);
+  db.query(sqlQuery, (err, allSearchHistory) => {
+    if (err) {
+      return res
+        .status(404)
+        .send("error occurred while fetching jobs in the database");
+    }
+    if (Object.keys(allSearchHistory).length === 0) {
+      return res.status(404).send("No jobs present in the database");
+    }
+    res.send(JSON.stringify(allSearchHistory, undefined, 4));
   });
 });
 
@@ -220,22 +210,16 @@ app.get("*", (_req, res) => {
 function checkIfJobExists(jobName, callback) {
   if (jobName) {
     let query =
-      "select * from Jobs where JobName like '%" +
+      "select * from jobs where jobName like '%" +
       jobName.trim().toLowerCase() +
       "%'";
 
-    db.then((client) => {
-      client
-        .query(query, (err, results) => {
-          if (err) {
-            callback("error occured while checking for data in the database");
-          }
-          callback(results, err);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    });
+    db.query(query, (err, results) => {
+      if (err) {
+        callback("error occured while checking for data in the database");
+      }
+      callback(results, err);
+    })
   } else {
     callback("invalid JobName");
   }
