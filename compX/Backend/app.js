@@ -7,6 +7,7 @@ app.use(express.json());
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.static(process.cwd() + '/companyX/dist/companyX/'));
 const jsonParser = bodyParser.json();
 const db = mysql.createConnection({
   host: 'groupassignmentsdb.cibsusss4zqs.us-east-1.rds.amazonaws.com',
@@ -248,4 +249,9 @@ app.get('/api/orders', (req, res) => {
     }
   });
 });
+
+app.get('/', (req, res) => {
+  res.sendFile(process.cwd() + '/companyX/dist/companyX/index.html');
+});
+
 module.exports = app;
