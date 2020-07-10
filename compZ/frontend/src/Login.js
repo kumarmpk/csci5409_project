@@ -33,6 +33,8 @@ class Login extends Component {
         .then((res) => {
           console.log("res", res);
           if (res.status === 200) {
+            localStorage.setItem("userId", this.state.email);
+            localStorage.setItem("session_token", res.data);
             this.props.history.push({
               pathname: `/homepage`,
               state: {
@@ -51,7 +53,7 @@ class Login extends Component {
         .catch((err) => {
           console.log("err", err);
           this.setState({
-            //errorMsg: err.response.data,
+            errorMsg: err.response.data,
           });
         });
     } catch (err) {

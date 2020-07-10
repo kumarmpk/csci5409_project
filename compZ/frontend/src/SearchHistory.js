@@ -30,15 +30,19 @@ class SearchHistory extends Component {
               <thead className="thead">
                 <tr>
                   <th>Jobname</th>
+                  <th>Date</th>
+                  <th>Time</th>
                 </tr>
               </thead>
               <tbody>
-                {this.state.jobparts.map((data) => {
+                {this.state.searchHistory.map((data) => {
                   return (
                     <tr key={Math.random()}>
                       <th>
                         <a href={`/login/${data.jobName}`}>{data.jobName}</a>
                       </th>
+                      <td>{data.date}</td>
+                      <td>{data.time}</td>
                     </tr>
                   );
                 })}
