@@ -22,7 +22,7 @@ class GetAll extends Component {
 
     try {
       await axios
-        .get(`https://company-x-ms.azurewebsites.net/api/jobs`)
+        .get(`http://localhost:5000/api/jobs`)
         .then((res) => {
           console.log("res", res);
           this.setState({

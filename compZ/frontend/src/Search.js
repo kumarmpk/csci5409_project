@@ -1,6 +1,7 @@
 import React, { Component } from "react";
-import { Button } from "react-bootstrap";
 import axios from "axios";
+import { Modal, Button } from "react-bootstrap";
+import errMsg from "./errormessages";
 
 class Search extends Component {
   constructor(props) {
@@ -10,8 +11,13 @@ class Search extends Component {
       search: "",
       tableFlag: false,
       errorMsg: "",
+      loading: false,
     };
   }
+
+  handleLoadingClose = (e) => {
+    this.setState({ loading: false });
+  };
 
   onChange = (e) => {
     this.setState({
@@ -21,21 +27,30 @@ class Search extends Component {
   };
 
   async apiCall() {
+    this.setState({
+      loading: true,
+    });
     await axios
-      .get(`http://localhost:4000/api/jobs/${this.state.search}`)
+      .get(`http://localhost:5000/api/jobList?jobName=${this.state.search}`)
       .then((res) => {
+        console.log("search page response", res);
+        this.setState({
+          loading: false,
+        });
         let obj = {};
-        obj = res.data;
+        obj = res.data.result;
         this.setState({
           jobpart: obj,
           tableFlag: true,
           errorMsg: "",
+          loading: false,
         });
       })
       .catch((err) => {
         this.setState({
           tableFlag: false,
-          errorMsg: err.response.data,
+          errorMsg: errMsg["4"],
+          loading: false,
         });
       });
   }
@@ -80,6 +95,21 @@ class Search extends Component {
         ) : (
           <div></div>
         )}
+        <Modal
+          show={this.state.loading}
+          onHide={this.handleLoadingClose}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Loading</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>The details are loading please wait....</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.handleLoadingClose}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     );
   }

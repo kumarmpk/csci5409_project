@@ -6,6 +6,12 @@ import SearchHistory from "./SearchHistory";
 class HomePage extends Component {
   constructor(props) {
     super(props);
+
+    if (!this.props.location.state) {
+      this.props.history.push("/NotFound");
+      return;
+    }
+
     let jobName = this.props.location.state.jobName;
     let userId = this.props.location.state.userId;
 

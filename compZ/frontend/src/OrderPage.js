@@ -12,7 +12,7 @@ class OrderPage extends Component {
     let userId = this.props.orderObj.userId;
 
     this.state = {
-      jobpart: [],
+      jobparts: [],
       jobName: jobName,
       selected: {},
       errorMsg: "",
@@ -21,6 +21,7 @@ class OrderPage extends Component {
       modalFlag: false,
       modalMsg: "",
       modalRoute: 0,
+      partsFromX: [],
     };
   }
 
@@ -28,16 +29,62 @@ class OrderPage extends Component {
     let jobName = this.state.jobName;
 
     await axios
-      .get(
-        `https://company-x-ms.azurewebsites.net/api/jobList?jobName=${jobName}`
-      )
+      .get(`http://localhost:5000/api/jobList?jobName=${jobName}`)
       .then((res) => {
-        console.log("orderpage jobs res", res);
-        /* this.setState({
-          jobpart: res.data,
-        }); */
+        let jobs = res.data.result;
+        let obj = {};
+        let partIdList = [];
+
+        let jobparts = [];
+        for (obj of jobs) {
+          let jobpartObj = {};
+          partIdList.push(obj.partId);
+          jobpartObj.jobName = obj.jobName;
+          jobpartObj.reqQty = obj.qty;
+          jobpartObj.partId = obj.partId;
+          jobparts.push(jobpartObj);
+        }
+        this.setState({
+          partsFromX: partIdList,
+          jobparts: jobparts,
+        });
       })
-      .catch((err) => console.log("orderpage jobs err", err));
+      .catch((err) => {
+        this.setState({
+          loading: false,
+          errorMsg: errMsg["5"],
+        });
+      });
+
+    let partIdList = this.state.partsFromX;
+    let jobparts = [];
+    if (partIdList && partIdList.length) {
+      let partId;
+      for (partId of partIdList) {
+        await axios
+          .get(
+            `http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/parts/${partId}`
+          )
+          .then((res) => {
+            if (Object.keys(res).length !== 0) {
+              let jobpartObj = this.state.jobparts.find(
+                (c) => c.partId === partId
+              );
+
+              let partObj = res.data[0];
+
+              jobpartObj.partName = partObj.partName;
+              jobpartObj.avlQty = partObj.qoh;
+              jobparts.push(jobpartObj);
+            }
+          })
+          .catch((err) => console.log(err));
+      }
+      this.setState({
+        jobparts: jobparts,
+        loading: false,
+      });
+    }
   }
 
   handleCheckbox(partId) {
@@ -49,13 +96,9 @@ class OrderPage extends Component {
     });
   }
 
-  async orderBackendCall() {
+  async orderBackendCall(selectedPartIdList) {
     this.setState({ loading: true });
-    let selectedList = this.state.selected;
-    let selectedPartIdList = [];
-    Object.keys(selectedList).forEach((key) => {
-      selectedPartIdList.push(key);
-    });
+
     let obj = {
       partId: selectedPartIdList,
       jobName: this.state.jobName,
@@ -110,9 +153,36 @@ class OrderPage extends Component {
   onOrder = (e) => {
     e.preventDefault();
 
-    let checkboxSelected = Object.keys(this.state.selected).length;
-    if (checkboxSelected) {
-      this.orderBackendCall();
+    this.setState({
+      errorMsg: "",
+    });
+
+    let selectedList = [];
+    let stateList = this.state.selected;
+    let stateListKeys = Object.keys(stateList);
+    let key;
+    for (key of stateListKeys) {
+      if (stateList[key]) {
+        selectedList.push(key);
+      }
+    }
+
+    if (selectedList && selectedList.length) {
+      let partId;
+      for (partId of selectedList) {
+        let obj = this.state.jobparts.find(
+          (c) => c.partId === parseInt(partId)
+        );
+        if (obj && Object.keys(obj).length !== 0)
+          if (obj.avlQty < obj.reqQty) {
+            this.setState({
+              errorMsg: obj.partName + errMsg["6"],
+            });
+            return;
+          }
+      }
+
+      this.orderBackendCall(selectedList);
     } else {
       this.setState({
         errorMsg: errMsg["3"],
@@ -133,44 +203,61 @@ class OrderPage extends Component {
               <p className="error-msg" style={{ color: "red" }}>
                 {this.state.errorMsg ? this.state.errorMsg : null}
               </p>
-              <table className="table table-hover">
-                <thead className="thead">
-                  <tr>
-                    <th></th>
-                    <th>JobName</th>
-                    <th>PartId</th>
-                    <th>Quantity</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.state.jobpart.map((data) => {
-                    return (
-                      <tr key={Math.random()}>
-                        <td>
-                          <input
-                            name="checkbox"
-                            type="checkbox"
-                            onChange={() => this.handleCheckbox(data.partId)}
-                            checked={this.state.selected[data.partId] === true}
-                          />
-                        </td>
-                        <td>{data.jobName}</td>
-                        <td>{data.partId}</td>
-                        <td>{data.qty}</td>
+              {this.state.jobparts.length > 0 ? (
+                <div>
+                  <table className="table table-hover">
+                    <thead className="thead">
+                      <tr>
+                        <th></th>
+                        <th>Job Name</th>
+                        <th>Part Id</th>
+                        <th>Part Name</th>
+                        <th>Required Quantity</th>
+                        <th>Available Quantity</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-              <div className="form-group text-center">
-                <button
-                  onClick={this.onOrder}
-                  type="submit"
-                  className="btn btn-info btn-centre"
-                >
-                  Order
-                </button>
-              </div>
+                    </thead>
+                    <tbody>
+                      {this.state.jobparts.map((data) => {
+                        return (
+                          <tr key={Math.random()}>
+                            <td>
+                              <input
+                                name="checkbox"
+                                type="checkbox"
+                                onChange={() =>
+                                  this.handleCheckbox(data.partId)
+                                }
+                                checked={
+                                  this.state.selected[data.partId] === true
+                                }
+                              />
+                            </td>
+                            <td>{data.jobName}</td>
+                            <td>{data.partId}</td>
+                            <td>{data.partName}</td>
+                            <td>{data.reqQty}</td>
+                            <td>{data.avlQty}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                  <div className="form-group text-center">
+                    <button
+                      onClick={this.onOrder}
+                      type="submit"
+                      className="btn btn-info btn-centre"
+                    >
+                      Order
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <p>
+                  No parts for this job. Kindly contact company Y to add the
+                  details.
+                </p>
+              )}
             </form>
           </div>
         </div>
