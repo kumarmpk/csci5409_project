@@ -17,14 +17,14 @@ export class JobService {
     private dataSource = new BehaviorSubject<Job[]>([]);
     data = this.dataSource.asObservable();
 
-    baseURL = 'https://company-x-ms.azurewebsites.net/api/';
+    baseURL = '/api';
 
     constructor(private http: HttpClient, private partService: PartService) {
     }
 
     fetchJobs() {
         this.http
-            .get(this.baseURL + 'jobs')
+            .get(this.baseURL + '/jobs')
             .pipe(
                 map(responseData => {
                     const key = 'result';
@@ -42,7 +42,7 @@ export class JobService {
 
     fetchJob(name: string) {
         return this.http
-            .get(this.baseURL + 'jobList', {
+            .get(this.baseURL + '/jobList', {
                 params: {
                     jobName: name,
                 }
@@ -68,7 +68,7 @@ export class JobService {
             // tslint:disable-next-line:no-shadowed-variable
             flatMap(job => {
                 return this.http
-                    .post(this.baseURL + 'jobs',
+                    .post(this.baseURL + '/jobs',
                         JSON.stringify(job),
                         {
                             headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -94,7 +94,7 @@ export class JobService {
             // tslint:disable-next-line:no-shadowed-variable
             flatMap(job => {
                 return this.http
-                    .put(this.baseURL + 'jobs',
+                    .put(this.baseURL + '/jobs',
                         JSON.stringify(job),
                         {
                             headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -114,7 +114,7 @@ export class JobService {
 
     deleteJob(name, partID) {
         return this.http
-            .delete(this.baseURL + 'jobs',
+            .delete(this.baseURL + '/jobs',
                 {
                     params: {
                         jobName: name,
@@ -147,7 +147,7 @@ export class JobService {
 
     fetchOrders() {
         return this.http
-            .get(this.baseURL + 'orders')
+            .get(this.baseURL + '/orders')
             .pipe(
                 map(responseData => {
                     const key = 'result';
