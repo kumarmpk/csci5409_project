@@ -20,7 +20,7 @@ class App extends Component {
   }
 
   getAllParts = async () => {
-    await axios.get('http://localhost:5000/parts')
+    await axios.get('http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/parts')
       .then((res) => {
         this.setState({
           parts: res.data
@@ -29,7 +29,7 @@ class App extends Component {
   }
 
   getOrderDetail = async () => {
-    await axios.get('http://localhost:5002/order')
+    await axios.get('http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/order')
       .then((res) => {
         this.setState({
           orders: res.data
