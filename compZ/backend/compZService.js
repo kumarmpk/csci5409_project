@@ -140,14 +140,14 @@ app.get("/api/users/:username/:password", (req, res) => {
       if (err) {
         return res.status(404).send("credentials are wrong");
       }
-      if (results) {
+      if (Object.keys(results).length>0) {
         let token = jwt.sign(
           req.params.username.trim().toLowerCase(),
           process.env.SECRETKEY
         );
-        return res.send(token);
+        return res.status(200).send(token);
       } else {
-        return res.send(`credentials are wrong`);
+        return res.status(404).send(`credentials are wrong`);
       }
     });
   }
