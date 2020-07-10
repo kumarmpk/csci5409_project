@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "64c20a6e-f2a6-4387-8040-bad9dc042e8e",
+		"_postman_id": "f49ed727-843f-413d-a039-2100ffd49384",
 		"name": "companyX",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -11,12 +11,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://company-x-ms.azurewebsites.net/api/jobs",
-					"protocol": "https",
+					"raw": "{{host}}/api/jobs",
 					"host": [
-						"company-x-ms",
-						"azurewebsites",
-						"net"
+						"{{host}}"
 					],
 					"path": [
 						"api",
@@ -41,12 +38,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://company-x-ms.azurewebsites.net/api/jobs",
-					"protocol": "https",
+					"raw": "{{host}}/api/jobs",
 					"host": [
-						"company-x-ms",
-						"azurewebsites",
-						"net"
+						"{{host}}"
 					],
 					"path": [
 						"api",
@@ -71,12 +65,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://company-x-ms.azurewebsites.net/api/jobs",
-					"protocol": "https",
+					"raw": "{{host}}/api/jobs",
 					"host": [
-						"company-x-ms",
-						"azurewebsites",
-						"net"
+						"{{host}}"
 					],
 					"path": [
 						"api",
@@ -101,12 +92,9 @@
 					}
 				},
 				"url": {
-					"raw": "https://company-x-ms.azurewebsites.net/api/orders",
-					"protocol": "https",
+					"raw": "{{host}}/api/orders",
 					"host": [
-						"company-x-ms",
-						"azurewebsites",
-						"net"
+						"{{host}}"
 					],
 					"path": [
 						"api",
@@ -122,12 +110,9 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "https://company-x-ms.azurewebsites.net/api/jobs?jobName=job6&partId=4",
-					"protocol": "https",
+					"raw": "{{host}}/api/jobs?jobName=job6&partId=4",
 					"host": [
-						"company-x-ms",
-						"azurewebsites",
-						"net"
+						"{{host}}"
 					],
 					"path": [
 						"api",
@@ -153,12 +138,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://company-x-ms.azurewebsites.net/api/jobList?jobName=job4",
-					"protocol": "https",
+					"raw": "{{host}}/api/jobList?jobName=job4",
 					"host": [
-						"company-x-ms",
-						"azurewebsites",
-						"net"
+						"{{host}}"
 					],
 					"path": [
 						"api",
@@ -180,12 +162,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://company-x-ms.azurewebsites.net/api/orders",
-					"protocol": "https",
+					"raw": "{{host}}/api/orders",
 					"host": [
-						"company-x-ms",
-						"azurewebsites",
-						"net"
+						"{{host}}"
 					],
 					"path": [
 						"api",
@@ -201,12 +180,9 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://company-x-ms.azurewebsites.net/api/jobById?jobName=job5&partId=4",
-					"protocol": "https",
+					"raw": "{{host}}/api/jobById?jobName=job5&partId=4",
 					"host": [
-						"company-x-ms",
-						"azurewebsites",
-						"net"
+						"{{host}}"
 					],
 					"path": [
 						"api",
