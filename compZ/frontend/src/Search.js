@@ -21,9 +21,6 @@ class Search extends Component {
   };
 
   async apiCall() {
-    var config = {
-      headers: { "Content-Type": "application/json" },
-    };
     await axios
       .get(`http://localhost:4000/api/jobs/${this.state.search}`)
       .then((res) => {

@@ -1,12 +1,15 @@
 import React, { Component } from "react";
 import axios from "axios";
 import errMsg from "./errormessages";
+import { Modal, Button } from "react-bootstrap";
+import { withRouter } from "react-router-dom";
 
 class OrderPage extends Component {
   constructor(props) {
     super(props);
-    let { jobName } = this.props.match.params;
-    let userId = this.props.location.state.userId;
+
+    let jobName = this.props.orderObj.jobName;
+    let userId = this.props.orderObj.userId;
 
     this.state = {
       jobpart: [],
@@ -14,6 +17,10 @@ class OrderPage extends Component {
       selected: {},
       errorMsg: "",
       userId: userId,
+      loading: true,
+      modalFlag: false,
+      modalMsg: "",
+      modalRoute: 0,
     };
   }
 
@@ -21,13 +28,16 @@ class OrderPage extends Component {
     let jobName = this.state.jobName;
 
     await axios
-      .get(`http://localhost:4000/api/parts/${jobName}`)
+      .get(
+        `https://company-x-ms.azurewebsites.net/api/jobList?jobName=${jobName}`
+      )
       .then((res) => {
-        this.setState({
+        console.log("orderpage jobs res", res);
+        /* this.setState({
           jobpart: res.data,
-        });
+        }); */
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.log("orderpage jobs err", err));
   }
 
   handleCheckbox(partId) {
@@ -40,6 +50,7 @@ class OrderPage extends Component {
   }
 
   async orderBackendCall() {
+    this.setState({ loading: true });
     let selectedList = this.state.selected;
     let selectedPartIdList = [];
     Object.keys(selectedList).forEach((key) => {
@@ -51,8 +62,50 @@ class OrderPage extends Component {
       userId: this.state.userId,
     };
     console.log(obj);
-    //await axios.post("http://localhost:4000/api/updateOrder").then();
+    await axios
+      .post("http://localhost:4000/api/updateOrder")
+      .then((res) => {
+        console.log("orderpage updateorder res", res);
+        if (res.status === 200) {
+          this.setState({
+            loading: false,
+            modalFlag: true,
+            modalMsg: "The order is successfully placed.",
+            modalRoute: "1",
+          });
+        } else {
+          this.setState({
+            loading: false,
+            modalFlag: true,
+            modalMsg: "The system faced error while placing order." + res.data,
+            modalRoute: "2",
+          });
+        }
+      })
+      .catch((err) => {
+        console.log("orderpage updateorder err", err);
+        this.setState({
+          loading: false,
+          errorMsg: err.data,
+        });
+      });
   }
+
+  handleModalClose = (e) => {
+    this.setState({
+      modalFlag: false,
+    });
+    if (this.state.modalRoute === "1") {
+      this.props.history.push("/search");
+    } else if (this.state.modalRoute === "2") {
+      this.setState({
+        errorMsg: this.state.modalMsg,
+        modalMsg: "",
+        modalRoute: 0,
+        modalFlag: false,
+      });
+    }
+  };
 
   onOrder = (e) => {
     e.preventDefault();
@@ -65,6 +118,10 @@ class OrderPage extends Component {
         errorMsg: errMsg["3"],
       });
     }
+  };
+
+  handleLoadingClose = (e) => {
+    this.setState({ loading: false });
   };
 
   render() {
@@ -117,9 +174,39 @@ class OrderPage extends Component {
             </form>
           </div>
         </div>
+        <Modal
+          show={this.state.loading}
+          onHide={this.handleLoadingClose}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Loading</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>The details are loading please wait....</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.handleLoadingClose}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        <Modal
+          show={this.state.modalFlag}
+          onHide={this.handleModalClose}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Order Success</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>The order is placed successfully.</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.handleModalClose}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     );
   }
 }
 
-export default OrderPage;
+export default withRouter(OrderPage);

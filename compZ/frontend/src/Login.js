@@ -12,6 +12,22 @@ class Login extends Component {
       errorMsg: "",
       jobName: jobName,
     };
+
+    console.log("login page localStorage.userId", localStorage.userId);
+    console.log(
+      "login page localStorage.session_token",
+      localStorage.session_token
+    );
+    console.log("login page this.state", this.state);
+    if (localStorage.userId && localStorage.session_token) {
+      this.props.history.push({
+        pathname: `/homepage`,
+        state: {
+          userId: localStorage.userId,
+          jobName: this.state.jobName,
+        },
+      });
+    }
   }
 
   componentDidMount() {}
@@ -33,9 +49,14 @@ class Login extends Component {
         .then((res) => {
           console.log("res", res);
           if (res.status === 200) {
+            localStorage.setItem("userId", this.state.email);
+            localStorage.setItem("session_token", res.data);
             this.props.history.push({
-              pathname: `/orderpage/${this.state.jobName}`,
-              state: { userId: this.state.email },
+              pathname: `/homepage`,
+              state: {
+                userId: this.state.email,
+                jobName: this.state.jobName,
+              },
             });
 
             this.setState({
@@ -48,7 +69,7 @@ class Login extends Component {
         .catch((err) => {
           console.log("err", err);
           this.setState({
-            //errorMsg: err.response.data,
+            errorMsg: err.response.data,
           });
         });
     } catch (err) {

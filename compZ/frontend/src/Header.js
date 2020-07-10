@@ -1,11 +1,18 @@
 import React, { Component } from "react";
-import { Navbar, Nav } from "react-bootstrap";
+import { Navbar, Nav, Button } from "react-bootstrap";
+import { withRouter } from "react-router-dom";
 
 class Header extends Component {
   constructor(props) {
     super(props);
     this.state = {};
   }
+
+  handleLogout = (e) => {
+    localStorage.removeItem("userId");
+    localStorage.removeItem("session_token");
+    this.props.history.push("/");
+  };
 
   render() {
     return (
@@ -36,6 +43,15 @@ class Header extends Component {
                   Get All Jobs
                 </Nav.Link>
               </Nav>
+              {localStorage.session_token ? (
+                <Button
+                  className="text-light ml-auto mr-2"
+                  onClick={this.handleLogout}
+                  variant=""
+                >
+                  <i className="fas fa-sign-out-alt" />
+                </Button>
+              ) : null}
             </Navbar.Collapse>
           </Navbar>
         </div>
@@ -44,4 +60,4 @@ class Header extends Component {
   }
 }
 
-export default Header;
+export default withRouter(Header);
