@@ -34,8 +34,11 @@ class Login extends Component {
           console.log("res", res);
           if (res.status === 200) {
             this.props.history.push({
-              pathname: `/orderpage/${this.state.jobName}`,
-              state: { userId: this.state.email },
+              pathname: `/homepage`,
+              state: {
+                userId: this.state.email,
+                jobName: this.state.jobName,
+              },
             });
 
             this.setState({

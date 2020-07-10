@@ -5,8 +5,9 @@ import errMsg from "./errormessages";
 class OrderPage extends Component {
   constructor(props) {
     super(props);
-    let { jobName } = this.props.match.params;
-    let userId = this.props.location.state.userId;
+
+    let jobName = this.props.orderObj.jobName;
+    let userId = this.props.orderObj.userId;
 
     this.state = {
       jobpart: [],

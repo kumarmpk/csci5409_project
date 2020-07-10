@@ -1,21 +1,21 @@
 import React, { Component } from "react";
 import axios from "axios";
 
-class GetAll extends Component {
+class SearchHistory extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      jobparts: [],
+      searchHistory: [],
     };
   }
 
   async componentDidMount() {
     await axios
-      .get(`http://localhost:4000/api/jobs`)
+      .get(`http://localhost:4000/api/searchHistory`)
       .then((res) => {
         console.log(res);
         this.setState({
-          jobparts: res.data,
+          searchHistory: res.data,
         });
       })
       .catch((err) => console.log(err));
@@ -51,4 +51,4 @@ class GetAll extends Component {
   }
 }
 
-export default GetAll;
+export default SearchHistory;
