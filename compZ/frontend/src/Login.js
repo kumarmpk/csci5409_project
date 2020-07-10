@@ -12,6 +12,22 @@ class Login extends Component {
       errorMsg: "",
       jobName: jobName,
     };
+
+    console.log("login page localStorage.userId", localStorage.userId);
+    console.log(
+      "login page localStorage.session_token",
+      localStorage.session_token
+    );
+    console.log("login page this.state", this.state);
+    if (localStorage.userId && localStorage.session_token) {
+      this.props.history.push({
+        pathname: `/homepage`,
+        state: {
+          userId: localStorage.userId,
+          jobName: this.state.jobName,
+        },
+      });
+    }
   }
 
   componentDidMount() {}
