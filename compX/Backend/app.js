@@ -95,7 +95,7 @@ app.get('/api/jobList', (req, res) => {
   if (!req.query.jobName) {
     res.status(400).send('Include the query parameter in the request');
   } else {
-    let sql = `select * from jobs where jobName = '${req.query.jobName}'`;
+    let sql = `select * from jobs where lower(jobName) like'${req.query.jobName.toLowerCase()}'`;
     let query = db.query(sql, (err, result) => {
       if (err) {
         throw err;
