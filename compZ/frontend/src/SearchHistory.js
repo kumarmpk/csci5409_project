@@ -13,12 +13,11 @@ class SearchHistory extends Component {
     await axios
       .get(`http://localhost:4000/api/searchHistory`)
       .then((res) => {
-        console.log(res);
         this.setState({
           searchHistory: res.data,
         });
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.log("search history err", err));
   }
 
   render() {
