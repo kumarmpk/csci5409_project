@@ -1,24 +1,49 @@
 import React, { Component } from "react";
 import axios from "axios";
+import { Modal, Button } from "react-bootstrap";
 
 class GetAll extends Component {
   constructor(props) {
     super(props);
     this.state = {
       jobparts: [],
+      loading: true,
+      errorMsg: "",
     };
+    console.log("get all const");
   }
 
+  handleLoadingClose = (e) => {
+    this.setState({ loading: false });
+  };
+
   async componentDidMount() {
-    await axios
-      .get(`http://localhost:4000/api/jobs`)
-      .then((res) => {
-        console.log(res);
-        this.setState({
-          jobparts: res.data,
+    console.log("get all componentDidMount");
+
+    try {
+      await axios
+        .get(`https://company-x-ms.azurewebsites.net/api/jobs`)
+        .then((res) => {
+          console.log("res", res);
+          this.setState({
+            loading: false,
+            jobparts: res.data.result,
+          });
+        })
+        .catch((err) => {
+          console.log("err", err);
+          this.setState({
+            loading: false,
+            errorMsg: err.data,
+          });
         });
-      })
-      .catch((err) => console.log(err));
+    } catch (err) {
+      console.log("get all componentDidMount exception");
+      this.setState({
+        loading: false,
+        errorMsg: err.data,
+      });
+    }
   }
 
   render() {
@@ -46,6 +71,21 @@ class GetAll extends Component {
             </table>
           </div>
         </div>
+        <Modal
+          show={this.state.loading}
+          onHide={this.handleLoadingClose}
+          centered
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Loading</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>The details are loading please wait....</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.handleLoadingClose}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
     );
   }

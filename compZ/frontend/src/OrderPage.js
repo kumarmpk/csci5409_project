@@ -17,7 +17,7 @@ class OrderPage extends Component {
       selected: {},
       errorMsg: "",
       userId: userId,
-      loading: false,
+      loading: true,
       modalFlag: false,
       modalMsg: "",
       modalRoute: 0,
@@ -28,13 +28,16 @@ class OrderPage extends Component {
     let jobName = this.state.jobName;
 
     await axios
-      .get(`http://localhost:4000/api/parts/${jobName}`)
+      .get(
+        `https://company-x-ms.azurewebsites.net/api/jobList?jobName=${jobName}`
+      )
       .then((res) => {
-        this.setState({
+        console.log("orderpage jobs res", res);
+        /* this.setState({
           jobpart: res.data,
-        });
+        }); */
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.log("orderpage jobs err", err));
   }
 
   handleCheckbox(partId) {
