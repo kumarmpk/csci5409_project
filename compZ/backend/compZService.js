@@ -155,10 +155,15 @@ app.get("/api/users/:username/:password", (req, res) => {
 
 //method to insert the order and  in JobParts table
 app.post("/api/updateOrder", (req, res) => {
+  let selectQuery = 'select * from JobParts where jobName=? and partId=? and userId=?'
   let insertQuery = "Insert into JobParts values(?,?,?,?,?,?,?)";
   let updatePartsQuery =
     " update parts set qoh = case when qoh-? >=0 Then qoh-? else qoh end where partId = ?";
   if (req.body) {
+    let selectValues = [req.body.jobName , req.body.partId,req.body.userId]
+    db.query(selectQuery,selectValues,(err,selctedResults)=>{
+    if(!selctedResults)
+    {
     values = [
       req.body.partId,
       req.body.jobName,
@@ -183,11 +188,17 @@ app.post("/api/updateOrder", (req, res) => {
       });
     });
   }
+  else
+  {
+    res.send(JSON.stringify(selctedResults),undefined,4)
+  }
+  });
+  }
 });
 
 //searching all the jobs present
 app.get("/api/searchhistory", (_req, res) => {
-  let sqlQuery = "Select * from Search";
+  let sqlQuery = "Select * from Search order by time desc limit 10";
   db.query(sqlQuery, (err, allSearchHistory) => {
     if (err) {
       return res
