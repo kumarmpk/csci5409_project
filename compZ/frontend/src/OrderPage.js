@@ -30,7 +30,9 @@ class OrderPage extends Component {
     let jobName = this.state.jobName;
 
     await axios
-      .get(`http://localhost:5000/api/jobList?jobName=${jobName}`)
+      .get(
+        `http://afternoon-taiga-86166.herokuapp.com/api/jobList?jobName=${jobName}`
+      )
       .then((res) => {
         let jobs = res.data.result;
         let obj = {};
@@ -152,7 +154,10 @@ class OrderPage extends Component {
     let requestObj = {};
     for (requestObj of requestDetails) {
       await axios
-        .post("http://localhost:5000/api/orders", requestObj)
+        .post(
+          "http://afternoon-taiga-86166.herokuapp.com/api/orders",
+          requestObj
+        )
         .then((res) => {
           if (res.status !== 200) {
             this.setState({
@@ -206,6 +211,9 @@ class OrderPage extends Component {
     this.setState({
       errorMsg: "",
       requestDetails: [],
+      modalRoute: 0,
+      modalFlag: false,
+      modalMsg: "",
     });
 
     let selectedList = [];

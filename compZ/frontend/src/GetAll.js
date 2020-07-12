@@ -19,7 +19,7 @@ class GetAll extends Component {
   async componentDidMount() {
     try {
       await axios
-        .get(`http://localhost:5000/api/jobs`)
+        .get(`http://afternoon-taiga-86166.herokuapp.com/api/jobs`)
         .then((res) => {
           this.setState({
             loading: false,

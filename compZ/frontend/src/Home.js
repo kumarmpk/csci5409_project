@@ -7,6 +7,9 @@ class Home extends Component {
   }
 
   render() {
+    console.log("localStorage.userId", localStorage.userId);
+    console.log("localStorage.session_token", localStorage.session_token);
+
     return (
       <div>
         <div className="homebox">

@@ -35,11 +35,11 @@ class Login extends Component {
 
   async apiCall() {
     try {
-      //this.props.userId = this.state.email;
+      let obj = {
+        password: this.state.password,
+      };
       await axios
-        .get(
-          `http://localhost:4000/api/users/${this.state.email}/${this.state.password}`
-        )
+        .get(`http://localhost:4000/api/users/${this.state.email}`, obj)
         .then((res) => {
           if (res.status === 200) {
             localStorage.setItem("userId", this.state.email);

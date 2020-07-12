@@ -31,9 +31,10 @@ class Search extends Component {
       loading: true,
     });
     await axios
-      .get(`http://localhost:5000/api/jobList?jobName=${this.state.search}`)
+      .get(
+        `http://afternoon-taiga-86166.herokuapp.com/api/jobList?jobName=${this.state.search}`
+      )
       .then((res) => {
-        console.log("search page response", res);
         this.setState({
           loading: false,
         });
@@ -61,6 +62,8 @@ class Search extends Component {
           });
         }
       });
+
+    await axios.get(`http://localhost:4000/api/jobs/${this.state.search}`);
   }
 
   onSearch = (e) => {
@@ -69,10 +72,6 @@ class Search extends Component {
       this.apiCall();
     }
   };
-
-  placeOrder(data) {
-    console.log("data", data);
-  }
 
   searchResults() {
     return (
