@@ -92,7 +92,6 @@ app.get("/api/parts/:jobName/", (req, res) => {
     values = [req.params.jobName.trim().toLowerCase()];
     db.query(sqlQuery, values, (err, allJobs) => {
       if (err) {
-        console.log('error occurred while fetching jobs in the database');
         return res
           .status(404)
           .send("error occurred while fetching jobs in the database");
@@ -115,7 +114,6 @@ app.get("/api/parts/:jobName/:partId/", (req, res) => {
     values = [req.params.jobName.trim().toLowerCase(), req.params.partId];
     db.query(sqlQuery, values, (err, partDetails) => {
       if (err) {
-        console.log('error occurred while fetching jobs in the database');
         return res
           .status(404)
           .send("error occurred while fetching jobs in the database");
@@ -132,7 +130,7 @@ app.get("/api/parts/:jobName/:partId/", (req, res) => {
 
 //authenticating the user
 process.env.SECRETKEY = "secret";
-app.post("/api/users/:username/", (req, res) => {
+app.post("/api/users", (req, res) => {
   if (req.body.username && req.body.password) {
     let sqlQuery = "select * from Users where email=? and password=?";
     let values = [req.body.username, req.body.password];
@@ -162,17 +160,16 @@ app.post("/api/updateOrder", (req, res) => {
     let array = req.body;
     let obj = "";
     let partIdList = [];
-    let jobName = req.body[0].jobName
-    let userId = req.body[0].userId
+    let jobName = req.body[0].jobName;
+    let userId = req.body[0].userId;
     for (obj of array) {
       partIdList.push(obj.partId);
     }
-    let selectQuery =
-      `select * from JobParts where jobName='${jobName}' and userId='${userId}' and partId in (${partIdList})`;
+    let selectQuery = `select * from JobParts where jobName='${jobName}' and userId='${userId}' and partId in (${partIdList})`;
     db.query(selectQuery, (err, selectedResults) => {
       if (!selectedResults || Object.keys(selectedResults).length === 0) {
         if (err) {
-          res.status(404).send('something went wrong with the database');
+          res.status(404).send("something went wrong with the database");
         }
         array.forEach((reqObj) => {
           values = [
@@ -184,25 +181,27 @@ app.post("/api/updateOrder", (req, res) => {
             new Date().toLocaleTimeString(),
             reqObj.result,
           ];
-          db.query(insertQuery, values, (err, results) => {
-            if (err) {
-              return res.status(404).send('something went wrong with the database');
-            }
-            res.send("Jobparts inserted successfully");
-          });
+        });
+        db.query(insertQuery, values, (err, results) => {
+          if (err) {
+            console.log(err);
+            return res
+              .status(404)
+              .send("something went wrong with the database");
+          }
+          res.send("Jobparts inserted successfully");
         });
       } else {
         res
           .status(500)
           .send(
             "user has ordered already for parts" +
-            JSON.stringify(selectedResults, undefined, 4)
+              JSON.stringify(selectedResults, undefined, 4)
           );
       }
     });
   }
 });
-
 
 //searching all the jobs present
 app.get("/api/searchhistory", (_req, res) => {
@@ -222,7 +221,12 @@ app.get("/api/searchhistory", (_req, res) => {
 
 //Invalid url handling
 app.get("*", (_req, res) => {
-  res.send("Invalid url, please enter valid url path");
+  res.status(404).send("Invalid url, please enter valid url path");
+});
+
+//Invalid url handling
+app.post("*", (_req, res) => {
+  res.status(404).send("Invalid url, please enter valid url path");
 });
 
 function checkIfJobExists(jobName, callback) {

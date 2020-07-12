@@ -15,6 +15,7 @@ class OrderPage extends Component {
       jobparts: [],
       jobName: jobName,
       selected: {},
+      selectedList: [],
       errorMsg: "",
       userId: userId,
       loading: true,
@@ -106,45 +107,69 @@ class OrderPage extends Component {
 
   async orderBackendCall() {
     this.setState({ loading: true });
-
     let requestDetails = this.state.requestDetails;
     let selectedPartIdList = [];
     let requestObj = {};
+    let jobList = this.state.jobparts;
 
-    for (requestObj of requestDetails) {
+    for (requestObj of jobList) {
+      let obj = {
+        jobName: requestObj.jobName,
+        partId: requestObj.partId,
+        qty: requestObj.reqQty,
+        userId: this.state.userId,
+        result: "Ordered",
+      };
+      requestDetails.push(obj);
+
       selectedPartIdList.push(requestObj.partId);
     }
+
+    this.setState({
+      requestDetails: requestDetails,
+    });
 
     await axios
       .post("http://localhost:4000/api/updateOrder", requestDetails)
       .then((res) => {
         if (res.status === 200) {
-          this.setState({
-            loading: false,
-            modalFlag: true,
-            modalMsg: "The order is successfully placed.",
-            modalRoute: "1",
+          this.updateOrderDetailsinX((resx) => {
+            if (resx === 1) {
+              this.updateOrderDetailsinY((resy) => {
+                console.log(resy);
+                if (resy === 2) {
+                  this.setState({
+                    loading: false,
+                    modalFlag: true,
+                    modalMsg:
+                      "The order has been successfully placed and updated in company X and Y",
+                    modalRoute: "1",
+                  });
+                }
+              });
+            }
           });
-          this.updateOrderDetailsinX();
-          this.updateOrderDetailsinY();
         } else {
           this.setState({
             loading: false,
             modalFlag: true,
-            modalMsg: "The system faced error while placing order." + res.data,
+            modalMsg: "The system faced error while placing order. " + res.data,
             modalRoute: "2",
           });
         }
       })
       .catch((err) => {
-        if (err.response === 500) {
-          this.setState({
-            loading: false,
-            modalFlag: true,
-            modalMsg:
-              "The system faced error while placing order." + err.response.data,
-            modalRoute: "2",
-          });
+        if (err.response) {
+          if (err.response.status === 500) {
+            this.setState({
+              loading: false,
+              modalFlag: true,
+              modalMsg:
+                "The system faced error while placing order." +
+                err.response.data,
+              modalRoute: "2",
+            });
+          }
         } else {
           this.setState({
             loading: false,
@@ -154,14 +179,14 @@ class OrderPage extends Component {
       });
   }
 
-  async updateOrderDetailsinX() {
+  async updateOrderDetailsinX(resx) {
     let requestDetails = this.state.requestDetails;
     let requestObj = {};
     for (requestObj of requestDetails) {
       await axios
         .post(
-          //"http://afternoon-taiga-86166.herokuapp.com/api/orders",
-          "http://localhost:5000/api/orders",
+          "http://afternoon-taiga-86166.herokuapp.com/api/orders",
+          //"http://localhost:5000/api/orders",
           requestObj
         )
         .then((res) => {
@@ -171,12 +196,20 @@ class OrderPage extends Component {
             });
             return;
           }
+          resx(1);
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          if (err.response) {
+            this.setState({
+              errorMsg: err.response.data.error,
+              loading: false,
+            });
+          }
+        });
     }
   }
 
-  async updateOrderDetailsinY() {
+  async updateOrderDetailsinY(resy) {
     let requestDetails = this.state.requestDetails;
     let requestObj = {};
     for (requestObj of requestDetails) {
@@ -192,6 +225,10 @@ class OrderPage extends Component {
             });
             return;
           }
+          resy(2);
+        })
+        .catch((err) => {
+          console.log("err y");
         });
     }
   }
@@ -236,6 +273,9 @@ class OrderPage extends Component {
 
     if (selectedList && selectedList.length) {
       let partId;
+      this.setState({
+        selectedList: selectedList,
+      });
       for (partId of selectedList) {
         let obj = this.state.jobparts.find(
           (c) => c.partId === parseInt(partId)
@@ -246,18 +286,9 @@ class OrderPage extends Component {
               errorMsg: obj.partName + errMsg["6"],
             });
             return;
-          } else {
-            let requestObj = {
-              jobName: obj.jobName,
-              partId: obj.partId,
-              qty: obj.reqQty,
-              userId: this.state.userId,
-              result: "Ordered",
-            };
-            requestDetails.push(requestObj);
           }
       }
-      this.state.requestDetails = requestDetails;
+      //this.state.requestDetails = requestDetails;
 
       this.orderBackendCall();
     } else {
