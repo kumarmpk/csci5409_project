@@ -13,12 +13,6 @@ class Login extends Component {
       jobName: jobName,
     };
 
-    console.log("login page localStorage.userId", localStorage.userId);
-    console.log(
-      "login page localStorage.session_token",
-      localStorage.session_token
-    );
-    console.log("login page this.state", this.state);
     if (localStorage.userId && localStorage.session_token) {
       this.props.history.push({
         pathname: `/homepage`,
@@ -47,7 +41,6 @@ class Login extends Component {
           `http://localhost:4000/api/users/${this.state.email}/${this.state.password}`
         )
         .then((res) => {
-          console.log("res", res);
           if (res.status === 200) {
             localStorage.setItem("userId", this.state.email);
             localStorage.setItem("session_token", res.data);
@@ -67,7 +60,6 @@ class Login extends Component {
           }
         })
         .catch((err) => {
-          console.log("err", err);
           this.setState({
             errorMsg: err.response.data,
           });

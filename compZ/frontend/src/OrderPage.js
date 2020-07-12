@@ -22,6 +22,7 @@ class OrderPage extends Component {
       modalMsg: "",
       modalRoute: 0,
       partsFromX: [],
+      requestDetails: {},
     };
   }
 
@@ -77,13 +78,18 @@ class OrderPage extends Component {
               jobpartObj.avlQty = partObj.qoh;
               jobparts.push(jobpartObj);
             }
+            this.setState({
+              jobparts: jobparts,
+              loading: false,
+            });
           })
-          .catch((err) => console.log(err));
+          .catch((err) => {
+            this.setState({
+              errorMsg: errMsg["4"],
+              loading: false,
+            });
+          });
       }
-      this.setState({
-        jobparts: jobparts,
-        loading: false,
-      });
     }
   }
 
@@ -96,26 +102,34 @@ class OrderPage extends Component {
     });
   }
 
-  async orderBackendCall(selectedPartIdList) {
+  async orderBackendCall() {
     this.setState({ loading: true });
+
+    let requestDetails = this.state.requestDetails;
+    let selectedPartIdList = [];
+    let requestObj = {};
+    for (requestObj of requestDetails) {
+      selectedPartIdList.push(requestObj.partId);
+    }
 
     let obj = {
       partId: selectedPartIdList,
       jobName: this.state.jobName,
       userId: this.state.userId,
     };
-    console.log(obj);
     await axios
-      .post("http://localhost:4000/api/updateOrder")
+      .post("http://localhost:4000/api/updateOrder", obj)
       .then((res) => {
-        console.log("orderpage updateorder res", res);
         if (res.status === 200) {
           this.setState({
             loading: false,
             modalFlag: true,
             modalMsg: "The order is successfully placed.",
             modalRoute: "1",
+            orderObj: obj,
           });
+          this.updateOrderDetailsinX();
+          this.updateOrderDetailsinY();
         } else {
           this.setState({
             loading: false,
@@ -126,12 +140,48 @@ class OrderPage extends Component {
         }
       })
       .catch((err) => {
-        console.log("orderpage updateorder err", err);
         this.setState({
           loading: false,
           errorMsg: err.data,
         });
       });
+  }
+
+  async updateOrderDetailsinX() {
+    let requestDetails = this.state.requestDetails;
+    let requestObj = {};
+    for (requestObj of requestDetails) {
+      await axios
+        .post("http://localhost:5000/api/orders", requestObj)
+        .then((res) => {
+          if (res.status !== 200) {
+            this.setState({
+              errorMsg: errMsg["4"],
+            });
+            return;
+          }
+        });
+    }
+  }
+
+  async updateOrderDetailsinY() {
+    let requestDetails = this.state.requestDetails;
+    let requestObj = {};
+    for (requestObj of requestDetails) {
+      await axios
+        .post(
+          "http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/order",
+          requestObj
+        )
+        .then((res) => {
+          if (res.status !== 200) {
+            this.setState({
+              errorMsg: errMsg["4"],
+            });
+            return;
+          }
+        });
+    }
   }
 
   handleModalClose = (e) => {
@@ -155,12 +205,14 @@ class OrderPage extends Component {
 
     this.setState({
       errorMsg: "",
+      requestDetails: [],
     });
 
     let selectedList = [];
     let stateList = this.state.selected;
     let stateListKeys = Object.keys(stateList);
     let key;
+    let requestDetails = [];
     for (key of stateListKeys) {
       if (stateList[key]) {
         selectedList.push(key);
@@ -179,10 +231,22 @@ class OrderPage extends Component {
               errorMsg: obj.partName + errMsg["6"],
             });
             return;
+          } else {
+            let requestObj = {
+              jobName: obj.jobName,
+              partId: obj.partId,
+              qty: obj.reqQty,
+              userId: this.state.userId,
+            };
+            requestDetails.push(requestObj);
           }
       }
 
-      this.orderBackendCall(selectedList);
+      this.setState({
+        requestDetails: requestDetails,
+      });
+
+      this.orderBackendCall();
     } else {
       this.setState({
         errorMsg: errMsg["3"],

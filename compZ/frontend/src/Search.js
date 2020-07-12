@@ -47,11 +47,19 @@ class Search extends Component {
         });
       })
       .catch((err) => {
-        this.setState({
-          tableFlag: false,
-          errorMsg: errMsg["4"],
-          loading: false,
-        });
+        if (err.response) {
+          this.setState({
+            tableFlag: false,
+            errorMsg: err.response.data.error,
+            loading: false,
+          });
+        } else {
+          this.setState({
+            tableFlag: false,
+            errorMsg: errMsg["4"],
+            loading: false,
+          });
+        }
       });
   }
 

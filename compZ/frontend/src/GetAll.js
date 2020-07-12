@@ -10,7 +10,6 @@ class GetAll extends Component {
       loading: true,
       errorMsg: "",
     };
-    console.log("get all const");
   }
 
   handleLoadingClose = (e) => {
@@ -18,13 +17,10 @@ class GetAll extends Component {
   };
 
   async componentDidMount() {
-    console.log("get all componentDidMount");
-
     try {
       await axios
         .get(`http://localhost:5000/api/jobs`)
         .then((res) => {
-          console.log("res", res);
           this.setState({
             loading: false,
             jobparts: res.data.result,
@@ -38,7 +34,6 @@ class GetAll extends Component {
           });
         });
     } catch (err) {
-      console.log("get all componentDidMount exception");
       this.setState({
         loading: false,
         errorMsg: err.data,
