@@ -92,7 +92,7 @@ app.get("/api/parts/:jobName/", (req, res) => {
     values = [req.params.jobName.trim().toLowerCase()];
     db.query(sqlQuery, values, (err, allJobs) => {
       if (err) {
-        console.log(err);
+        console.log('error occurred while fetching jobs in the database');
         return res
           .status(404)
           .send("error occurred while fetching jobs in the database");
@@ -115,7 +115,7 @@ app.get("/api/parts/:jobName/:partId/", (req, res) => {
     values = [req.params.jobName.trim().toLowerCase(), req.params.partId];
     db.query(sqlQuery, values, (err, partDetails) => {
       if (err) {
-        console.log(err);
+        console.log('error occurred while fetching jobs in the database');
         return res
           .status(404)
           .send("error occurred while fetching jobs in the database");
@@ -157,24 +157,23 @@ app.post("/api/users/:username/", (req, res) => {
 
 //method to insert the order and  in JobParts table
 app.post("/api/updateOrder", (req, res) => {
-  let selectQuery =
-    "select * from JobParts where jobName=? and userId=? and partId in (?)";
   let insertQuery = "Insert into JobParts values(?,?,?,?,?,?,?)";
-
   if (req.body) {
     let array = req.body;
-    console.log(array);
     let obj = "";
     let partIdList = [];
-
+    let jobName = req.body[0].jobName
+    let userId = req.body[0].userId
     for (obj of array) {
       partIdList.push(obj.partId);
     }
-    let selectValues = [req.body.jobName, req.body.userId, partIdList];
-
-    db.query(selectQuery, selectValues, (err, selectedResults) => {
-      console.log("selectedResults", selectedResults);
-      if (selectedResults && Object.keys(selectedResults).length === 0) {
+    let selectQuery =
+      `select * from JobParts where jobName='${jobName}' and userId='${userId}' and partId in (${partIdList})`;
+    db.query(selectQuery, (err, selectedResults) => {
+      if (!selectedResults || Object.keys(selectedResults).length === 0) {
+        if (err) {
+          res.status(404).send('something went wrong with the database');
+        }
         array.forEach((reqObj) => {
           values = [
             reqObj.partId,
@@ -187,7 +186,7 @@ app.post("/api/updateOrder", (req, res) => {
           ];
           db.query(insertQuery, values, (err, results) => {
             if (err) {
-              return res.status(404).send(err);
+              return res.status(404).send('something went wrong with the database');
             }
             res.send("Jobparts inserted successfully");
           });
@@ -197,12 +196,13 @@ app.post("/api/updateOrder", (req, res) => {
           .status(500)
           .send(
             "user has ordered already for parts" +
-              JSON.stringify(selectedResults, undefined, 4)
+            JSON.stringify(selectedResults, undefined, 4)
           );
       }
     });
   }
 });
+
 
 //searching all the jobs present
 app.get("/api/searchhistory", (_req, res) => {
