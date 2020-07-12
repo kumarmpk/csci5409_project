@@ -206,6 +206,7 @@ app.delete("/api/jobs", (req, res) => {
 });
 
 app.post("/api/orders", jsonParser, (req, res) => {
+  console.log(req.body);
   let select =
     " select * from partordersX where jobName = '" +
     req.body.jobName +

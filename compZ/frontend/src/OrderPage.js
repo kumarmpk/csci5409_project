@@ -22,7 +22,7 @@ class OrderPage extends Component {
       modalMsg: "",
       modalRoute: 0,
       partsFromX: [],
-      requestDetails: {},
+      requestDetails: [],
     };
   }
 
@@ -110,17 +110,13 @@ class OrderPage extends Component {
     let requestDetails = this.state.requestDetails;
     let selectedPartIdList = [];
     let requestObj = {};
+
     for (requestObj of requestDetails) {
       selectedPartIdList.push(requestObj.partId);
     }
 
-    let obj = {
-      partId: selectedPartIdList,
-      jobName: this.state.jobName,
-      userId: this.state.userId,
-    };
     await axios
-      .post("http://localhost:4000/api/updateOrder", obj)
+      .post("http://localhost:4000/api/updateOrder", requestDetails)
       .then((res) => {
         if (res.status === 200) {
           this.setState({
@@ -128,7 +124,6 @@ class OrderPage extends Component {
             modalFlag: true,
             modalMsg: "The order is successfully placed.",
             modalRoute: "1",
-            orderObj: obj,
           });
           this.updateOrderDetailsinX();
           this.updateOrderDetailsinY();
@@ -142,10 +137,20 @@ class OrderPage extends Component {
         }
       })
       .catch((err) => {
-        this.setState({
-          loading: false,
-          errorMsg: err.data,
-        });
+        if (err.response === 500) {
+          this.setState({
+            loading: false,
+            modalFlag: true,
+            modalMsg:
+              "The system faced error while placing order." + err.response.data,
+            modalRoute: "2",
+          });
+        } else {
+          this.setState({
+            loading: false,
+            errorMsg: err.data,
+          });
+        }
       });
   }
 
@@ -155,7 +160,8 @@ class OrderPage extends Component {
     for (requestObj of requestDetails) {
       await axios
         .post(
-          "http://afternoon-taiga-86166.herokuapp.com/api/orders",
+          //"http://afternoon-taiga-86166.herokuapp.com/api/orders",
+          "http://localhost:5000/api/orders",
           requestObj
         )
         .then((res) => {
@@ -165,7 +171,8 @@ class OrderPage extends Component {
             });
             return;
           }
-        });
+        })
+        .catch((err) => console.log(err));
     }
   }
 
@@ -245,14 +252,12 @@ class OrderPage extends Component {
               partId: obj.partId,
               qty: obj.reqQty,
               userId: this.state.userId,
+              result: "Ordered",
             };
             requestDetails.push(requestObj);
           }
       }
-
-      this.setState({
-        requestDetails: requestDetails,
-      });
+      this.state.requestDetails = requestDetails;
 
       this.orderBackendCall();
     } else {
@@ -354,9 +359,9 @@ class OrderPage extends Component {
           centered
         >
           <Modal.Header closeButton>
-            <Modal.Title>Order Success</Modal.Title>
+            <Modal.Title>Order Result</Modal.Title>
           </Modal.Header>
-          <Modal.Body>The order is placed successfully.</Modal.Body>
+          <Modal.Body>{this.state.modalMsg}</Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={this.handleModalClose}>
               Close

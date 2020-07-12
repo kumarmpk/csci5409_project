@@ -28,6 +28,7 @@ class Login extends Component {
 
   handleChange = (e) => {
     this.setState({
+      errorMsg: "",
       [e.target.name]: e.target.value,
       validationErrorFlag: false,
     });
@@ -37,9 +38,10 @@ class Login extends Component {
     try {
       let obj = {
         password: this.state.password,
+        username: this.state.email,
       };
       await axios
-        .get(`http://localhost:4000/api/users/${this.state.email}`, obj)
+        .post(`http://localhost:4000/api/users`, obj)
         .then((res) => {
           if (res.status === 200) {
             localStorage.setItem("userId", this.state.email);
