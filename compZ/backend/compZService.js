@@ -132,10 +132,10 @@ app.get("/api/parts/:jobName/:partId/", (req, res) => {
 
 //authenticating the user
 process.env.SECRETKEY = "secret";
-app.get("/api/users/:username/:password", (req, res) => {
-  if (req.params.username && req.params.password) {
+app.get("/api/users/:username/", (req, res) => {
+  if (req.params.username && req.body.password) {
     let sqlQuery = "select * from Users where email=? and password=?";
-    let values = [req.params.username, req.params.password];
+    let values = [req.params.username, req.body.password];
     db.query(sqlQuery, values, (err, results) => {
       if (err) {
         return res.status(404).send("credentials are wrong");
@@ -151,21 +151,29 @@ app.get("/api/users/:username/:password", (req, res) => {
       }
     });
   }
+  else
+  {
+    res.status.send(`credentials are wrong`);
+  }
 });
+
+
 
 //method to insert the order and  in JobParts table
 app.post("/api/updateOrder", (req, res) => {
-  let selectQuery = 'select * from JobParts where jobName=? and partId=? and userId=?'
+  let selectQuery = "select * from JobParts where jobName=? and userId=? and partId in (?)"
   let insertQuery = "Insert into JobParts values(?,?,?,?,?,?,?)";
-  let updatePartsQuery =
-    " update parts set qoh = case when qoh-? >=0 Then qoh-? else qoh end where partId = ?";
+  // let updatePartsQuery =
+  //   "update parts set qoh = case when qoh-? >=0 Then qoh-? else qoh end where partId = ?";
   if (req.body) {
-    let selectValues = [req.body.jobName , req.body.partId,req.body.userId]
-    db.query(selectQuery,selectValues,(err,selctedResults)=>{
-    if(!selctedResults)
+    let selectValues = [req.body.jobName ,req.body.userId,req.body.partId]
+    db.query(selectQuery,selectValues,(err,selectedResults)=>{
+    console.log(selectedResults)
+    if(Object.keys(selectedResults).length==0)
     {
+    req.body.partId.forEach(partId => {
     values = [
-      req.body.partId,
+      partId,
       req.body.jobName,
       req.body.userId,
       req.body.qty,
@@ -177,20 +185,13 @@ app.post("/api/updateOrder", (req, res) => {
       if (err) {
         return res.status(404).send(err);
       }
-
-      let updateValues = [req.body.qty, req.body.qty, req.body.partId];
-      db.query(updatePartsQuery, updateValues, (err, results) => {
-        if (err) {
-          return res.status(404).send(err);
-        }
-        console.log(results);
-        res.send("Jobparts and parts inserted successfully");
-      });
+        res.send("Jobparts inserted successfully");
     });
+  });
   }
   else
   {
-    res.send(JSON.stringify(selctedResults),undefined,4)
+    res.status(500).send('user has ordered already for parts'+JSON.stringify(selectedResults, undefined, 4))
   }
   });
   }
