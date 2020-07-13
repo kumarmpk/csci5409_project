@@ -16,11 +16,13 @@ class SearchHistory extends Component {
         `https://cloudassignment6backendcompz.azurewebsites.net/api/searchhistory`
       )
       .then((res) => {
+        console.log("res", res);
         this.setState({
           searchHistory: res.data,
         });
       })
       .catch((err) => {
+        console.log("err", err);
         this.setState({
           errorMsg: err.data,
         });
