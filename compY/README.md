@@ -1,5 +1,8 @@
 End point for Company Y
 
+HOME PAGE
+http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/
+
 GET http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/parts
 Return all the parts from the parts DB
 
