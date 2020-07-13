@@ -100,7 +100,6 @@ app.post("/api/updateOrder", (req, res) => {
           res.status(404).send("something went wrong with the database");
         }
         array.forEach((reqObj) => {
-          console.log(reqObj)
           values = [
             reqObj.partId,
             reqObj.jobName,
@@ -122,12 +121,15 @@ app.post("/api/updateOrder", (req, res) => {
         res.send("Jobparts inserted successfully");
 
       } else {
+        orderedPartIds = []
+        selectedResults.forEach((element) => {
+          orderedPartIds.push(element.partId)
+        })
         res
           .status(500)
           .send(
-            "user has ordered already for parts" +
-            JSON.stringify(selectedResults, undefined, 4)
-          );
+            " user has already ordered  parts " +
+            orderedPartIds + " for Job " + selectedResults[0].jobName);
       }
     });
   }
