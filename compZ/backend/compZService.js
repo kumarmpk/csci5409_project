@@ -133,7 +133,7 @@ app.post("/api/updateOrder", (req, res) => {
 
 //searching all the jobs present
 app.get("/api/searchhistory", (_req, res) => {
-  let sqlQuery = "Select * from Search order by time desc limit 10";
+  let sqlQuery = "Select * from Search order by date desc, time desc limit 10";
   db.query(sqlQuery, (err, allSearchHistory) => {
     if (err) {
       return res
