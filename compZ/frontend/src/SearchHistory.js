@@ -11,15 +11,19 @@ class SearchHistory extends Component {
 
   async componentDidMount() {
     await axios
-      .get(`http://localhost:4000/api/searchhistory`)
+      //.get(`http://localhost:4000/api/searchhistory`)
+      .get(
+        `https://cloudassignment6backendcompz.azurewebsites.net/api/searchhistory`
+      )
       .then((res) => {
         this.setState({
           searchHistory: res.data,
         });
       })
       .catch((err) => {
-        console.log("search history err", err);
-        console.log("search history err", err.data);
+        this.setState({
+          errorMsg: err.data,
+        });
       });
   }
 

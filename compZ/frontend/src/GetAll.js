@@ -27,7 +27,6 @@ class GetAll extends Component {
           });
         })
         .catch((err) => {
-          console.log("err", err);
           this.setState({
             loading: false,
             errorMsg: err.data,

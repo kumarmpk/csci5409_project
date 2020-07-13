@@ -130,13 +130,16 @@ class OrderPage extends Component {
     });
 
     await axios
-      .post("http://localhost:4000/api/updateOrder", requestDetails)
+      //.post("http://localhost:4000/api/updateOrder", requestDetails)
+      .post(
+        "https://cloudassignment6backendcompz.azurewebsites.net/api/updateOrder",
+        requestDetails
+      )
       .then((res) => {
         if (res.status === 200) {
           this.updateOrderDetailsinX((resx) => {
             if (resx === 1) {
               this.updateOrderDetailsinY((resy) => {
-                console.log(resy);
                 if (resy === 2) {
                   this.setState({
                     loading: false,
@@ -228,7 +231,15 @@ class OrderPage extends Component {
           resy(2);
         })
         .catch((err) => {
-          console.log("err y");
+          if (err.response) {
+            this.setState({
+              errorMsg: err.response.data,
+            });
+          } else {
+            this.setState({
+              errorMsg: err.data,
+            });
+          }
         });
     }
   }

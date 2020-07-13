@@ -63,7 +63,12 @@ class Search extends Component {
         }
       });
 
-    await axios.get(`http://localhost:4000/api/jobs/${this.state.search}`);
+    await axios
+      .post(
+        `https://cloudassignment6backendcompz.azurewebsites.net/api/jobs/${this.state.search}`
+      )
+      .then((res) => {})
+      .catch((err) => {});
   }
 
   onSearch = (e) => {

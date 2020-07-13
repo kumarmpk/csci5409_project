@@ -184,7 +184,6 @@ app.post("/api/updateOrder", (req, res) => {
         });
         db.query(insertQuery, values, (err, results) => {
           if (err) {
-            console.log(err);
             return res
               .status(404)
               .send("something went wrong with the database");
