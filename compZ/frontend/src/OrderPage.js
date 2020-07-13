@@ -61,7 +61,8 @@ class OrderPage extends Component {
       });
 
     let partIdList = this.state.partsFromX;
-    let jobparts = [];
+    let jobpartList = [];
+    let jobparts = this.state.jobparts;
     if (partIdList && partIdList.length) {
       let partId;
       for (partId of partIdList) {
@@ -71,22 +72,23 @@ class OrderPage extends Component {
           )
           .then((res) => {
             if (Object.keys(res).length !== 0) {
-              let jobpartObj = this.state.jobparts.find(
-                (c) => c.partId === partId
+              let jobpartObj = jobparts.find(
+                (c) => c.partId === parseInt(partId)
               );
 
               let partObj = res.data[0];
 
               jobpartObj.partName = partObj.partName;
               jobpartObj.avlQty = partObj.qoh;
-              jobparts.push(jobpartObj);
+              jobpartList.push(jobpartObj);
             }
             this.setState({
-              jobparts: jobparts,
+              jobparts: jobpartList,
               loading: false,
             });
           })
           .catch((err) => {
+            console.log(err);
             this.setState({
               errorMsg: errMsg["4"],
               loading: false,
@@ -111,26 +113,33 @@ class OrderPage extends Component {
     let selectedPartIdList = [];
     let requestObj = {};
     let jobList = this.state.jobparts;
+    let selected = this.state.selected;
+    console.log(this.state);
 
     for (requestObj of jobList) {
-      let obj = {
-        jobName: requestObj.jobName,
-        partId: requestObj.partId,
-        qty: requestObj.reqQty,
-        userId: this.state.userId,
-        result: "Ordered",
-      };
-      requestDetails.push(obj);
+      if (selected[requestObj.partId]) {
+        let obj = {
+          jobName: requestObj.jobName,
+          partId: requestObj.partId,
+          qty: requestObj.reqQty,
+          userId: this.state.userId,
+          result: "Ordered",
+        };
+        requestDetails.push(obj);
 
-      selectedPartIdList.push(requestObj.partId);
+        selectedPartIdList.push(requestObj.partId);
+      }
     }
 
     this.setState({
       requestDetails: requestDetails,
     });
-
+    console.log("requestDetails", requestDetails);
     await axios
-      .post("https://compzbackend-bzedu2xpga-uc.a.run.app/api/updateOrder", requestDetails)
+      .post(
+        "https://compzbackend-bzedu2xpga-uc.a.run.app/api/updateOrder",
+        requestDetails
+      )
       .then((res) => {
         if (res.status === 200) {
           this.updateOrderDetailsinX((resx) => {
