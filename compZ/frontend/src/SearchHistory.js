@@ -11,7 +11,7 @@ class SearchHistory extends Component {
 
   async componentDidMount() {
     await axios
-      .get(`http://localhost:4000/api/searchhistory`)
+      .get(`https://compzbackend-bzedu2xpga-uc.a.run.app/api/searchhistory`)
       .then((res) => {
         this.setState({
           searchHistory: res.data,

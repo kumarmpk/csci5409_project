@@ -41,7 +41,7 @@ class Login extends Component {
         username: this.state.email,
       };
       await axios
-        .post(`http://localhost:4000/api/users`, obj)
+        .post(`https://compzbackend-bzedu2xpga-uc.a.run.app/api/users`, obj)
         .then((res) => {
           if (res.status === 200) {
             localStorage.setItem("userId", this.state.email);

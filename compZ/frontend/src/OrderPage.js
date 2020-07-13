@@ -130,7 +130,7 @@ class OrderPage extends Component {
     });
 
     await axios
-      .post("http://localhost:4000/api/updateOrder", requestDetails)
+      .post("https://compzbackend-bzedu2xpga-uc.a.run.app/api/updateOrder", requestDetails)
       .then((res) => {
         if (res.status === 200) {
           this.updateOrderDetailsinX((resx) => {
