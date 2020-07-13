@@ -3,7 +3,6 @@ const bodyParser = require("body-parser");
 const app = express();
 const mySql = require("mysql");
 const cors = require("cors");
-const http = require("http");
 const jwt = require("jsonwebtoken");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -101,6 +100,7 @@ app.post("/api/updateOrder", (req, res) => {
           res.status(404).send("something went wrong with the database");
         }
         array.forEach((reqObj) => {
+          console.log(reqObj)
           values = [
             reqObj.partId,
             reqObj.jobName,
@@ -110,15 +110,17 @@ app.post("/api/updateOrder", (req, res) => {
             new Date().toLocaleTimeString(),
             reqObj.result,
           ];
+          db.query(insertQuery, values, (err, results) => {
+            if (err) {
+              return res
+                .status(404)
+                .send("something went wrong with the database");
+            }
+          });
+
         });
-        db.query(insertQuery, values, (err, results) => {
-          if (err) {
-            return res
-              .status(404)
-              .send("something went wrong with the database");
-          }
-          res.send("Jobparts inserted successfully");
-        });
+        res.send("Jobparts inserted successfully");
+
       } else {
         res
           .status(500)
@@ -152,8 +154,4 @@ app.get("*", (_req, res) => {
   res.status(404).send("Invalid url, please enter valid url path");
 });
 
-//Invalid url handling
-app.post("*", (_req, res) => {
-  res.status(404).send("Invalid url, please enter valid url path");
-});
 
