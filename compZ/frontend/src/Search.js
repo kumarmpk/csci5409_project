@@ -38,10 +38,26 @@ class Search extends Component {
         this.setState({
           loading: false,
         });
-        let obj = {};
-        obj = res.data.result;
+        let objList = [];
+
+        let resList = {};
+        let uniq = {};
+        let exist = {};
+        resList = res.data.result;
+
+        for (uniq of resList) {
+          if (objList && objList.length > 0) {
+            exist = objList.find((c) => c.jobName === uniq.jobName);
+            if (!exist) {
+              objList.push(uniq);
+            }
+          } else {
+            objList.push(uniq);
+          }
+        }
+
         this.setState({
-          jobpart: obj,
+          jobpart: objList,
           tableFlag: true,
           errorMsg: "",
           loading: false,
@@ -55,6 +71,7 @@ class Search extends Component {
             loading: false,
           });
         } else {
+          console.log(err);
           this.setState({
             tableFlag: false,
             errorMsg: errMsg["4"],
@@ -63,7 +80,9 @@ class Search extends Component {
         }
       });
 
-    await axios.get(`https://compzbackend-bzedu2xpga-uc.a.run.app/api/jobs/${this.state.search}`);
+    await axios.post(
+      `https://compzbackend-bzedu2xpga-uc.a.run.app/api/jobs/${this.state.search}`
+    );
   }
 
   onSearch = (e) => {

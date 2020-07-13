@@ -21,9 +21,26 @@ class GetAll extends Component {
       await axios
         .get(`http://afternoon-taiga-86166.herokuapp.com/api/jobs`)
         .then((res) => {
+          let objList = [];
+          let resList = {};
+          let uniq = {};
+          let exist = {};
+          resList = res.data.result;
+
+          for (uniq of resList) {
+            if (objList && objList.length > 0) {
+              exist = objList.find((c) => c.jobName === uniq.jobName);
+              if (!exist) {
+                objList.push(uniq);
+              }
+            } else {
+              objList.push(uniq);
+            }
+          }
+
           this.setState({
             loading: false,
-            jobparts: res.data.result,
+            jobparts: objList,
           });
         })
         .catch((err) => {
