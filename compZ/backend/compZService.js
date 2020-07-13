@@ -37,94 +37,23 @@ app.get("/", (_req, res) => {
   }
 });
 
-//fetching all the jobs present
-app.get("/api/jobs", (_req, res) => {
-  let sqlQuery = "Select * from jobs";
-  db.query(sqlQuery, (err, allJobs) => {
-    if (err) {
-      return res
-        .status(404)
-        .send("error occurred while fetching jobs in the database");
-    }
-    if (Object.keys(allJobs).length === 0) {
-      return res.status(404).send("No jobs present in the database");
-    }
-    res.send(JSON.stringify(allJobs, undefined, 4));
-  });
-});
-
-//fetching a specific job details based on the value entered in the textbox
-app.get("/api/jobs/:jobName/", (req, res) => {
+//maintain history for every search
+app.post("/api/jobs/:jobName/", (req, res) => {
   let insertQuery = "Insert into Search values(?,?,?)";
-  var callback = (jobToFetch, error) => {
-    if (error) {
-      res
-        .status(404)
-        .send("error occurred while fetching job from the database");
-    }
-    if (Object.keys(jobToFetch).length === 0) {
-      return res
-        .status(404)
-        .send("job not found, please enter another job name");
-    }
+  if (req.params.jobName) {
     values = [
       req.params.jobName.trim().toLowerCase(),
       new Date(),
       new Date().toLocaleTimeString(),
     ];
-    db.query(insertQuery, values, (err, records) => {
+    db.query(insertQuery, values, (err, results) => {
       if (err) {
         res
           .status(404)
           .send("error occurred while inserting record in the database");
       }
+      res.status(200).send('search record inserted successfully')
     });
-    res.send(JSON.stringify(jobToFetch, undefined, 4));
-  };
-  checkIfJobExists(req.params.jobName, callback);
-});
-
-//Fetching all the parts details for a job
-app.get("/api/parts/:jobName/", (req, res) => {
-  if (req.params.jobName) {
-    let sqlQuery =
-      "select * from jobs j inner join parts p  on j.partId = p.partId where j.jobName=?";
-    values = [req.params.jobName.trim().toLowerCase()];
-    db.query(sqlQuery, values, (err, allJobs) => {
-      if (err) {
-        return res
-          .status(404)
-          .send("error occurred while fetching jobs in the database");
-      }
-      if (Object.keys(allJobs).length === 0) {
-        return res.status(404).send("No jobs present in the database");
-      }
-      res.send(JSON.stringify(allJobs, undefined, 4));
-    });
-  } else {
-    res.status(404).send("something wrong with the input");
-  }
-});
-
-//Fetching all the parts details for a job with jobName and partId
-app.get("/api/parts/:jobName/:partId/", (req, res) => {
-  if (req.params.jobName && req.params.partId) {
-    let sqlQuery =
-      "select * from jobs j inner join parts p  on j.partId = p.partId where j.jobName=? and j.partId=?";
-    values = [req.params.jobName.trim().toLowerCase(), req.params.partId];
-    db.query(sqlQuery, values, (err, partDetails) => {
-      if (err) {
-        return res
-          .status(404)
-          .send("error occurred while fetching jobs in the database");
-      }
-      if (Object.keys(partDetails).length === 0) {
-        return res.status(404).send("No jobs or parts present in the database");
-      }
-      res.send(JSON.stringify(partDetails, undefined, 4));
-    });
-  } else {
-    res.status(404).send("something wrong with the input");
   }
 });
 
@@ -195,7 +124,7 @@ app.post("/api/updateOrder", (req, res) => {
           .status(500)
           .send(
             "user has ordered already for parts" +
-              JSON.stringify(selectedResults, undefined, 4)
+            JSON.stringify(selectedResults, undefined, 4)
           );
       }
     });
@@ -228,20 +157,3 @@ app.post("*", (_req, res) => {
   res.status(404).send("Invalid url, please enter valid url path");
 });
 
-function checkIfJobExists(jobName, callback) {
-  if (jobName) {
-    let query =
-      "select * from jobs where jobName like '%" +
-      jobName.trim().toLowerCase() +
-      "%'";
-
-    db.query(query, (err, results) => {
-      if (err) {
-        callback("error occured while checking for data in the database");
-      }
-      callback(results, err);
-    });
-  } else {
-    callback("invalid JobName");
-  }
-}
