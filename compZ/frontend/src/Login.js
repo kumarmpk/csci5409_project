@@ -41,12 +41,7 @@ class Login extends Component {
         username: this.state.email,
       };
       await axios
-        //.post(`http://localhost:4000/api/users`, obj)
-        .post(
-          `https://cloudassignment6backendcompz.azurewebsites.net/api/users`,
-          obj
-        )
-
+        .post(`https://compzbackend-bzedu2xpga-uc.a.run.app/api/users`, obj)
         .then((res) => {
           if (res.status === 200) {
             localStorage.setItem("userId", this.state.email);
@@ -67,6 +62,7 @@ class Login extends Component {
           }
         })
         .catch((err) => {
+          console.log(err.response);
           this.setState({
             errorMsg: err.response.data,
           });
