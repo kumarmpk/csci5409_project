@@ -8,4 +8,5 @@ module.exports = {
     "The application faced unexpected exception while fetching job details. Please contact support.",
   "6":
     " part is out of stock. Order cannot be placed right now. Please try after sometime.",
+  "7": "Search field is empty. Kindly enter a jobname to search.",
 };

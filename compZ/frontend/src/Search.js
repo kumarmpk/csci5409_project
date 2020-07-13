@@ -21,18 +21,20 @@ class Search extends Component {
 
   onChange = (e) => {
     this.setState({
+      errorMsg: "",
       [e.target.name]: e.target.value,
       validationErrorFlag: false,
     });
   };
 
-  async apiCall() {
+  async apiCall(searchText) {
     this.setState({
       loading: true,
     });
+
     await axios
       .get(
-        `http://afternoon-taiga-86166.herokuapp.com/api/jobList?jobName=${this.state.search}`
+        `http://afternoon-taiga-86166.herokuapp.com/api/jobList?jobName=${searchText}`
       )
       .then((res) => {
         this.setState({
@@ -87,8 +89,17 @@ class Search extends Component {
 
   onSearch = (e) => {
     e.preventDefault();
-    if (this.state.search) {
-      this.apiCall();
+    let searchText = this.state.search;
+    searchText = searchText.trim();
+
+    if (searchText) {
+      this.apiCall(searchText);
+    } else {
+      this.setState({
+        errorMsg: errMsg["7"],
+        tableFlag: false,
+        loading: false,
+      });
     }
   };
 
