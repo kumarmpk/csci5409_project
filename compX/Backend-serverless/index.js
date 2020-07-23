@@ -55,9 +55,19 @@ exports.handler = (event, context, callback) => {
                 });
             });
         } else if (jobName && jobName !== "" && partId && partId !== "") {
-            //
-            ////////////////////////////////////////////////////////////
-            //
+          
+            let selectById = `select * from jobs where jobName = ${jobName} and partId = ${partId};`
+
+            context.callbackWaitsForEmptyEventLoop= false;
+            db.getConnection(function(err,connection){
+                connection.query(selectById,function(err,res,fields){
+                    connection.release();
+                    if(err){
+                        sql_err.body = error;
+                        callback(sql_err);
+                    }else callback(null,results);
+                });
+            });
         } else {
             callback(invalid_request);
         }
@@ -100,9 +110,31 @@ exports.handler = (event, context, callback) => {
                 });
             });
         } else if (jobName && jobName !== "" && partId && partId !== "" && qty && qty !== "" && userId && userId !== "") {
-            //
-            //////////////////////////////////////////
-            //
+            let selectQuery =
+                    `select * from partordersX where jobName = ${jobName} and partId = ${partId} and userId = ${userId};`;
+            context.callbackWaitsForEmptyEventLoop = false;
+            db.connection(function(err,connection){
+                connection.query(selectQuery,function(select_err,select_res,select_fields){
+                    if(select_err,callback(select_err));
+                    else if(select_res.length==0){
+                        let insertQuery = "insert into partordersX SET ?";
+                        let insertData = {
+                            jobName: jobName,
+                            partId: partId,
+                            qty: qty,
+                            userId : userId,
+                        };
+                        connection.query(insertQuery,function(insert_err, insert_res, insert_fields){
+                            connection.release();
+                            if(insert_err) callback(insert_err);
+                            console.log("insert_results", insert_res);
+                            callback(null, "1");
+                        });
+                    }else {
+                        callback("2");
+                    }
+                });
+            });
         } else {
             callback(invalid_request);
         }
