@@ -40,7 +40,7 @@ exports.handler = (event, context, callback) => {
           });
         });
       } else if (jobName && jobName !== "" && (!partId || partId === "")) {
-        let selectJobByName = `select * from jobs where lower(jobName) like '%${jobName.toLowerCase()}%';`;
+        let selectJobByName = `select * from jobs where lower(jobName) = '${jobName.toLowerCase()}';`;
 
         context.callbackWaitsForEmptyEventLoop = false;
         db.getConnection(function (err, connection) {
@@ -248,5 +248,3 @@ exports.handler = (event, context, callback) => {
     callback(invalid_request);
   }
 };
-
-//https://www.youtube.com/watch?v=cGYknt3xIvM

@@ -19,13 +19,14 @@ class GetAll extends Component {
   async componentDidMount() {
     try {
       await axios
-        .get(`http://afternoon-taiga-86166.herokuapp.com/api/jobs`)
+        //.get(`http://afternoon-taiga-86166.herokuapp.com/api/jobs`)
+        .get(`https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX`)
         .then((res) => {
           let objList = [];
           let resList = {};
           let uniq = {};
           let exist = {};
-          resList = res.data.result;
+          resList = res.data;
 
           for (uniq of resList) {
             if (objList && objList.length > 0) {
