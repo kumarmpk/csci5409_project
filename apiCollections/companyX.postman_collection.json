@@ -1,7 +1,7 @@
 {
 	"info": {
-		"_postman_id": "b125253c-46d4-481e-b549-8beec9a4ddb9",
-		"name": "A7-compx",
+		"_postman_id": "42c6d04f-b240-408b-a018-c8fa2114c3f0",
+		"name": "companyX",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -35,7 +35,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n   \"jobName\": \"jobName2\",\r\n   \"partId\": 4,\r\n   \"qty\": 2\r\n}",
+					"raw": "{\r\n   \"jobName\": \"job8\",\r\n   \"partId\": 4,\r\n   \"qty\": 2\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -66,7 +66,7 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX/?jobName=job9&partId=4",
+					"raw": "https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX/?jobName=jobName2&partId=4",
 					"protocol": "https",
 					"host": [
 						"qvysii6xyi",
@@ -82,7 +82,7 @@
 					"query": [
 						{
 							"key": "jobName",
-							"value": "job9"
+							"value": "jobName2"
 						},
 						{
 							"key": "partId",
@@ -100,7 +100,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n   \"jobName\": \"jobName2\",\r\n   \"partId\": 4,\r\n   \"qty\": 2\r\n}",
+					"raw": "{\n   \"jobName\": \"job8\",\n   \"partId\": 4,\n   \"qty\": 20\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -153,15 +153,6 @@
 			"request": {
 				"method": "POST",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n   \"jobName\": \"jobName2\",\r\n   \"partId\": 4,\r\n   \"qty\": 2,\r\n   \"userId\":\"user@as.in\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
 				"url": {
 					"raw": "https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX/order",
 					"protocol": "https",
@@ -215,7 +206,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX?jobName=jobName2&partId=4",
+					"raw": "https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX?jobName=job1&partId=2",
 					"protocol": "https",
 					"host": [
 						"qvysii6xyi",
@@ -230,11 +221,11 @@
 					"query": [
 						{
 							"key": "jobName",
-							"value": "jobName2"
+							"value": "job1"
 						},
 						{
 							"key": "partId",
-							"value": "4"
+							"value": "2"
 						}
 					]
 				}
@@ -246,7 +237,7 @@
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "4c0fb16d-8bcf-4031-989d-2ed46ebf090e",
+				"id": "25c29595-9510-4fb6-97ed-986ebcd9c74f",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -256,7 +247,7 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "3272297a-c15e-4a1c-9892-378cae1cdae9",
+				"id": "14b7a27e-f938-4b5c-9e32-40c64bbff6ad",
 				"type": "text/javascript",
 				"exec": [
 					""
