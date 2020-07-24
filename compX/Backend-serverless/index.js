@@ -69,9 +69,17 @@ exports.handler = (event, context, callback) => {
         callback(invalid_request);
       }
     } else if (resource_path === "/order") {
-      //
-      //
-      //
+        context.callbackWaitsForEmptyEventLoop = false;
+        let selectOrders = "select * from partordersX";
+        db.getConnection(function(err,connection){
+            connection.query(selectOrders,function(error,result,fields){
+                connection.release();
+                if(err){
+                    sql_err.body = error;
+                    callback(sql_err);
+                }else callback(null, result);
+            });    
+        });
     } else {
       callback(invalid_request);
     }
