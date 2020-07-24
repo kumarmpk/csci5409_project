@@ -32,7 +32,8 @@ class OrderPage extends Component {
 
     await axios
       .get(
-        `http://afternoon-taiga-86166.herokuapp.com/api/jobList?jobName=${jobName}`
+        //`http://afternoon-taiga-86166.herokuapp.com/api/jobList?jobName=${jobName}`
+        `https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX?jobName=${jobName}`
       )
       .then((res) => {
         let jobs = res.data.result;
@@ -194,8 +195,9 @@ class OrderPage extends Component {
     for (requestObj of requestDetails) {
       await axios
         .post(
-          "http://afternoon-taiga-86166.herokuapp.com/api/orders",
+          //"http://afternoon-taiga-86166.herokuapp.com/api/orders",
           //"http://localhost:5000/api/orders",
+          `https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX/order`,
           requestObj
         )
         .then((res) => {

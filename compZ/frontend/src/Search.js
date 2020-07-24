@@ -34,8 +34,10 @@ class Search extends Component {
 
     await axios
       .get(
-        `http://afternoon-taiga-86166.herokuapp.com/api/jobList?jobName=${searchText}`
+        // `http://afternoon-taiga-86166.herokuapp.com/api/jobList?jobName=${searchText}`
+        `https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX?jobName=${searchText}`
       )
+
       .then((res) => {
         this.setState({
           loading: false,
@@ -45,7 +47,7 @@ class Search extends Component {
         let resList = {};
         let uniq = {};
         let exist = {};
-        resList = res.data.result;
+        resList = res.data;
 
         for (uniq of resList) {
           if (objList && objList.length > 0) {
