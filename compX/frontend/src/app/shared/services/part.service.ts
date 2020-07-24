@@ -14,7 +14,7 @@ export class PartService {
     data = this.dataSource.asObservable();
     error = null;
 
-    baseURL = 'http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/';
+    baseURL = 'https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/';
 
     constructor(private http: HttpClient) {
     }
