@@ -30,13 +30,15 @@ class OrderPage extends Component {
   async componentDidMount() {
     let jobName = this.state.jobName;
 
+    console.log("inside order page component");
+
     await axios
       .get(
-        //`http://afternoon-taiga-86166.herokuapp.com/api/jobList?jobName=${jobName}`
         `https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX?jobName=${jobName}`
       )
       .then((res) => {
-        let jobs = res.data.result;
+        console.log("res", res);
+        let jobs = res.data;
         let obj = {};
         let partIdList = [];
 
@@ -61,17 +63,20 @@ class OrderPage extends Component {
         });
       });
 
+    console.log("after x");
     let partIdList = this.state.partsFromX;
     let jobpartList = [];
     let jobparts = this.state.jobparts;
+    console.log(partIdList);
     if (partIdList && partIdList.length) {
       let partId;
       for (partId of partIdList) {
         await axios
           .get(
-            `http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/parts/${partId}`
+            `https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/parts/${partId}`
           )
           .then((res) => {
+            console.log("res 2", res);
             if (Object.keys(res).length !== 0) {
               let jobpartObj = jobparts.find(
                 (c) => c.partId === parseInt(partId)
@@ -89,10 +94,12 @@ class OrderPage extends Component {
             });
           })
           .catch((err) => {
-            console.log(err);
+            console.log("111", err);
             this.setState({
               errorMsg: errMsg["4"],
               loading: false,
+              modalFlag: true,
+              modalMsg: errMsg["4"],
             });
           });
       }
@@ -110,7 +117,7 @@ class OrderPage extends Component {
 
   async orderBackendCall() {
     this.setState({ loading: true });
-    let requestDetails = this.state.requestDetails;
+    let requestDetails = [];
     let selectedPartIdList = [];
     let requestObj = {};
     let jobList = this.state.jobparts;
@@ -155,7 +162,24 @@ class OrderPage extends Component {
                       "The order has been successfully placed and updated in company X and Y",
                     modalRoute: "1",
                   });
+                } else {
+                  this.setState({
+                    loading: false,
+                    modalFlag: true,
+                    modalMsg:
+                      "The system faced error while placing order. " +
+                      resy.data,
+                    modalRoute: "2",
+                  });
                 }
+              });
+            } else {
+              this.setState({
+                loading: false,
+                modalFlag: true,
+                modalMsg:
+                  "The system faced error while placing order. " + resx.data,
+                modalRoute: "2",
               });
             }
           });
@@ -195,17 +219,22 @@ class OrderPage extends Component {
     for (requestObj of requestDetails) {
       await axios
         .post(
-          //"http://afternoon-taiga-86166.herokuapp.com/api/orders",
-          //"http://localhost:5000/api/orders",
           `https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX/order`,
           requestObj
         )
         .then((res) => {
-          if (res.status !== 200) {
-            this.setState({
-              errorMsg: errMsg["4"],
-            });
-            return;
+          if (res.data) {
+            if (res.data.errorMessage) {
+              if (res.data.errorMessage === "2") {
+                this.setState({
+                  errorMsg: errMsg["8"],
+                  loading: false,
+                  modalFlag: true,
+                  modalMsg: errMsg["8"],
+                });
+                return;
+              }
+            }
           }
           resx(1);
         })
@@ -226,7 +255,7 @@ class OrderPage extends Component {
     for (requestObj of requestDetails) {
       await axios
         .post(
-          "http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/order",
+          "https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/order",
           requestObj
         )
         .then((res) => {
@@ -275,7 +304,6 @@ class OrderPage extends Component {
     let stateList = this.state.selected;
     let stateListKeys = Object.keys(stateList);
     let key;
-    let requestDetails = [];
     for (key of stateListKeys) {
       if (stateList[key]) {
         selectedList.push(key);
@@ -299,7 +327,6 @@ class OrderPage extends Component {
             return;
           }
       }
-      //this.state.requestDetails = requestDetails;
 
       this.orderBackendCall();
     } else {

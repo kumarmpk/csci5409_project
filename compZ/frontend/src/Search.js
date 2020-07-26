@@ -34,7 +34,6 @@ class Search extends Component {
 
     await axios
       .get(
-        // `http://afternoon-taiga-86166.herokuapp.com/api/jobList?jobName=${searchText}`
         `https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX?jobName=${searchText}`
       )
 
