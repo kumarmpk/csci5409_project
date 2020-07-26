@@ -1,7 +1,7 @@
 End point for Company Y
 
 HOME PAGE
-https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/
+http://a7companyy.s3-website-us-east-1.amazonaws.com/
 
 GET https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/parts
 Return all the parts from the parts DB
