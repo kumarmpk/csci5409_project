@@ -2,6 +2,8 @@ const express = require('express');
 const path = require('path')
 const mysql = require('mysql');
 const cors = require('cors');
+const axios = require('axios')
+
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -110,11 +112,19 @@ app.get('/order', (req, res) => {
 
 });
 
-app.post('/order', (req, res) => {
+app.post('/order', async (req, res) => {
 
   let sql = 'INSERT INTO partordersY Values (?,?,?,?)';
   let values = [req.body.jobName, Number(req.body.partId), req.body.userId,
   Number(req.body.qty)]
+
+  await axios.get(`http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/parts/${Number(req.body.partId)}`).then(
+    res => {
+      axios.put("http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/parts/update",
+        { partName: res.data[0].partName, qoh: res.data[0].qoh - Number(req.body.qty), partId: Number(req.body.partId) })
+    }
+  )
+
   db.query(sql, values, async (err, result) => {
     if (err) {
       throw err;
