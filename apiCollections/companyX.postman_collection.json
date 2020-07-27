@@ -153,6 +153,15 @@
 			"request": {
 				"method": "POST",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n   \"jobName\": \"job9\",\n   \"partId\": 2,\n   \"userId\": \"userTwo\",\n   \"qty\": 7\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
 					"raw": "https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX/order",
 					"protocol": "https",
