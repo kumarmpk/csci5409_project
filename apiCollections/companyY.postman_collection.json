@@ -1,54 +1,25 @@
 {
 	"info": {
-		"_postman_id": "a8b3b002-a518-408d-a8d9-3270dfd43a8b",
+		"_postman_id": "546dff54-7cab-4de6-94cf-e3170225fc51",
 		"name": "companyY",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/parts",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
+			"name": "all parts",
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "urlencoded",
-					"urlencoded": [
-						{
-							"key": "jobName",
-							"value": "j1439",
-							"type": "text"
-						},
-						{
-							"key": "partId",
-							"value": "2",
-							"type": "text"
-						},
-						{
-							"key": "userId",
-							"value": "nie",
-							"type": "text"
-						},
-						{
-							"key": "qty",
-							"value": "2",
-							"type": "text"
-						}
-					]
-				},
 				"url": {
-					"raw": "http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/parts",
-					"protocol": "http",
+					"raw": "https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/parts",
+					"protocol": "https",
 					"host": [
-						"companyy-env",
-						"eba-faeivpbr",
-						"us-east-1",
-						"elasticbeanstalk",
-						"com"
+						"us-central1-cloudprojects-279901",
+						"cloudfunctions",
+						"net"
 					],
 					"path": [
+						"companyy",
 						"parts"
 					]
 				},
@@ -57,21 +28,20 @@
 			"response": []
 		},
 		{
-			"name": " http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/parts/1",
+			"name": "get part by id",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/parts/1",
-					"protocol": "http",
+					"raw": "https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/parts/1",
+					"protocol": "https",
 					"host": [
-						"companyy-env",
-						"eba-faeivpbr",
-						"us-east-1",
-						"elasticbeanstalk",
-						"com"
+						"us-central1-cloudprojects-279901",
+						"cloudfunctions",
+						"net"
 					],
 					"path": [
+						"companyy",
 						"parts",
 						"1"
 					]
@@ -81,21 +51,29 @@
 			"response": []
 		},
 		{
-			"name": "http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/parts/create",
+			"name": "create part",
 			"request": {
 				"method": "POST",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"partId\": \"11\",\n    \"partName\": \"partz\",\n    \"qoh\": \"50\",\n    \"message\": \"\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/parts/create",
-					"protocol": "http",
+					"raw": "https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/parts/create",
+					"protocol": "https",
 					"host": [
-						"companyy-env",
-						"eba-faeivpbr",
-						"us-east-1",
-						"elasticbeanstalk",
-						"com"
+						"us-central1-cloudprojects-279901",
+						"cloudfunctions",
+						"net"
 					],
 					"path": [
+						"companyy",
 						"parts",
 						"create"
 					]
@@ -105,21 +83,29 @@
 			"response": []
 		},
 		{
-			"name": "http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/parts/update",
+			"name": "update part",
 			"request": {
 				"method": "PUT",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"partId\": \"8\",\n    \"partName\": \"partm\",\n    \"qoh\": \"200\",\n    \"message\": \"\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/parts/update",
-					"protocol": "http",
+					"raw": "https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/parts/update",
+					"protocol": "https",
 					"host": [
-						"companyy-env",
-						"eba-faeivpbr",
-						"us-east-1",
-						"elasticbeanstalk",
-						"com"
+						"us-central1-cloudprojects-279901",
+						"cloudfunctions",
+						"net"
 					],
 					"path": [
+						"companyy",
 						"parts",
 						"update"
 					]
@@ -129,21 +115,20 @@
 			"response": []
 		},
 		{
-			"name": "http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/order",
+			"name": "get orders",
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/order",
-					"protocol": "http",
+					"raw": "https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/order",
+					"protocol": "https",
 					"host": [
-						"companyy-env",
-						"eba-faeivpbr",
-						"us-east-1",
-						"elasticbeanstalk",
-						"com"
+						"us-central1-cloudprojects-279901",
+						"cloudfunctions",
+						"net"
 					],
 					"path": [
+						"companyy",
 						"order"
 					]
 				},
@@ -152,22 +137,31 @@
 			"response": []
 		},
 		{
-			"name": "http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/order",
+			"name": "create order",
 			"request": {
 				"method": "POST",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n   \"jobName\": \"job8\",\n   \"partId\": 6,\n   \"userId\": \"user\",\n   \"qty\": 7\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
-					"raw": "http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/order",
-					"protocol": "http",
+					"raw": "https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/order/",
+					"protocol": "https",
 					"host": [
-						"companyy-env",
-						"eba-faeivpbr",
-						"us-east-1",
-						"elasticbeanstalk",
-						"com"
+						"us-central1-cloudprojects-279901",
+						"cloudfunctions",
+						"net"
 					],
 					"path": [
-						"order"
+						"companyy",
+						"order",
+						""
 					]
 				},
 				"description": "Create new partsOrder and then store the data into partorderY DB\nParameter need to specify when create new part: jobName, partId, userId, qty"

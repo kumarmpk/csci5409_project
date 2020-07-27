@@ -35,7 +35,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n   \"jobName\": \"job8\",\r\n   \"partId\": 4,\r\n   \"qty\": 2\r\n}",
+					"raw": "{\r\n   \"jobName\": \"job177\",\r\n   \"partId\": 4,\r\n   \"qty\": 2\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -66,7 +66,7 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX/?jobName=jobName2&partId=4",
+					"raw": "https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX/?jobName=job177&partId=4",
 					"protocol": "https",
 					"host": [
 						"qvysii6xyi",
@@ -82,7 +82,7 @@
 					"query": [
 						{
 							"key": "jobName",
-							"value": "jobName2"
+							"value": "job177"
 						},
 						{
 							"key": "partId",
@@ -100,7 +100,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n   \"jobName\": \"job8\",\n   \"partId\": 4,\n   \"qty\": 20\n}",
+					"raw": "{\n   \"jobName\": \"job3\",\n   \"partId\": 1,\n   \"qty\": 50\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -186,7 +186,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX/?jobName=job9",
+					"raw": "https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX/?jobName=job3",
 					"protocol": "https",
 					"host": [
 						"qvysii6xyi",
@@ -202,7 +202,7 @@
 					"query": [
 						{
 							"key": "jobName",
-							"value": "job9"
+							"value": "job3"
 						}
 					]
 				}
@@ -215,7 +215,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX?jobName=job1&partId=2",
+					"raw": "https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX?jobName=job2&partId=4",
 					"protocol": "https",
 					"host": [
 						"qvysii6xyi",
@@ -230,11 +230,11 @@
 					"query": [
 						{
 							"key": "jobName",
-							"value": "job1"
+							"value": "job2"
 						},
 						{
 							"key": "partId",
-							"value": "2"
+							"value": "4"
 						}
 					]
 				}
