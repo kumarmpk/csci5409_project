@@ -89,10 +89,7 @@ exports.handler = (event, context, callback) => {
     let qty = event["body-json"]["qty"];
     let userId = event["body-json"]["userId"];
 
-    console.log("inside post");
-
     if (resource_path === "/") {
-      console.log("inside userId empty");
       let selectQuery = `select * from jobs where jobName = '${jobName}' and partId = '${partId}';`;
 
       context.callbackWaitsForEmptyEventLoop = false;
@@ -117,7 +114,6 @@ exports.handler = (event, context, callback) => {
             ) {
               connection.release();
               if (insert_error) callback(insert_error);
-              console.log("insert_results", insert_results);
               callback(null, "1");
             });
           } else {
@@ -126,7 +122,6 @@ exports.handler = (event, context, callback) => {
         });
       });
     } else if (resource_path === "/order") {
-      console.log("inside userId not empty");
       let selectQuery = `select * from partordersX where jobName = '${jobName}' and partId = '${partId}' and userId = '${userId}';`;
       context.callbackWaitsForEmptyEventLoop = false;
       db.getConnection(function (err, connection) {
@@ -135,14 +130,10 @@ exports.handler = (event, context, callback) => {
           select_res,
           select_fields
         ) {
-          console.log("select query");
-          console.log("select_res", select_res);
           if (select_err) {
-            console.log("select select_err");
             sql_err.body = select_err;
             callback(sql_err);
           } else if (select_res.length == 0) {
-            console.log("select_res inside if");
             let insertQuery = "insert into partordersX SET ?";
             let insertData = {
               jobName: jobName,
@@ -158,10 +149,8 @@ exports.handler = (event, context, callback) => {
               connection.release();
 
               if (insert_err) {
-                console.log("insert_err ");
                 callback(insert_err);
               }
-              console.log("insert_results", insert_res);
               callback(null, "1");
             });
           } else {
@@ -177,9 +166,6 @@ exports.handler = (event, context, callback) => {
     let partId = event["body-json"]["partId"];
     let qty = event["body-json"]["qty"];
 
-    console.log("inside put");
-    console.log(jobName, partId, qty);
-
     const selectQuery = `SELECT * FROM jobs WHERE jobName = '${jobName}' and partId = '${partId}'`;
     context.callbackWaitsForEmptyEventLoop = false;
     db.getConnection(function (err, connection) {
@@ -188,14 +174,10 @@ exports.handler = (event, context, callback) => {
         select_result,
         select_fields
       ) {
-        console.log("select_result", select_result);
         if (select_err) {
-          console.log("select err");
           sql_err.body = select_err;
           callback(sql_err);
         } else if (select_result.length != 0) {
-          console.log("inside select res if");
-
           const updateQuery = `UPDATE jobs
                        SET qty='${qty}'
                        WHERE jobName='${jobName}' AND partId='${partId}';`;
@@ -206,13 +188,10 @@ exports.handler = (event, context, callback) => {
             update_fields
           ) {
             connection.release();
-            console.log("update_result", update_result);
             if (update_err) {
-              console.log("update err");
               sql_err.body = update_err;
               callback(sql_err);
             }
-            console.log("update_result 2");
             callback(null, "3");
           });
         } else {

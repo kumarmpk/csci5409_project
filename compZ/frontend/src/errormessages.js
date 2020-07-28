@@ -11,4 +11,7 @@ module.exports = {
   "7": "Search field is empty. Kindly enter a jobname to search.",
   "8":
     "partorders table with jobName, partId, and userId combination already exists",
+  "9": "User has already ordered the part",
+  "10":
+    "Job name does not match with the data. Try get all page to select the job.",
 };

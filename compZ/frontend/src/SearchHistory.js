@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import axios from "axios";
+import errMsg from "./errormessages";
 
 class SearchHistory extends Component {
   constructor(props) {
@@ -18,8 +19,9 @@ class SearchHistory extends Component {
         });
       })
       .catch((err) => {
-        console.log("search history err", err);
-        console.log("search history err", err.data);
+        this.setState({
+          errorMsg: errMsg["4"],
+        });
       });
   }
 
@@ -27,6 +29,9 @@ class SearchHistory extends Component {
     return (
       <div>
         <div>
+          <p className="error-msg" style={{ color: "red" }}>
+            {this.state.errorMsg ? this.state.errorMsg : null}
+          </p>
           <div className="col-12 col-sm-12 pt-4">
             <table className="table table-hover">
               <thead className="thead">

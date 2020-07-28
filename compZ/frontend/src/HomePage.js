@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Tabs, Tab } from "react-bootstrap";
 import OrderPage from "./OrderPage";
 import SearchHistory from "./SearchHistory";
+import NotFound from "./NotFound";
 
 class HomePage extends Component {
   constructor(props) {
@@ -24,23 +25,32 @@ class HomePage extends Component {
   componentDidMount() {}
 
   render() {
-    const orderObj = {
-      jobName: this.state.jobName,
-      userId: this.state.userId,
-    };
+    if (this.state) {
+      const orderObj = {
+        jobName: this.state.jobName,
+        userId: this.state.userId,
+      };
 
-    return (
-      <div>
-        <Tabs defaultActiveKey="orderPage" id="uncontrolled-tab-example">
-          <Tab eventKey="orderPage" title="Order Page">
-            <OrderPage orderObj={orderObj} />
-          </Tab>
-          <Tab eventKey="searchHistory" title="Search History">
-            <SearchHistory userId={this.state.userId} />
-          </Tab>
-        </Tabs>
-      </div>
-    );
+      return (
+        <div>
+          <Tabs defaultActiveKey="orderPage" id="uncontrolled-tab-example">
+            <Tab eventKey="orderPage" title="Order Page">
+              <OrderPage orderObj={orderObj} />
+            </Tab>
+            <Tab eventKey="searchHistory" title="Search History">
+              <SearchHistory userId={this.state.userId} />
+            </Tab>
+          </Tabs>
+        </div>
+      );
+    } else {
+      this.props.history.push("./not-found");
+      return (
+        <div>
+          <NotFound></NotFound>
+        </div>
+      );
+    }
   }
 }
 

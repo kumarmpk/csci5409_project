@@ -23,18 +23,19 @@ class GetAll extends Component {
         .then((res) => {
           let objList = [];
           let resList = {};
-          let uniq = {};
           let exist = {};
           resList = res.data;
 
-          for (uniq of resList) {
-            if (objList && objList.length > 0) {
-              exist = objList.find((c) => c.jobName === uniq.jobName);
-              if (!exist) {
+          if (resList && resList.length) {
+            for (let uniq of resList) {
+              if (objList && objList.length > 0 && uniq && uniq.jobName) {
+                exist = objList.find((c) => c.jobName === uniq["jobName"]);
+                if (!exist) {
+                  objList.push(uniq);
+                }
+              } else {
                 objList.push(uniq);
               }
-            } else {
-              objList.push(uniq);
             }
           }
 

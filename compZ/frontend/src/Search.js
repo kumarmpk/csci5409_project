@@ -44,27 +44,33 @@ class Search extends Component {
         let objList = [];
 
         let resList = {};
-        let uniq = {};
+
         let exist = {};
         resList = res.data;
 
-        for (uniq of resList) {
-          if (objList && objList.length > 0) {
-            exist = objList.find((c) => c.jobName === uniq.jobName);
-            if (!exist) {
+        if (resList && resList.length) {
+          for (let uniq of resList) {
+            if (objList && objList.length > 0) {
+              exist = objList.find((c) => c.jobName === uniq.jobName);
+              if (!exist) {
+                objList.push(uniq);
+              }
+            } else {
               objList.push(uniq);
             }
-          } else {
-            objList.push(uniq);
           }
+          this.setState({
+            jobpart: objList,
+            tableFlag: true,
+            errorMsg: "",
+            loading: false,
+          });
+        } else {
+          this.setState({
+            errorMsg: errMsg["10"],
+            loading: false,
+          });
         }
-
-        this.setState({
-          jobpart: objList,
-          tableFlag: true,
-          errorMsg: "",
-          loading: false,
-        });
       })
       .catch((err) => {
         if (err.response) {
@@ -74,7 +80,6 @@ class Search extends Component {
             loading: false,
           });
         } else {
-          console.log(err);
           this.setState({
             tableFlag: false,
             errorMsg: errMsg["4"],

@@ -62,10 +62,15 @@ class Login extends Component {
           }
         })
         .catch((err) => {
-          console.log(err.response);
-          this.setState({
-            errorMsg: err.response.data,
-          });
+          if (err && err.response && err.response.data) {
+            this.setState({
+              errorMsg: err.response.data,
+            });
+          } else {
+            this.setState({
+              errorMsg: errMsg["4"],
+            });
+          }
         });
     } catch (err) {
       this.setState({
