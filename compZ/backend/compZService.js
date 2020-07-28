@@ -51,7 +51,7 @@ app.post("/api/jobs/:jobName/", (req, res) => {
           .status(404)
           .send("error occurred while inserting record in the database");
       }
-      res.status(200).send('search record inserted successfully')
+      res.status(200).send("search record inserted successfully");
     });
   }
 });
@@ -81,7 +81,30 @@ app.post("/api/users", (req, res) => {
   }
 });
 
-//method to insert the order and  in JobParts table
+app.post("/api/getOrder", (req, res) => {
+  console.log("entered");
+  if (req.body) {
+    let array = req.body;
+    let partIdList = [];
+    let jobName = req.body[0].jobName;
+    let userId = req.body[0].userId;
+    for (let obj of array) {
+      partIdList.push(obj.partId);
+    }
+    let selectQuery = `select * from JobParts where jobName='${jobName}' and userId='${userId}' and partId in (${partIdList})`;
+    db.query(selectQuery, (err, selectedResults) => {
+      if (err) {
+        res.status(404).send("something went wrong with the database");
+      }
+
+      res.status(200).send(selectedResults);
+    });
+  } else {
+    res.status(500).send("invalid request");
+  }
+});
+
+//method to insert the order and in JobParts table
 app.post("/api/updateOrder", (req, res) => {
   let insertQuery = "Insert into JobParts values(?,?,?,?,?,?,?)";
   if (req.body) {
@@ -116,20 +139,21 @@ app.post("/api/updateOrder", (req, res) => {
                 .send("something went wrong with the database");
             }
           });
-
         });
         res.send("Jobparts inserted successfully");
-
       } else {
-        orderedPartIds = []
+        orderedPartIds = [];
         selectedResults.forEach((element) => {
-          orderedPartIds.push(element.partId)
-        })
+          orderedPartIds.push(element.partId);
+        });
         res
           .status(500)
           .send(
             " user has already ordered  parts " +
-            orderedPartIds + " for Job " + selectedResults[0].jobName);
+              orderedPartIds +
+              " for Job " +
+              selectedResults[0].jobName
+          );
       }
     });
   }
@@ -155,5 +179,3 @@ app.get("/api/searchhistory", (_req, res) => {
 app.get("*", (_req, res) => {
   res.status(404).send("Invalid url, please enter valid url path");
 });
-
-
