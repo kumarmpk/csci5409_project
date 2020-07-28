@@ -114,6 +114,37 @@
 				"description": "The update order endpoint updates the order details in the company Z job parts table."
 			},
 			"response": []
+		},
+		{
+			"name": "https://compzbackend-bzedu2xpga-uc.a.run.app/api/getOrder",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "[{\r\n    \"jobName\": \"job8\",\r\n    \"userId\": \"compz@email.com\",\r\n    \"partId\" : 4\r\n}]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://compzbackend-bzedu2xpga-uc.a.run.app/api/getOrder",
+					"protocol": "https",
+					"host": [
+						"compzbackend-bzedu2xpga-uc",
+						"a",
+						"run",
+						"app"
+					],
+					"path": [
+						"api",
+						"getOrder"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"protocolProfileBehavior": {}
