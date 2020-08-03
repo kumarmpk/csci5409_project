@@ -7,6 +7,7 @@ const jwt = require("jsonwebtoken");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
+const axios = require("axios");
 
 var db = mySql.createConnection({
   host: "groupassignmentsdb.cibsusss4zqs.us-east-1.rds.amazonaws.com",
@@ -172,6 +173,215 @@ app.get("/api/searchhistory", (_req, res) => {
       return res.status(404).send("No jobs present in the database");
     }
     res.send(JSON.stringify(allSearchHistory, undefined, 4));
+  });
+});
+
+function endTransaction(transactionName, endRes) {
+  let trans_end = `XA end '${transactionName}' ;`;
+
+  db.query(trans_end, (trans_end_err, trans_end_res) => {
+    if (trans_end_err) {
+      console.log("trans_end_err", trans_end_err);
+    } else {
+      console.log("trans_end_res", trans_end_res);
+      endRes("success");
+    }
+  });
+}
+
+function prepareTransaction(transactionName, prepRes) {
+  let trans_prep_query = `XA prepare '${transactionName}' ;`;
+
+  db.query(trans_prep_query, (trans_prep_err, trans_prep_res) => {
+    if (trans_prep_err) {
+      console.log("trans_prep_err", trans_prep_err);
+    } else {
+      console.log("trans_prep_res", trans_prep_res);
+      prepRes("success");
+    }
+  });
+}
+
+function rollbackTransaction(transactionName, rollRes) {
+  let trans_roll_query = `XA rollback '${transactionName}' ;`;
+
+  db.query(trans_roll_query, (trans_roll_err, trans_roll_res) => {
+    if (trans_roll_err) {
+      console.log("trans_roll_err", trans_roll_err);
+    } else {
+      console.log("trans_roll_res", trans_roll_res);
+      rollRes("success");
+    }
+  });
+}
+
+function commitTransaction(transactionName, commRes) {
+  let trans_comm_query = `XA commit '${transactionName}' ;`;
+
+  db.query(trans_comm_query, (trans_comm_err, trans_comm_res) => {
+    if (trans_comm_err) {
+      console.log("trans_commit_err", trans_comm_err);
+    } else {
+      console.log("trans_commit_res", trans_comm_res);
+      commRes("success");
+    }
+  });
+}
+
+function startTransaction(transactionName, startRes) {
+  let trans_start_query = `XA start '${transactionName}' ;`;
+
+  db.query(trans_start_query, (trans_start_err, trans_strat_res) => {
+    if (trans_start_err) {
+      console.log("trans_start_err", trans_start_err);
+    } else {
+      console.log("trans_strat_res", trans_strat_res);
+      startRes("success");
+    }
+  });
+}
+
+//2PC trial
+app.get("/api/2pc", (_req, res) => {
+  let transactionName = "1";
+  let trans_start_query = `XA start '${transactionName}' ;`;
+
+  db.query(trans_start_query, (trans_start_err, trans_start_res) => {
+    if (trans_start_err) {
+      console.log("transaction start err", trans_start_err);
+      return;
+    }
+    console.log("transaction start res", trans_start_res);
+
+    let insert_query = "insert into parts values ('11', 'part11', '11');";
+
+    db.query(insert_query, (insert_err, insert_res) => {
+      if (insert_err) {
+        console.log("insert_err", insert_err);
+        endTransaction(transactionName, (endRes) => {
+          if (endRes === "success") {
+            prepareTransaction(transactionName, (prepRes) => {
+              if (prepRes === "success") {
+                rollbackTransaction(transactionName, (commRes) => {
+                  res.send("rolled back success");
+                });
+              }
+            });
+          }
+        });
+      } else {
+        console.log("insert_res", insert_res);
+
+        let select_query = "select * from parts where partId = 11;";
+
+        db.query(select_query, (select_err, select_res) => {
+          if (select_err) {
+            console.log("select_err", select_err);
+            endTransaction(transactionName, (endRes) => {
+              if (endRes === "success") {
+                prepareTransaction(transactionName, (prepRes) => {
+                  if (prepRes === "success") {
+                    rollbackTransaction(transactionName, (commRes) => {
+                      res.send("rolled back success");
+                    });
+                  }
+                });
+              }
+            });
+          } else {
+            console.log("select_res", select_res);
+            if (select_res && select_res.length > 0) {
+              axios
+                .get(
+                  `http://localhost:5000/api/2pc?transName=${transactionName}`
+                )
+                .then((company2_res) => {
+                  console.log("company2_res status", company2_res.status);
+                  console.log("company2_res data", company2_res.data);
+
+                  let company2_trans_name = company2_res.data;
+
+                  endTransaction(transactionName, (endRes) => {
+                    console.log("1");
+                    if (endRes === "success") {
+                      console.log("2");
+                      prepareTransaction(transactionName, (prepRes) => {
+                        console.log("3");
+                        if (prepRes === "success") {
+                          console.log("4");
+                          commitTransaction(transactionName, (commRes) => {
+                            console.log("5");
+                            axios
+                              .get(
+                                `http://localhost:5000/api/2pc_commit?transName=${company2_trans_name}`
+                              )
+                              .then((company2_comm_res) => {
+                                return res.status(200).send("success");
+                              })
+                              .catch((company2_comm_err) => {
+                                return res.status(500).send("failed");
+                              });
+                          });
+                        }
+                      });
+                    }
+                  });
+                })
+                .catch((company2_err) => {
+                  //console.log("company2_err", company2_err);
+                  console.log(
+                    "company2_err status",
+                    company2_err.response.status
+                  );
+                  console.log("company2_err data", company2_err.response.data);
+
+                  let company2_trans_name = company2_err.response.data;
+
+                  endTransaction(transactionName, (endRes) => {
+                    if (endRes === "success") {
+                      prepareTransaction(transactionName, (prepRes) => {
+                        if (prepRes === "success") {
+                          rollbackTransaction(transactionName, (commRes) => {
+                            endTransaction(company2_trans_name, (endRes) => {
+                              if (endRes === "success") {
+                                prepareTransaction(
+                                  company2_trans_name,
+                                  (prepRes) => {
+                                    if (prepRes === "success") {
+                                      commitTransaction(
+                                        company2_trans_name,
+                                        (commRes) => {
+                                          return res.status(500).send("failed");
+                                        }
+                                      );
+                                    }
+                                  }
+                                );
+                              }
+                            });
+                          });
+                        }
+                      });
+                    }
+                  });
+                });
+            } else {
+              endTransaction(transactionName, (endRes) => {
+                if (endRes === "success") {
+                  prepareTransaction(transactionName, (prepRes) => {
+                    if (prepRes === "success") {
+                      rollbackTransaction(transactionName, (commRes) => {
+                        res.send("rolled back success");
+                      });
+                    }
+                  });
+                }
+              });
+            }
+          }
+        });
+      }
+    });
   });
 });
 

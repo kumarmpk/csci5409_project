@@ -277,4 +277,115 @@ app.get("/", (req, res) => {
   res.sendFile(process.cwd() + "/companyX/dist/companyX/index.html");
 });
 
+function endTransaction(transactionName, endRes) {
+  let trans_end = `XA end '${transactionName}' ;`;
+
+  db.query(trans_end, (trans_end_err, trans_end_res) => {
+    if (trans_end_err) {
+      console.log("trans_end_err", trans_end_err);
+    } else {
+      endRes("success");
+    }
+  });
+}
+
+function prepareTransaction(transactionName, prepRes) {
+  let trans_prep_query = `XA prepare '${transactionName}' ;`;
+
+  db.query(trans_prep_query, (trans_prep_err, trans_prep_res) => {
+    if (trans_prep_err) {
+      console.log("trans_prep_err", trans_prep_err);
+    } else {
+      prepRes("success");
+    }
+  });
+}
+
+function rollbackTransaction(transactionName, rollRes) {
+  let trans_roll_query = `XA rollback '${transactionName}' ;`;
+
+  db.query(trans_roll_query, (trans_roll_err, trans_roll_res) => {
+    if (trans_roll_err) {
+      console.log("trans_roll_err", trans_roll_err);
+    } else {
+      rollRes("success");
+    }
+  });
+}
+
+function commitTransaction(transactionName, commRes) {
+  let trans_comm_query = `XA commit '${transactionName}' ;`;
+
+  db.query(trans_comm_query, (trans_comm_err, trans_comm_res) => {
+    if (trans_comm_err) {
+      console.log("trans_comm_err", trans_comm_err);
+    } else {
+      commRes("success");
+    }
+  });
+}
+
+function startTransaction(transactionName, startRes) {
+  let trans_start_query = `XA start '${transactionName}' ;`;
+
+  db.query(trans_start_query, (trans_start_err, trans_strat_res) => {
+    if (trans_start_err) {
+      console.log("trans_start_err", trans_start_err);
+    } else {
+      startRes("success");
+    }
+  });
+}
+
+//2PC trial
+app.get("/api/2pc", (_req, res) => {
+  if (!_req.query.transName) {
+    return res.status(500).send("No transaction name to continue");
+  }
+
+  let transactionName = `${_req.query.transName}_1`;
+
+  startTransaction(transactionName, (startRes) => {
+    if (startRes === "success") {
+      let delete_query = "delete from JobParts where jobName = 'jobname11';";
+
+      db.query(delete_query, (delete_err, delete_res) => {
+        if (delete_err) {
+          console.log("delete_err", delete_err);
+          return res.status(501).send(transactionName);
+        } else {
+          return res.status(200).send(transactionName);
+        }
+      });
+    } else {
+      return res.status(400).send(transactionName);
+    }
+  });
+});
+
+app.get("/api/2pc_commit", (_req, res) => {
+  if (!_req.query.transName) {
+    return res.status(500).send("No transaction name to continue");
+  }
+
+  let transactionName = `${_req.query.transName}`;
+  endTransaction(transactionName, (endRes) => {
+    if (endRes === "success") {
+      prepareTransaction(transactionName, (prepRes) => {
+        if (prepRes === "success") {
+          commitTransaction(transactionName, (commRes) => {
+            if (commRes === "success") {
+              return res.status(200).send("success");
+            }
+          });
+        } else {
+          return res.status(500).send("failed");
+        }
+      });
+    } else {
+      return res.status(500).send("failed");
+    }
+  });
+});
+
 module.exports = app;
