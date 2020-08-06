@@ -12,8 +12,24 @@ router.post(
     body('partId').exists().withMessage('Value is required').isNumeric(),
     body('userId').exists().withMessage('Value is required').isString(),
     body('qty').exists().withMessage('Value is required').isNumeric(),
+    body('transactionName')
+      .exists()
+      .withMessage('Value is required')
+      .isString(),
   ],
-  orderController.createTask
+  orderController.createOrder
+);
+
+router.post(
+  '/orders/finish',
+  [
+    body('transactionName')
+      .exists()
+      .withMessage('Value is required')
+      .isString(),
+    body('operationType').exists().withMessage('Value is required').isString(),
+  ],
+  orderController.finishOrder
 );
 
 router.get('/orders', orderController.getOrders);
