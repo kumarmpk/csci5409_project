@@ -9,6 +9,7 @@ class App extends Component {
   state = {
     parts: [],
     orders: [],
+    search: "",
     partsTab: true,
     ordersTab: false,
   };
@@ -17,6 +18,22 @@ class App extends Component {
     this.getAllParts();
     this.getOrderDetail();
   }
+
+  handleSearch = (e) => {
+    e.preventDefault();
+    if (this.state.search === "") {
+      return this.getOrderDetail();
+    }
+    this.setState({
+      orders: this.state.orders.filter(
+        (order) => order.jobName === this.state.search
+      ),
+    });
+  };
+
+  handleChange = (e) => {
+    this.setState({ search: e.target.value });
+  };
 
   getAllParts = async () => {
     await axios
@@ -122,6 +139,29 @@ class App extends Component {
                 }
                 data-tab="second"
               >
+                <form onSubmit={(e) => this.handleSearch(e)}>
+                  <div className="ui search">
+                    <div className="ui icon input">
+                      <input
+                        className="prompt searchbar"
+                        name="search"
+                        type="text"
+                        value={this.state.search}
+                        onChange={(e) => this.handleChange(e)}
+                        placeholder="Typing job name for searching order"
+                      />
+                      <input type="submit" value="Search" />
+                      <i className="search icon"></i>
+                    </div>
+                    <input
+                      className="ui button"
+                      type="button"
+                      value="All Order"
+                      onClick={() => this.getOrderDetail()}
+                    />
+                  </div>
+                </form>
+
                 <table className="ui single line table">
                   <thead>
                     <tr>
