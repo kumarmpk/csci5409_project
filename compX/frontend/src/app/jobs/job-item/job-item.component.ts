@@ -1,60 +1,68 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {JobService} from '../../shared/services/job.service';
-import {Subscription} from 'rxjs';
-import {Job} from '../../shared/models/job.model';
+import { JobService } from '../../shared/services/job.service';
+import { Subscription } from 'rxjs';
+import { Job } from '../../shared/models/job.model';
 import {Router} from '@angular/router';
 
 @Component({
-    selector: 'app-job-item',
-    templateUrl: './job-item.component.html'
+  selector: 'app-job-item',
+  templateUrl: './job-item.component.html'
 })
 export class JobItemComponent implements OnInit, OnDestroy {
 
-    jobs: Job[] = [];
-    error = null;
-    jobSub: Subscription;
-    delSub: Subscription;
+  filteredJobs: Job[] = [];
+  query = '';
 
-    constructor(private jobService: JobService,
-                private router: Router) {
+  jobs: Job[] = [];
+  error = null;
+  jobSub: Subscription;
+  delSub: Subscription;
+
+  constructor(private jobService: JobService,
+              private router: Router) { }
+
+  ngOnInit() {
+    this.onFetchJobs();
+  }
+
+  ngOnDestroy() {
+    this.jobSub.unsubscribe();
+    if (this.delSub) {
+      this.delSub.unsubscribe();
     }
+  }
 
-    ngOnInit() {
-        this.onFetchJobs();
-    }
+  onFilter(query: string) {
+    this.query = query;
+    this.filteredJobs = this.jobs.filter(i => i.jobName.includes(query));
+  }
 
-    ngOnDestroy() {
-        this.jobSub.unsubscribe();
-        if (this.delSub) {
-            this.delSub.unsubscribe();
+  onFetchJobs() {
+    this.jobSub = this.jobService.data.subscribe(
+        jobs => {
+          this.jobs = jobs;
+          this.onFilter('');
+        },
+        error => {
+          this.error = error.message;
         }
-    }
+    );
+    this.jobService.fetchJobs();
+  }
 
-    onFetchJobs() {
-        this.jobSub = this.jobService.data.subscribe(
-            jobs => {
-                this.jobs = jobs;
-            },
-            error => {
-                this.error = error.message;
-            }
-        );
-        this.jobService.fetchJobs();
-    }
+  onDeleteJob(jobName, partID) {
+    this.delSub = this.jobService.deleteJob(jobName, partID).subscribe(
+        res => {
+          this.jobs.splice( this.jobs.findIndex(j => j.jobName === jobName && j.partId === partID), 1 );
+          this.onFilter(this.query);
+        },
+        error => {
+          this.error = error.message;
+        }
+    );
+  }
 
-    onDeleteJob(jobName, partID) {
-        this.delSub = this.jobService.deleteJob(jobName, partID).subscribe(
-            res => {
-                console.log(res);
-                this.jobs.splice( this.jobs.findIndex(j => j.jobName === jobName && j.partId === partID), 1 );
-            },
-            error => {
-                this.error = error.message;
-            }
-        );
-    }
-
-    onShowOrders() {
-        this.router.navigate(['orders']);
-    }
+  onShowOrders() {
+    this.router.navigate(['orders']);
+  }
 }

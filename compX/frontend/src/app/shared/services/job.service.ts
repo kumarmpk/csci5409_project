@@ -1,42 +1,36 @@
-import {Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
-import {catchError, map, skip} from 'rxjs/operators';
-import {BehaviorSubject, from, Observable, throwError} from 'rxjs';
-import {Job} from '../models/job.model';
-import {plainToClass} from 'class-transformer';
-import {JobShort} from '../models/job-short.model';
-import {OrderItem} from '../models/order-item.model';
-import {PartService} from './part.service';
-import {flatMap} from 'rxjs/internal/operators';
-import {ServerError} from '../models/server-error.model';
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { catchError, map, skip } from 'rxjs/operators';
+import { BehaviorSubject, from, Observable, throwError } from 'rxjs';
+import { Job } from '../models/job.model';
+import { plainToClass} from 'class-transformer';
+import { JobShort} from '../models/job-short.model';
+import { OrderItem } from '../models/order-item.model';
+import { PartService } from './part.service';
+import { flatMap } from 'rxjs/internal/operators';
 
 @Injectable({
     providedIn: 'root',
 })
 export class JobService {
 
-    // tslint:disable-next-line:ban-types
-    private errors = new Map<String, string>([['1', 'inserted jobs into table success'],
-        ['2', 'job already present in table insert failed'],
-        ['3', 'job update success'],
-        ['4', 'job update failed no job found'],
-        ['5', 'job not found delete failed'],
-        ['6', 'job deleted']]);
-
     private dataSource = new BehaviorSubject<Job[]>([]);
     data = this.dataSource.asObservable();
 
-    baseURL = 'https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX';
+    baseURL = 'http://localhost:5000/api';
 
     constructor(private http: HttpClient, private partService: PartService) {
     }
 
     fetchJobs() {
         this.http
-            .get(this.baseURL)
+            .get(this.baseURL + '/jobs')
             .pipe(
                 map(responseData => {
-                    return plainToClass(Job, responseData) as unknown as Array<Job>;
+                    const key = 'result';
+                    if (responseData.hasOwnProperty(key)) {
+                        return plainToClass(Job, responseData[key]) as unknown as Array<Job>;
+                    }
                 }),
                 catchError(errorRes => {
                     return throwError(errorRes);
@@ -48,14 +42,17 @@ export class JobService {
 
     fetchJob(name: string) {
         return this.http
-            .get(this.baseURL, {
+            .get(this.baseURL + '/jobList', {
                 params: {
                     jobName: name,
                 }
             })
             .pipe(
                 map(responseData => {
-                    return plainToClass(Job, responseData) as unknown as Array<Job>;
+                    const key = 'result';
+                    if (responseData.hasOwnProperty(key)) {
+                        return plainToClass(Job, responseData[key]) as unknown as Array<Job>;
+                    }
                 }),
                 catchError(errorRes => {
                     return throwError(errorRes);
@@ -71,14 +68,14 @@ export class JobService {
             // tslint:disable-next-line:no-shadowed-variable
             flatMap(job => {
                 return this.http
-                    .post(this.baseURL,
+                    .post(this.baseURL + '/jobs',
                         JSON.stringify(job),
                         {
-                            headers: new HttpHeaders({'Content-Type': 'application/json'})
+                            headers: new HttpHeaders({ 'Content-Type': 'application/json' })
                         })
                     .pipe(
                         map((responseData) => {
-                            return this.handle(responseData);
+                            return responseData;
                         }),
                         catchError(errorRes => {
                             return throwError(errorRes);
@@ -97,14 +94,14 @@ export class JobService {
             // tslint:disable-next-line:no-shadowed-variable
             flatMap(job => {
                 return this.http
-                    .put(this.baseURL,
+                    .put(this.baseURL + '/jobs',
                         JSON.stringify(job),
                         {
-                            headers: new HttpHeaders({'Content-Type': 'application/json'})
+                            headers: new HttpHeaders({ 'Content-Type': 'application/json' })
                         })
                     .pipe(
                         map((responseData) => {
-                            return this.handle(responseData);
+                            return responseData;
                         }),
                         catchError(errorRes => {
                             return throwError(errorRes);
@@ -117,7 +114,7 @@ export class JobService {
 
     deleteJob(name, partID) {
         return this.http
-            .delete(this.baseURL,
+            .delete(this.baseURL + '/jobs',
                 {
                     params: {
                         jobName: name,
@@ -126,7 +123,7 @@ export class JobService {
                 })
             .pipe(
                 map(responseData => {
-                    return this.handle(responseData);
+                    return responseData;
                 }),
                 catchError(errorRes => {
                     return throwError(errorRes);
@@ -146,29 +143,17 @@ export class JobService {
         return job.parts.map(x => new Job(name, partDict[x.partName], x.qoh));
     }
 
-    private handle(response) {
-
-        const failCode = plainToClass(ServerError, response).errorMessage;
-        const successCode = plainToClass(String, response);
-
-        let code;
-        if (null != failCode) {
-            code = failCode;
-        } else {
-            code = successCode;
-        }
-
-        return this.errors.get(code);
-    }
-
     /* orders */
 
     fetchOrders() {
         return this.http
-            .get(this.baseURL + '/order')
+            .get(this.baseURL + '/orders')
             .pipe(
                 map(responseData => {
-                    return plainToClass(OrderItem, responseData) as unknown as Array<OrderItem>;
+                    const key = 'result';
+                    if (responseData.hasOwnProperty(key)) {
+                        return plainToClass(OrderItem, responseData[key]) as unknown as Array<OrderItem>;
+                    }
                 }),
                 catchError(errorRes => {
                     return throwError(errorRes);
