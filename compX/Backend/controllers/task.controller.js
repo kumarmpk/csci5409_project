@@ -101,11 +101,11 @@ exports.createTask = (req, res, next) => {
     .then(() => {
       res.status(201).json({
         message: 'New job was successfully created',
-        data: { jobName: jobName, partId: partID, qty: qty },
+        result: { jobName: jobName, partId: partID, qty: qty },
       });
     })
     .catch((err) => {
-      if (err.message.includes('Duplicate entry')) {
+      if (err.original.sqlMessage.includes('Duplicate entry')) {
         err.message = `Job with jobName: ${jobName} and partID: ${partID} already exists`;
         err.statusCode = 409;
       }
@@ -149,7 +149,7 @@ exports.updateTask = (req, res, next) => {
 
       res.status(200).json({
         message: message,
-        data: { jobName: jobName, partId: partID, qty: qty },
+        result: { jobName: jobName, partId: partID, qty: qty },
       });
     })
     .catch((err) => {
