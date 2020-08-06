@@ -57,7 +57,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n   \"jobName\": \"job9\",\n   \"partId\": 4,\n   \"qty\": 2\n}",
+					"raw": "{\n   \"jobName\": \"job3\",\n   \"partId\": 4,\n   \"qty\": 2\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -84,7 +84,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n   \"jobName\": \"job10\",\n   \"partId\": 1,\n   \"userId\": \"userTwo\",\n   \"qty\": 7,\n   \"transactionName\": \"t2\"\n}",
+					"raw": "{\n   \"order\": [\n      {\n         \"jobName\": \"job9\",\n         \"partId\": 2,\n         \"userId\": \"userTwo\",\n         \"qty\": 7\n      },\n      {\n         \"jobName\": \"job9\",\n         \"partId\": 3,\n         \"userId\": \"userTwo\",\n         \"qty\": 7\n      }\n   ],\n   \"transactionName\": \"t2\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
