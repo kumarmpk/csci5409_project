@@ -176,6 +176,20 @@ app.get("/api/searchhistory", (_req, res) => {
   });
 });
 
+app.get("/api/getOrderedJobs",(req,res)=>{
+let sqlQuery = "Select * from JobParts"
+db.query(sqlQuery,(err,jobparts)=>{
+  if(err)
+  {
+    return res.status.send("error occured while fetching jobs in the database");
+  }
+  if(Object.keys(jobparts).length===0){
+    return res.status(404).send("No orders present in the database");
+  }
+  res.send(JSON.stringify(jobparts,undefined,4));
+})
+})
+
 function endTransaction(transactionName, endRes) {
   let trans_end = `XA end '${transactionName}' ;`;
 
