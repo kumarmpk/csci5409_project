@@ -2,6 +2,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/node,angular,react
 # Edit at https://www.toptal.com/developers/gitignore?templates=node,angular,react
 
+compX/frontend/src/assets/.*
+
 ### Angular ###
 ## Angular ##
 # compiled output
@@ -139,6 +141,7 @@ dist
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
+compX/backend/.vscode/
 
 ### react ###
 .DS_*
