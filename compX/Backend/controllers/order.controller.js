@@ -20,9 +20,10 @@ exports.getOrders = (req, res, next) => {
 
 // ------- HELPERS START -------
 
-async function jobExist(req) {
-  const jobName = req.body.jobName;
-  const partID = req.body.partId;
+async function jobExist(item) {
+  console.log(item);
+  const jobName = item.jobName;
+  const partID = item.partId;
 
   return Task.findOne({
     where: {
@@ -50,11 +51,11 @@ async function jobExist(req) {
     });
 }
 
-async function createOrder(req) {
-  const jobName = req.body.jobName;
-  const partID = req.body.partId;
-  const userID = req.body.userId;
-  const qty = req.body.qty;
+async function createOrder(item) {
+  const jobName = item.jobName;
+  const partID = item.partId;
+  const userID = item.userId;
+  const qty = item.qty;
 
   return Order.create({
     jobName: jobName,
@@ -74,7 +75,7 @@ async function createOrder(req) {
       if (!err.statusCode) {
         err.statusCode = 500;
       }
-      console.log('Error with order creation');
+
       throw err;
     });
 }
@@ -88,12 +89,15 @@ exports.createOrder = async function (req, res, next) {
   }
 
   const tName = req.body.transactionName;
+  const orderItems = req.body.order;
 
   try {
     await db.query(`XA START '${tName}';`);
 
-    await jobExist(req);
-    await createOrder(req);
+    for (var i = 0; i < orderItems.length; i++) {
+      await jobExist(orderItems[i]);
+      await createOrder(orderItems[i]);
+    }
 
     await db.query(`XA END '${tName}';`);
     await db.query(`XA PREPARE '${tName}';`);
@@ -102,11 +106,14 @@ exports.createOrder = async function (req, res, next) {
       .status(200)
       .json({ isPrepared: true, message: 'Created order successfully' });
   } catch (err) {
-    console.log(err);
-    await db.query(`XA ROLLBACK '${tName}';`);
+    try {
+      await db.query(`XA END '${tName}';`);
+      await db.query(`XA PREPARE '${tName}';`);
+      await db.query(`XA ROLLBACK '${tName}';`);
+    } catch {}
 
-    const status = error.statusCode || 500;
-    const message = error.message || 'Unknown error occured';
+    const status = err.statusCode || 500;
+    const message = err.message || 'Unknown error occured';
 
     console.log(message);
     res.status(200).json({
@@ -139,11 +146,11 @@ exports.finishOrder = async function (req, res, next) {
 
     res.status(200).json({
       operationSuccessful: true,
-      message: `Operation ${oType} is successfully`,
+      message: `Operation ${oType} is successful`,
     });
   } catch (err) {
-    const status = error.statusCode || 500;
-    const message = error.message || 'Unknown error occured';
+    const status = err.statusCode || 500;
+    const message = err.message || 'Unknown error occured';
 
     console.log(message);
     res.status(200).json({

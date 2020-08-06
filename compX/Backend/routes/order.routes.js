@@ -8,10 +8,16 @@ const router = express.Router();
 router.post(
   '/orders',
   [
-    body('jobName').exists().withMessage('Value is required').isString(),
-    body('partId').exists().withMessage('Value is required').isNumeric(),
-    body('userId').exists().withMessage('Value is required').isString(),
-    body('qty').exists().withMessage('Value is required').isNumeric(),
+    body('order.*.jobName')
+      .exists()
+      .withMessage('Value is required')
+      .isString(),
+    body('order.*.partId')
+      .exists()
+      .withMessage('Value is required')
+      .isNumeric(),
+    body('order.*.userId').exists().withMessage('Value is required').isString(),
+    body('order.*.qty').exists().withMessage('Value is required').isNumeric(),
     body('transactionName')
       .exists()
       .withMessage('Value is required')
