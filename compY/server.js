@@ -50,7 +50,7 @@ app.get("/parts/:id", (req, res) => {
     if (result.length === 0) {
       res.send(false);
     } else {
-      res.status(200).send(result);
+      res.send(result);
     }
   });
 });
@@ -115,10 +115,13 @@ app.get("/order", (req, res) => {
   });
 });
 
-app.post("/order", async (req, res) => {
+app.post("/order", async (req, result) => {
   // need start XA transaction here
+
+  const tName = req.body.transactionName;
+
   try {
-    await db.query(`XA START '${req.body.transactionName}';`);
+    await db.query(`XA START '${tName}';`);
 
     let sql = "INSERT INTO partordersY Values (?,?,?,?)";
     let values = [
@@ -128,67 +131,82 @@ app.post("/order", async (req, res) => {
       Number(req.body.qty),
     ];
 
-    await axios
-      .get(
-        `http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/parts/${Number(
-          req.body.partId
-        )}`
-      )
-      .then(async (res) => {
-        if (res.data[0].qoh - Number(req.body.qty) >= 0) {
-          await axios.put(
-            "http://companyy-env.eba-faeivpbr.us-east-1.elasticbeanstalk.com/parts/update",
-            {
-              partName: res.data[0].partName,
-              qoh: res.data[0].qoh - Number(req.body.qty),
-              partId: Number(req.body.partId),
-            }
-          );
+    let sql_part = `SELECT * FROM parts WHERE partId = ${Number(
+      req.body.partId
+    )}`;
 
-          await db.query(sql, values, async (err, result) => {
-            if (err) {
-              throw err;
-            }
-          });
+    await db.query(sql_part, async (err, res) => {
+      if (err) {
+        throw err;
+      }
+      if (res[0].qoh - Number(req.body.qty) >= 0) {
+        let sql_update =
+          "UPDATE parts SET partName = ?, qoh = ? where partId = ?";
+        let values_update = [
+          res[0].partName,
+          res[0].qoh - Number(req.body.qty),
+          Number(req.body.partId),
+        ];
 
-          await db.query(`XA END '${req.body.transactionName}';`);
-          await db.query(`XA PREPARE '${req.body.transactionName}';`);
+        await db.query(sql_update, values_update, (err, res) => {
+          if (err) {
+            throw err;
+          }
+        });
 
-          res.status(200).json({
+        await db.query(sql, values, async (err, res) => {
+          if (err) {
+            throw err;
+          }
+        });
+
+        await db.query(`XA END '${tName}';`);
+        await db.query(`XA PREPARE '${tName}';`);
+
+        result.send(
+          JSON.stringify({
             isPrepared: true,
             message: "Created order successfully",
-          });
-        } else {
-          await db.query(`XA ROLLBACK '${req.body.transactionName}';`);
+          })
+        );
+      } else {
+        try {
+          await db.query(`XA END '${tName}';`);
+          await db.query(`XA PREPARE '${tName}';`);
+          await db.query(`XA ROLLBACK '${tName}';`);
+        } catch {}
 
-          const status = error.statusCode || 500;
-          const message = error.message || "Unknown error occured";
-
-          console.log(message);
-          res.status(200).json({
-            statusCode: status,
+        result.send(
+          JSON.stringify({
             isPrepared: false,
-            message: message,
-          });
-        }
-      });
+          })
+        );
+      }
+    });
   } catch (error) {
+    try {
+      await db.query(`XA END '${tName}';`);
+      await db.query(`XA PREPARE '${tName}';`);
+      await db.query(`XA ROLLBACK '${tName}';`);
+    } catch {}
+
     console.log(error);
-    await db.query(`XA ROLLBACK '${req.body.transactionName}';`);
 
     const status = error.statusCode || 500;
     const message = error.message || "Unknown error occured";
 
     console.log(message);
-    res.status(200).json({
-      statusCode: status,
-      isPrepared: false,
-      message: message,
-    });
+    result.send(
+      JSON.stringify({
+        statusCode: status,
+        isPrepared: false,
+        message: message,
+      })
+    );
   }
 });
 
-app.post("/finishOrder", async (req, res) => {
+app.post("/finishOrder", async (req, result) => {
   const oType = req.body.operationType;
   const tName = req.body.transactionName;
 
@@ -201,20 +219,24 @@ app.post("/finishOrder", async (req, res) => {
       throw new Error("Unknown transaction type");
     }
 
-    res.status(200).json({
-      operationSuccessful: true,
-      message: `Operation ${oType} is successfully`,
-    });
-  } catch (err) {
+    result.send(
+      JSON.stringify({
+        operationSuccessful: true,
+        message: `Operation ${oType} is successfully`,
+      })
+    );
+  } catch (error) {
     const status = error.statusCode || 500;
     const message = error.message || "Unknown error occured";
 
     console.log(message);
-    res.status(200).json({
-      statusCode: status,
-      operationSuccessful: false,
-      message: message,
-    });
+    result.send(
+      JSON.stringify({
+        statusCode: status,
+        operationSuccessful: false,
+        message: message,
+      })
+    );
   }
 });
 
