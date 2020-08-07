@@ -23,7 +23,7 @@ export class JobItemComponent implements OnInit, OnDestroy {
   delSub: Subscription;
 
   constructor(private jobService: JobService,
-              private partService: PartService,
+              public partService: PartService,
               private router: Router) { }
 
   ngOnInit() {

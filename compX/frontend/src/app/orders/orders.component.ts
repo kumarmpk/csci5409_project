@@ -15,7 +15,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
   orderSub: Subscription;
 
   constructor(private jobService: JobService,
-              private partService: PartService) { }
+              public partService: PartService) { }
 
   ngOnInit() {
     this.onFetchOrders();
