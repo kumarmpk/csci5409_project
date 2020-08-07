@@ -15,7 +15,7 @@ export class PartService {
     error = null;
     partMap = new Map();
 
-    baseURL = 'https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/';
+    baseURL = 'https://us-central1-testproject-277421.cloudfunctions.net/cloudproject_compY/';
 
     constructor(private http: HttpClient) {
     }

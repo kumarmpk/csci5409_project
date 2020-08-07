@@ -9,6 +9,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 const axios = require("axios");
+// const { commit } = require("../../compY/database/db");
 
 var db = mySql.createConnection({
   host: "groupassignmentsdb.cibsusss4zqs.us-east-1.rds.amazonaws.com",
@@ -105,22 +106,6 @@ app.post("/api/getOrder", (req, res) => {
   }
 });
 
-//searching all the jobs present
-app.get("/api/searchhistory", (_req, res) => {
-  let sqlQuery = "Select * from Search order by date desc, time desc limit 10";
-  db.query(sqlQuery, (err, allSearchHistory) => {
-    if (err) {
-      return res
-        .status(404)
-        .send("error occurred while fetching jobs in the database");
-    }
-    if (Object.keys(allSearchHistory).length === 0) {
-      return res.status(404).send("No jobs present in the database");
-    }
-    res.send(JSON.stringify(allSearchHistory, undefined, 4));
-  });
-});
-
 //method to insert the order and in JobParts table
 app.post("/api/updateOrder", (req, res) => {
   let insertQuery = "Insert into JobParts values(?,?,?,?,?,?,?)";
@@ -167,9 +152,9 @@ app.post("/api/updateOrder", (req, res) => {
           .status(500)
           .send(
             " user has already ordered  parts " +
-              orderedPartIds +
-              " for Job " +
-              selectedResults[0].jobName
+            orderedPartIds +
+            " for Job " +
+            selectedResults[0].jobName
           );
       }
     });
@@ -237,14 +222,14 @@ function prepareTransaction(transactionName, prepRes) {
 }
 
 //To commit request for CompZ
-function updateOrder(request) {
+function PreparerequestDetailsforZ(request, result) {
   let insertQuery = "Insert into JobParts values(?,?,?,?,?,?,?)";
   if (request) {
     let array = request;
     let obj = "";
     let partIdList = [];
-    let jobName = req.body[0].jobName;
-    let userId = req.body[0].userId;
+    let jobName = request[0].jobName;
+    let userId = request[0].userId;
     for (obj of array) {
       partIdList.push(obj.partId);
     }
@@ -252,7 +237,7 @@ function updateOrder(request) {
     db.query(selectQuery, (select_err, selectedResults) => {
       if (!selectedResults || Object.keys(selectedResults).length === 0) {
         if (select_err) {
-          res.status(404).send("something went wrong with the database");
+          result("something went wrong with the database");
         }
         array.forEach((reqObj) => {
           values = [
@@ -266,123 +251,135 @@ function updateOrder(request) {
           ];
           db.query(insertQuery, values, (insert_err, results) => {
             if (insert_err) {
-              return res
-                .status(404)
-                .send("something went wrong in the database");
+              result("something went wrong in the database");
             }
           });
         });
-        res.send("Jobparts inserted successfully");
+        result("success");
       } else {
         orderedPartIds = [];
         selectedResults.forEach((element) => {
           orderedPartIds.push(element.partId);
         });
-        res
-          .status(500)
-          .send(
-            " user has already ordered  parts " +
-              orderedPartIds +
-              " for Job " +
-              selectedResults[0].jobName
-          );
+        result(" user has already ordered  parts " +
+          orderedPartIds +
+          " for Job " +
+          selectedResults[0].jobName)
       }
     });
   }
+
+
 }
 
-//TO rollback compZ
-function rollbackTransactionforCompZ(transactionName) {
-  endTransaction(transactionName, (endRes) => {
-    if (endRes === "success") {
-      prepareTransaction(transactionName, (prepRes) => {
-        if (prepRes === "success") {
-          rollbackTransaction(transactionName, (commRes) => {
-            res.send("rolled back success");
-          });
-        }
-      });
-    }
-  });
-}
 
 //API created for 2 phase commit
 app.post("/api/updateOrderusing2pc", (req, res) => {
   if (req.body) {
+
     let request = req.body;
-    transactionName = randomString.random(5);
+    transactionName = randomString.random(5)
     startTransaction(transactionName, (startRes) => {
       if (startRes === "success") {
-        resultX = PreparerequestDetailsforX(request, transactionName);
-        resultY = PreparerequestDetailsforY(request, transactionName);
-        if (resultx && resultY) {
-          if (resultx == "error" || resulty == "error") {
-            operationType = "rollback";
-            let rollbackForX = sendRollbackRequestToX(
-              transactionName,
-              operationType
-            );
-            let rollbackForY = sendRollbackRequestToY(
-              transactionName,
-              operationType
-            );
-            if (rollbackForX == "success" && rollbackForY == "succcess") {
-              res.send(rollbackTransactionforCompZ(transactionName));
-            }
-          } else {
-            operationType = "commit";
-            commitX = sendCommitToX(transactionName, operationType);
-            commitY = sendCommitToY(transactionName, operationType);
-            if (commitX == "success" && commitY == "success") {
-              endTransaction(transactionName, (endRes) => {
-                if (endRes === "success") {
-                  prepareTransaction(transactionName, (prepRes) => {
-                    if (prepRes === "success") {
-                      endTransaction(transactionName, (endRes) => {
-                        if (endRes === "success") {
-                          prepareTransaction(transactionName, (prepRes) => {
-                            if (prepRes === "success") {
-                              res.send(updateOrder(request));
-                            }
-                          });
-                        }
-                      });
-                    }
-                  });
-                }
-              });
-            } else {
-              operationType = "rollback";
-              let rollbackForX = sendRollbackRequestToX(
-                transactionName,
-                operationType
-              );
-              let rollbackForY = sendRollbackRequestToY(
-                transactionName,
-                operationType
-              );
-              if (rollbackForX == "success" && rollbackForY == "success") {
-                res.send(rollbackTransactionforCompZ(transactionName));
+        PreparerequestDetailsforX(request, transactionName, (resultX) => {
+          if (resultX == 'success') {
+            PreparerequestDetailsforY(request, transactionName, (resultY) => {
+              if (resultY == 'success') {
+                resultZ = PreparerequestDetailsforZ(request, (results) => {
+                  endTransaction(transactionName,
+                    (endRes) => {
+                      if (endRes == 'success') {
+                        prepareTransaction(transactionName, (prepRes) => {
+                          if (prepRes == 'success') {
+                            commitX = sendCommitToX(transactionName, operationType, (commitResultX) => {
+                              if (commitResultX == 'success')
+                                commitY = sendCommitToY(transactionName, operationType, (commitResultY) => {
+                                  if (commitResultY == 'success')
+                                    commitTransaction(transactionName, (commitRes) => {
+                                      if (commitRes == 'success') {
+                                        console.log('commited')
+                                      }
+                                      else {
+                                        operationType = "rollback";
+                                        sendRollbackRequestToX(transactionName, operationType, (rollbackResult) => {
+                                          sendRollbackRequestToY(transactionName, operationType, (rollbackResult) => {
+                                            rollbackTransaction(transactionName, (rollRes) => {
+                                              console.log('rollback success')
+                                            });
+                                          })
+                                        })
+                                      }
+                                    })
+                                })
+                            })
+                          }
+                          else {
+                            operationType = "rollback";
+                            sendRollbackRequestToX(transactionName, operationType, (rollbackResult) => {
+                              sendRollbackRequestToY(transactionName, operationType, (rollbackResult) => {
+                                rollbackTransaction(transactionName, (rollRes) => {
+                                  console.log('rollback success')
+                                });
+                              })
+                            })
+                          }
+                        })
+                      }
+                      else {
+                        operationType = "rollback";
+                        sendRollbackRequestToX(transactionName, operationType, (rollbackResult) => {
+                          sendRollbackRequestToY(transactionName, operationType, (rollbackResult) => {
+                            rollbackTransaction(transactionName, (rollRes) => {
+                              console.log('rollback success')
+                            });
+                          })
+                        })
+                      }
+                    })
+                })
               }
-            }
+              else {
+                operationType = "rollback";
+                sendRollbackRequestToX(transactionName, operationType, (rollbackResult) => {
+                  sendRollbackRequestToY(transactionName, operationType, (rollbackResult) => {
+                    rollbackTransaction(transactionName, (rollRes) => {
+                      console.log('rollback success')
+                    });
+                  })
+                })
+              }
+            })
           }
-        }
-      } else {
-        return res.status(500).send("failed");
+          else {
+            operationType = "rollback";
+            sendRollbackRequestToX(transactionName, operationType, (rollbackResult) => {
+              sendRollbackRequestToY(transactionName, operationType, (rollbackResult) => {
+                rollbackTransaction(transactionName, (rollRes) => {
+                  console.log('rollback success')
+                });
+              })
+            })
+          }
+
+        })
       }
     });
+  }
+  else {
+    return res.status(500).send('something wrong with the transaction');
   }
 });
 
 //To send prepare request for X
-function PreparerequestDetailsforX(request, transactionName) {
+function PreparerequestDetailsforX(request, transactionName, resultX) {
   let orderList = [];
+  result = {}
   for (var obj of request) {
     orderDetailForX = obj;
     orderList.push({
       jobName: obj.jobName,
       partId: obj.partId,
-      userid: obj.userId,
+      userId: obj.userId,
       qty: obj.qty,
     });
   }
@@ -393,15 +390,19 @@ function PreparerequestDetailsforX(request, transactionName) {
   };
 
   axios
-    .post("http://localhost:5000/api/orders", requestDetailsForX)
+    .post("https://enigmatic-everglades-12100.herokuapp.com/api/orders", requestDetailsForX)
     .then((res) => {
-      if (res) {
-        return res;
-      } else {
-        console.log("error");
+      if (res.data.isPrepared == true) {
+        resultX('success')
       }
-    });
+      else {
+        resultX(res.data.message)
+
+      }
+    }).catch(err => console.log(err.response.data));
+
 }
+
 
 //To send prepare request for Comp Y
 function PreparerequestDetailsforY(request, transactionName) {
@@ -421,80 +422,81 @@ function PreparerequestDetailsforY(request, transactionName) {
     transactionName: transactionName,
   };
   axios
-    .post("http://localhost:5001/api/orders", requestDetailsForY)
+    .post("https://us-central1-testproject-277421.cloudfunctions.net/cloudproject_compY/api/orders", requestDetailsForY)
     .then((res) => {
-      if (res) {
-        return res;
-      } else {
-        console.log("error");
+      if (res.data.isPrepared == true) {
+        resultX('success')
       }
-    });
+      else {
+        resultX(res.data.message)
+      }
+    }).catch(err => console.log(err.response.data));;
 }
 
 //To send commit request to X
-function sendCommitToX(transactionName, operationType) {
+function sendCommitToX(transactionName, operationType, commitResultX) {
   requestDetailsForX = {
     transactionName: transactionName,
     operationType: operationType,
   };
   axios
-    .post("http://localhost:5000/api/order/finish", requestDetailsForX)
+    .post("https://enigmatic-everglades-12100.herokuapp.com/api/order/finish", requestDetailsForX)
     .then((res) => {
-      if (res) {
-        return res;
+      if (res.operationSuccessful == true) {
+        commitResultX(res.data.message);
       } else {
-        console.log("error");
+        commitResultX(res.data.message);
       }
-    });
+    }).catch(err => console.log(err.response.data));;
 }
 
 //To send commit request to Y
-function sendCommitToX(transactionName, operationType) {
+function sendCommitToY(transactionName, operationType, commitResultY) {
   requestDetailsForY = {
     transactionName: transactionName,
     operationType: operationType,
   };
   axios
-    .post("http://localhost:5001/api/order/finish", requestDetailsForY)
+    .post("https://us-central1-testproject-277421.cloudfunctions.net/cloudproject_compY/api/order/finish", requestDetailsForY)
     .then((res) => {
-      if (res) {
-        return res;
+      if (res.operationSuccessful == true) {
+        commitResultY(res.data.message);
       } else {
-        console.log("error");
+        commitResultY(res.data.message);
       }
-    });
+    }).catch(err => console.log(err.response.data));;
 }
 
 //TO Send rollback request to X
-function sendRollbackRequestToX(transactionName, operationType) {
-  requestDetailsForY = {
+function sendRollbackRequestToX(transactionName, operationType, rollbackResponseX) {
+  requestDetailsForX = {
     transactionName: transactionName,
     operationType: operationType,
   };
   axios
-    .post("http://localhost:5001/api/order/finish", requestDetailsForY)
+    .post("https://enigmatic-everglades-12100.herokuapp.com/api/order/finish", requestDetailsForX)
     .then((res) => {
-      if (res) {
-        return res;
+      if (res.operationSuccessful == true) {
+        rollbackResponseX(res.data.message);
       } else {
-        console.log("error");
+        rollbackResponseX(res.data.message);
       }
     });
 }
 
 //To send rollback request to Y
-function sendRollbackRequestToY(transactionName, operationType) {
+function sendRollbackRequestToY(transactionName, operationType, rollbackResponseY) {
   requestDetailsForY = {
     transactionName: transactionName,
     operationType: operationType,
   };
   axios
-    .post("http://localhost:5001/api/order/finish", requestDetailsForY)
+    .post("https://us-central1-testproject-277421.cloudfunctions.net/cloudproject_compY/api/order/finish", requestDetailsForY)
     .then((res) => {
-      if (res) {
-        return res;
+      if (res.operationSuccessful == true) {
+        rollbackResponseY(res.data.message);
       } else {
-        console.log("error");
+        rollbackResponseY(res.data.message);
       }
     });
 }
