@@ -4,7 +4,7 @@ const app = express();
 const mySql = require("mysql");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const randomString = require('@supercharge/strings')
+const randomString = require("@supercharge/strings");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
@@ -105,6 +105,22 @@ app.post("/api/getOrder", (req, res) => {
   }
 });
 
+//searching all the jobs present
+app.get("/api/searchhistory", (_req, res) => {
+  let sqlQuery = "Select * from Search order by date desc, time desc limit 10";
+  db.query(sqlQuery, (err, allSearchHistory) => {
+    if (err) {
+      return res
+        .status(404)
+        .send("error occurred while fetching jobs in the database");
+    }
+    if (Object.keys(allSearchHistory).length === 0) {
+      return res.status(404).send("No jobs present in the database");
+    }
+    res.send(JSON.stringify(allSearchHistory, undefined, 4));
+  });
+});
+
 //method to insert the order and in JobParts table
 app.post("/api/updateOrder", (req, res) => {
   let insertQuery = "Insert into JobParts values(?,?,?,?,?,?,?)";
@@ -151,15 +167,14 @@ app.post("/api/updateOrder", (req, res) => {
           .status(500)
           .send(
             " user has already ordered  parts " +
-            orderedPartIds +
-            " for Job " +
-            selectedResults[0].jobName
+              orderedPartIds +
+              " for Job " +
+              selectedResults[0].jobName
           );
       }
     });
   }
 });
-
 
 function endTransaction(transactionName, endRes) {
   let trans_end = `XA end '${transactionName}' ;`;
@@ -172,7 +187,6 @@ function endTransaction(transactionName, endRes) {
     }
   });
 }
-
 
 function rollbackTransaction(transactionName, rollRes) {
   let trans_roll_query = `XA rollback '${transactionName}' ;`;
@@ -210,7 +224,6 @@ function startTransaction(transactionName, startRes) {
   });
 }
 
-
 function prepareTransaction(transactionName, prepRes) {
   let trans_prep_query = `XA prepare '${transactionName}' ;`;
 
@@ -236,9 +249,9 @@ function updateOrder(request) {
       partIdList.push(obj.partId);
     }
     let selectQuery = `select * from JobParts where jobName='${jobName}' and userId='${userId}' and partId in (${partIdList})`;
-    db.query(selectQuery, (err, selectedResults) => {
+    db.query(selectQuery, (select_err, selectedResults) => {
       if (!selectedResults || Object.keys(selectedResults).length === 0) {
-        if (err) {
+        if (select_err) {
           res.status(404).send("something went wrong with the database");
         }
         array.forEach((reqObj) => {
@@ -251,11 +264,11 @@ function updateOrder(request) {
             new Date().toLocaleTimeString(),
             reqObj.result,
           ];
-          db.query(insertQuery, values, (err, results) => {
-            if (err) {
+          db.query(insertQuery, values, (insert_err, results) => {
+            if (insert_err) {
               return res
                 .status(404)
-                .send("something went wrong with the database");
+                .send("something went wrong in the database");
             }
           });
         });
@@ -269,15 +282,14 @@ function updateOrder(request) {
           .status(500)
           .send(
             " user has already ordered  parts " +
-            orderedPartIds +
-            " for Job " +
-            selectedResults[0].jobName
+              orderedPartIds +
+              " for Job " +
+              selectedResults[0].jobName
           );
       }
     });
   }
 }
-
 
 //TO rollback compZ
 function rollbackTransactionforCompZ(transactionName) {
@@ -297,26 +309,31 @@ function rollbackTransactionforCompZ(transactionName) {
 //API created for 2 phase commit
 app.post("/api/updateOrderusing2pc", (req, res) => {
   if (req.body) {
-    let request = req.body
+    let request = req.body;
     transactionName = randomString.random(5);
     startTransaction(transactionName, (startRes) => {
       if (startRes === "success") {
-        resultX = PreparerequestDetailsforX(request, transactionName)
-        resultY = PreparerequestDetailsforY(request, transactionName)
+        resultX = PreparerequestDetailsforX(request, transactionName);
+        resultY = PreparerequestDetailsforY(request, transactionName);
         if (resultx && resultY) {
-          if (resultx == 'error' || resulty == 'error') {
-            operationType = 'rollback'
-            let rollbackForX = sendRollbackRequestToX(transactionName, operationType);
-            let rollbackForY = sendRollbackRequestToY(transactionName, operationType);
-            if (rollbackForX == 'success' && rollbackForY == 'succcess') {
+          if (resultx == "error" || resulty == "error") {
+            operationType = "rollback";
+            let rollbackForX = sendRollbackRequestToX(
+              transactionName,
+              operationType
+            );
+            let rollbackForY = sendRollbackRequestToY(
+              transactionName,
+              operationType
+            );
+            if (rollbackForX == "success" && rollbackForY == "succcess") {
               res.send(rollbackTransactionforCompZ(transactionName));
             }
-          }
-          else {
-            operationType = 'commit'
-            commitX = sendCommitToX(transactionName, operationType)
-            commitY = sendCommitToY(transactionName, operationType)
-            if (commitX == 'success' && commitY == 'success') {
+          } else {
+            operationType = "commit";
+            commitX = sendCommitToX(transactionName, operationType);
+            commitY = sendCommitToY(transactionName, operationType);
+            if (commitX == "success" && commitY == "success") {
               endTransaction(transactionName, (endRes) => {
                 if (endRes === "success") {
                   prepareTransaction(transactionName, (prepRes) => {
@@ -325,35 +342,35 @@ app.post("/api/updateOrderusing2pc", (req, res) => {
                         if (endRes === "success") {
                           prepareTransaction(transactionName, (prepRes) => {
                             if (prepRes === "success") {
-                              res.send(updateOrder(request))
+                              res.send(updateOrder(request));
                             }
                           });
                         }
                       });
-
                     }
                   });
                 }
               });
-
-            }
-            else {
-              operationType = 'rollback'
-              let rollbackForX = sendRollbackRequestToX(transactionName, operationType);
-              let rollbackForY = sendRollbackRequestToY(transactionName, operationType);
-              if (rollbackForX == 'success' && rollbackForY == 'success') {
-                res.send(rollbackTransactionforCompZ(transactionName))
+            } else {
+              operationType = "rollback";
+              let rollbackForX = sendRollbackRequestToX(
+                transactionName,
+                operationType
+              );
+              let rollbackForY = sendRollbackRequestToY(
+                transactionName,
+                operationType
+              );
+              if (rollbackForX == "success" && rollbackForY == "success") {
+                res.send(rollbackTransactionforCompZ(transactionName));
               }
             }
           }
         }
-      }
-      else {
+      } else {
         return res.status(500).send("failed");
       }
-
     });
-
   }
 });
 
@@ -361,165 +378,146 @@ app.post("/api/updateOrderusing2pc", (req, res) => {
 function PreparerequestDetailsforX(request, transactionName) {
   let orderList = [];
   for (var obj of request) {
-    orderDetailForX = obj
+    orderDetailForX = obj;
     orderList.push({
       jobName: obj.jobName,
       partId: obj.partId,
       userid: obj.userId,
-      qty: obj.qty
-    })
+      qty: obj.qty,
+    });
   }
 
   requestDetailsForX = {
     order: orderList,
-    transactionName: transactionName
-  }
+    transactionName: transactionName,
+  };
 
   axios
-    .post(
-      "http://localhost:5000/api/orders",
-      requestDetailsForX
-    ).then(res => {
+    .post("http://localhost:5000/api/orders", requestDetailsForX)
+    .then((res) => {
       if (res) {
         return res;
+      } else {
+        console.log("error");
       }
-      else {
-        console.log('error')
-      }
-    })
+    });
 }
 
 //To send prepare request for Comp Y
 function PreparerequestDetailsforY(request, transactionName) {
   let orderList = [];
   for (var obj of request) {
-    orderDetailForX = obj
+    orderDetailForX = obj;
     orderList.push({
       jobName: obj.jobName,
       partId: obj.partId,
       userid: obj.userId,
-      qty: obj.qty
-    })
+      qty: obj.qty,
+    });
   }
 
   requestDetailsForY = {
     order: orderList,
-    transactionName: transactionName
-  }
+    transactionName: transactionName,
+  };
   axios
-    .post(
-      "http://localhost:5001/api/orders",
-      requestDetailsForY
-    ).then(res => {
+    .post("http://localhost:5001/api/orders", requestDetailsForY)
+    .then((res) => {
       if (res) {
         return res;
+      } else {
+        console.log("error");
       }
-      else {
-        console.log('error')
-      }
-    })
+    });
 }
 
 //To send commit request to X
 function sendCommitToX(transactionName, operationType) {
   requestDetailsForX = {
     transactionName: transactionName,
-    operationType: operationType
-  }
+    operationType: operationType,
+  };
   axios
-    .post(
-      "http://localhost:5000/api/order/finish",
-      requestDetailsForX
-    ).then(res => {
+    .post("http://localhost:5000/api/order/finish", requestDetailsForX)
+    .then((res) => {
       if (res) {
         return res;
+      } else {
+        console.log("error");
       }
-      else {
-        console.log('error')
-      }
-    })
-
+    });
 }
 
 //To send commit request to Y
 function sendCommitToX(transactionName, operationType) {
   requestDetailsForY = {
     transactionName: transactionName,
-    operationType: operationType
-  }
+    operationType: operationType,
+  };
   axios
-    .post(
-      "http://localhost:5001/api/order/finish",
-      requestDetailsForY
-    ).then(res => {
+    .post("http://localhost:5001/api/order/finish", requestDetailsForY)
+    .then((res) => {
       if (res) {
         return res;
+      } else {
+        console.log("error");
       }
-      else {
-        console.log('error')
-      }
-    })
-
+    });
 }
-
 
 //TO Send rollback request to X
 function sendRollbackRequestToX(transactionName, operationType) {
   requestDetailsForY = {
     transactionName: transactionName,
-    operationType: operationType
-  }
+    operationType: operationType,
+  };
   axios
-    .post(
-      "http://localhost:5001/api/order/finish",
-      requestDetailsForY
-    ).then(res => {
+    .post("http://localhost:5001/api/order/finish", requestDetailsForY)
+    .then((res) => {
       if (res) {
         return res;
+      } else {
+        console.log("error");
       }
-      else {
-        console.log('error')
-      }
-    })
-
+    });
 }
 
 //To send rollback request to Y
 function sendRollbackRequestToY(transactionName, operationType) {
   requestDetailsForY = {
     transactionName: transactionName,
-    operationType: operationType
-  }
+    operationType: operationType,
+  };
   axios
-    .post(
-      "http://localhost:5001/api/order/finish",
-      requestDetailsForY
-    ).then(res => {
+    .post("http://localhost:5001/api/order/finish", requestDetailsForY)
+    .then((res) => {
       if (res) {
         return res;
+      } else {
+        console.log("error");
       }
-      else {
-        console.log('error')
-      }
-    })
+    });
 }
 
-
-
 app.get("/api/getOrderedJobs", (req, res) => {
-  let sqlQuery = "Select * from JobParts"
-  db.query(sqlQuery, (err, jobparts) => {
-    if (err) {
-      return res.status.send("error occured while fetching jobs in the database");
-    }
-    if (Object.keys(jobparts).length === 0) {
-      return res.status(404).send("No orders present in the database");
-    }
-    res.send(JSON.stringify(jobparts, undefined, 4));
-  })
-})
-
-
+  let userId = req.query.userId;
+  if (!userId) {
+    return res.status(500).send("UserId is Invalid");
+  } else {
+    let sqlQuery = `Select * from JobParts where userId = '${userId}';`;
+    db.query(sqlQuery, (err, jobparts) => {
+      if (err) {
+        return res
+          .status(500)
+          .send("error occured while fetching jobs in the database");
+      }
+      if (Object.keys(jobparts).length === 0) {
+        return res.status(404).send("No orders present in the database");
+      }
+      res.send(JSON.stringify(jobparts, undefined, 4));
+    });
+  }
+});
 
 //2PC trial
 app.get("/api/2pc", (_req, res) => {

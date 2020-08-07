@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import axios from "axios";
 import errMsg from "./errormessages";
+import CONST from "./constants";
 
 class SearchHistory extends Component {
   constructor(props) {
@@ -11,8 +12,10 @@ class SearchHistory extends Component {
   }
 
   async componentDidMount() {
+    let url = CONST.COMP_Z_URL + `searchhistory`;
+
     await axios
-      .get(`https://compzbackend-bzedu2xpga-uc.a.run.app/api/searchhistory`)
+      .get(url)
       .then((res) => {
         this.setState({
           searchHistory: res.data,
@@ -45,9 +48,7 @@ class SearchHistory extends Component {
                 {this.state.searchHistory.map((data) => {
                   return (
                     <tr key={Math.random()}>
-                      <th>
-                        <a href={`/login/${data.jobName}`}>{data.jobName}</a>
-                      </th>
+                      <th>{data.jobName}</th>
                       <td>{data.date}</td>
                       <td>{data.time}</td>
                     </tr>

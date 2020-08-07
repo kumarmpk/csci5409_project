@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import errMsg from "./errormessages";
 import axios from "axios";
+import CONST from "./constants";
 
 class Login extends Component {
   constructor(props) {
@@ -40,8 +41,11 @@ class Login extends Component {
         password: this.state.password,
         username: this.state.email,
       };
+
+      let url = CONST.COMP_Z_URL + `users`;
+
       await axios
-        .post(`https://compzbackend-bzedu2xpga-uc.a.run.app/api/users`, obj)
+        .post(url, obj)
         .then((res) => {
           if (res.status === 200) {
             localStorage.setItem("userId", this.state.email);

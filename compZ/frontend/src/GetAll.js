@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import axios from "axios";
 import { Modal, Button } from "react-bootstrap";
+import CONST from "./constants";
 
 class GetAll extends Component {
   constructor(props) {
@@ -18,13 +19,16 @@ class GetAll extends Component {
 
   async componentDidMount() {
     try {
+      let url = CONST.COMP_X_URL + `jobs`;
+
       await axios
-        .get(`https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX`)
+        //.get(`https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX`)
+        .get(url)
         .then((res) => {
           let objList = [];
           let resList = {};
           let exist = {};
-          resList = res.data;
+          resList = res.data.result;
 
           if (resList && resList.length) {
             for (let uniq of resList) {

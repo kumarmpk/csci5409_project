@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import axios from "axios";
 import { Modal, Button } from "react-bootstrap";
 import errMsg from "./errormessages";
+import CONST from "./constants";
 
 class Search extends Component {
   constructor(props) {
@@ -32,42 +33,36 @@ class Search extends Component {
       loading: true,
     });
 
+    let url = CONST.COMP_X_URL + `jobList?jobName=${searchText}`;
+
     await axios
-      .get(
-        `https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX?jobName=${searchText}`
-      )
-
+      .get(url)
       .then((res) => {
-        this.setState({
-          loading: false,
-        });
-        let objList = [];
-
         let resList = {};
+        if (res.data.result) {
+          resList = res.data.result;
 
-        let exist = {};
-        resList = res.data;
-
-        if (resList && resList.length) {
-          for (let uniq of resList) {
-            if (objList && objList.length > 0) {
-              exist = objList.find((c) => c.jobName === uniq.jobName);
-              if (!exist) {
-                objList.push(uniq);
-              }
-            } else {
-              objList.push(uniq);
-            }
+          if (resList && resList.length) {
+            this.setState({
+              jobpart: resList[0],
+              tableFlag: true,
+              errorMsg: "",
+              loading: false,
+            });
+          } else {
+            this.setState({
+              errorMsg: errMsg["10"],
+              loading: false,
+            });
           }
+        } else if (res.data.statusCode === 204) {
           this.setState({
-            jobpart: objList,
-            tableFlag: true,
-            errorMsg: "",
+            errorMsg: res.data.message,
             loading: false,
           });
         } else {
           this.setState({
-            errorMsg: errMsg["10"],
+            errorMsg: errMsg["4"],
             loading: false,
           });
         }
@@ -88,9 +83,12 @@ class Search extends Component {
         }
       });
 
-    await axios.post(
-      `https://compzbackend-bzedu2xpga-uc.a.run.app/api/jobs/${this.state.search}`
-    );
+    let url2 = CONST.COMP_Z_URL + `jobs/${this.state.search}`;
+
+    await axios
+      .post(url2)
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err));
   }
 
   onSearch = (e) => {
@@ -110,6 +108,8 @@ class Search extends Component {
   };
 
   searchResults() {
+    const jobpart = this.state.jobpart;
+
     return (
       <div>
         {this.state.tableFlag ? (
@@ -122,15 +122,19 @@ class Search extends Component {
                   </tr>
                 </thead>
                 <tbody>
-                  {this.state.jobpart.map((data) => {
-                    return (
-                      <tr key={Math.random()}>
-                        <th>
-                          <a href={`/login/${data.jobName}`}>{data.jobName}</a>
-                        </th>
-                      </tr>
-                    );
-                  })}
+                  {this.state.jobpart ? (
+                    <tr key={Math.random()}>
+                      <th>
+                        <a href={`/login/${jobpart.jobName}`}>
+                          {jobpart.jobName}
+                        </a>
+                      </th>
+                    </tr>
+                  ) : (
+                    <tr key={Math.random()}>
+                      <th>No Job matches the search.</th>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
