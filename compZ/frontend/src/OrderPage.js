@@ -76,14 +76,16 @@ class OrderPage extends Component {
         let compyURL = CONST.COMP_Y_URL + `parts/${partId}`;
         await axios
           .get(compyURL)
-          .then((res) => {
-            console.log(res);
+          .then((response) => {
+            console.log("res y", response);
 
-            if (Object.keys(res).length !== 0) {
+            let res = response.data;
+
+            if (Object.keys(res[0]).length !== 0) {
               let jobpartObj = jobparts.find(
                 (c) => c.partId === parseInt(partId)
               );
-              let partObj = res.data;
+              let partObj = res[0];
               jobpartObj.partName = partObj.partName;
               jobpartObj.avlQty = partObj.qoh;
               jobpartList.push(jobpartObj);
@@ -95,6 +97,7 @@ class OrderPage extends Component {
           })
           .catch((err) => {
             console.log(err);
+            console.log(err.response);
             this.setState({
               errorMsg: errMsg["4"],
               loading: false,
