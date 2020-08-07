@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Tabs, Tab } from "react-bootstrap";
 import OrderPage from "./OrderPage";
 import SearchHistory from "./SearchHistory";
-import SearchHistory from "./OrderedHistory";
+import OrderedHistory from "./OrderedHistory";
 import NotFound from "./NotFound";
 
 class HomePage extends Component {
@@ -39,10 +39,10 @@ class HomePage extends Component {
               <OrderPage orderObj={orderObj} />
             </Tab>
             <Tab eventKey="searchHistory" title="Search History">
-              <SearchHistory userId={this.state.userId} />
+              <SearchHistory />
             </Tab>
-            <Tab eventKey="searchHistory" title="Search History">
-              <OrderedHistory userId={this.state.userId} />
+            <Tab eventKey="orderedHistory" title="Ordered History">
+              <OrderedHistory />
             </Tab>
           </Tabs>
         </div>

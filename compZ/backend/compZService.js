@@ -105,6 +105,22 @@ app.post("/api/getOrder", (req, res) => {
   }
 });
 
+//searching all the jobs present
+app.get("/api/searchhistory", (_req, res) => {
+  let sqlQuery = "Select * from Search order by date desc, time desc limit 10";
+  db.query(sqlQuery, (err, allSearchHistory) => {
+    if (err) {
+      return res
+        .status(404)
+        .send("error occurred while fetching jobs in the database");
+    }
+    if (Object.keys(allSearchHistory).length === 0) {
+      return res.status(404).send("No jobs present in the database");
+    }
+    res.send(JSON.stringify(allSearchHistory, undefined, 4));
+  });
+});
+
 //method to insert the order and in JobParts table
 app.post("/api/updateOrder", (req, res) => {
   let insertQuery = "Insert into JobParts values(?,?,?,?,?,?,?)";

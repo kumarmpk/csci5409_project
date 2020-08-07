@@ -3,6 +3,7 @@ import axios from "axios";
 import errMsg from "./errormessages";
 import { Modal, Button } from "react-bootstrap";
 import { withRouter } from "react-router-dom";
+import CONST from "./constants";
 
 class OrderPage extends Component {
   constructor(props) {
@@ -30,12 +31,12 @@ class OrderPage extends Component {
   async getJobDetails(jobRes) {
     let jobName = this.state.jobName;
 
+    let compxURL = CONST.COMP_X_URL + `jobList?jobName=${jobName}`;
+
     await axios
-      .get(
-        `https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX?jobName=${jobName}`
-      )
+      .get(compxURL)
       .then((res) => {
-        let jobs = res.data;
+        let jobs = res.data.result;
         let obj = {};
         let partIdList = [];
 
@@ -55,6 +56,9 @@ class OrderPage extends Component {
         return jobRes(1);
       })
       .catch((err) => {
+        console.log(err);
+        console.log(err.response);
+
         this.setState({
           loading: false,
           errorMsg: errMsg["5"],
@@ -69,16 +73,17 @@ class OrderPage extends Component {
 
     if (partIdList && partIdList.length) {
       for (let partId of partIdList) {
+        let compyURL = CONST.COMP_Y_URL + `parts/${partId}`;
         await axios
-          .get(
-            `https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/parts/${partId}`
-          )
+          .get(compyURL)
           .then((res) => {
+            console.log(res);
+
             if (Object.keys(res).length !== 0) {
               let jobpartObj = jobparts.find(
                 (c) => c.partId === parseInt(partId)
               );
-              let partObj = res.data[0];
+              let partObj = res.data;
               jobpartObj.partName = partObj.partName;
               jobpartObj.avlQty = partObj.qoh;
               jobpartList.push(jobpartObj);
@@ -89,6 +94,7 @@ class OrderPage extends Component {
             });
           })
           .catch((err) => {
+            console.log(err);
             this.setState({
               errorMsg: errMsg["4"],
               loading: false,
@@ -148,11 +154,10 @@ class OrderPage extends Component {
   }
 
   async updateOrderDetailsinZ(requestDetails, resZ) {
+    let compzURL = CONST.COMP_Z_URL + `updateOrder`;
+
     await axios
-      .post(
-        "https://compzbackend-bzedu2xpga-uc.a.run.app/api/updateOrder",
-        requestDetails
-      )
+      .post(compzURL, requestDetails)
       .then((res) => {
         if (res.status === 200) {
           return resZ(200);
@@ -178,11 +183,10 @@ class OrderPage extends Component {
   }
 
   async checkOrderUser(requestDetails, resCheck) {
+    let compzURL = CONST.COMP_Z_URL + `getOrder`;
+
     await axios
-      .post(
-        "https://compzbackend-bzedu2xpga-uc.a.run.app/api/getOrder",
-        requestDetails
-      )
+      .post(compzURL, requestDetails)
       .then((res) => {
         console.log("res", res);
         if (res.data) {

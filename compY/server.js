@@ -1,30 +1,30 @@
-const express = require('express');
-const path = require('path');
-const cors = require('cors');
-const dbHelper = require('./database/db.helper');
-const db = require('./database/db');
+const express = require("express");
+const path = require("path");
+const cors = require("cors");
+const dbHelper = require("./database/db.helper");
+const db = require("./database/db");
 
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static(__dirname + '/build/'));
+app.use(express.static(__dirname + "/build/"));
 
 db.connect((err) => {
   if (err) {
     throw err;
   }
-  console.log('MySql Connected');
+  console.log("MySql Connected");
 });
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname + '/build/index.html'));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname + "/build/index.html"));
 });
 
-app.get('/parts', (req, res) => {
-  let sql = 'SELECT * FROM Parts';
+app.get("/parts", (req, res) => {
+  let sql = "SELECT * FROM Parts";
   db.query(sql, (err, result) => {
     if (err) {
       throw err;
@@ -33,7 +33,7 @@ app.get('/parts', (req, res) => {
   });
 });
 
-app.get('/parts/:id', (req, res) => {
+app.get("/parts/:id", (req, res) => {
   let sql = `SELECT * FROM Parts WHERE partId = ${Number(req.params.id)}`;
   db.query(sql, (err, result) => {
     if (err) {
@@ -47,14 +47,14 @@ app.get('/parts/:id', (req, res) => {
   });
 });
 
-app.post('/parts/create', (req, res) => {
-  let sql = 'SELECT * FROM Parts WHERE partId = ?';
+app.post("/parts/create", (req, res) => {
+  let sql = "SELECT * FROM Parts WHERE partId = ?";
   db.query(sql, Number(req.body.partId), (err, result) => {
     if (err) {
       throw err;
     }
     if (result.length === 0) {
-      let sql = 'INSERT INTO Parts VALUES (?,?,?)';
+      let sql = "INSERT INTO Parts VALUES (?,?,?)";
       let values = [
         Number(req.body.partId),
         req.body.partName,
@@ -64,22 +64,22 @@ app.post('/parts/create', (req, res) => {
         if (err) {
           throw err;
         }
-        res.send('create success');
+        res.send("create success");
       });
     } else {
-      res.send('Part with ID ' + req.body.partId + ' already exist');
+      res.send("Part with ID " + req.body.partId + " already exist");
     }
   });
 });
 
-app.put('/parts/update', (req, res) => {
-  let sql = 'SELECT * FROM Parts WHERE partId = ?';
+app.put("/parts/update", (req, res) => {
+  let sql = "SELECT * FROM Parts WHERE partId = ?";
   db.query(sql, Number(req.body.partId), (err, result) => {
     if (err) {
       throw err;
     }
     if (result.length !== 0) {
-      let sql = 'UPDATE Parts SET partName = ?, qoh = ? where partId = ?';
+      let sql = "UPDATE Parts SET partName = ?, qoh = ? where partId = ?";
       let values = [
         req.body.partName,
         Number(req.body.qoh),
@@ -89,16 +89,16 @@ app.put('/parts/update', (req, res) => {
         if (err) {
           throw err;
         }
-        res.send('update success');
+        res.send("update success");
       });
     } else {
-      res.send('Part with ID ' + req.body.partId + " doesn't exist");
+      res.send("Part with ID " + req.body.partId + " doesn't exist");
     }
   });
 });
 
-app.get('/order', (req, res) => {
-  let sql = 'SELECT * FROM PartOrders order by jobName, userId, partId';
+app.get("/order", (req, res) => {
+  let sql = "SELECT * FROM PartOrders order by jobName, userId, partId";
   db.query(sql, (err, result) => {
     if (err) {
       throw err;
@@ -120,7 +120,7 @@ async function createOrder(item) {
   return dbHelper
     .queryDb(query)
     .then((result) => {
-      return 'Success';
+      return "Success";
     })
     .catch((err) => {
       if (!err.statusCode) {
@@ -160,7 +160,7 @@ async function checkParts(item) {
       }
     })
     .then((result) => {
-      return 'Success';
+      return "Success";
     })
     .catch((err) => {
       if (!err.statusCode) {
@@ -170,7 +170,7 @@ async function checkParts(item) {
     });
 }
 
-app.post('/orders', async (req, res) => {
+app.post("/orders", async (req, res) => {
   // need start XA transaction here
 
   const tName = req.body.transactionName;
@@ -189,7 +189,7 @@ app.post('/orders', async (req, res) => {
 
     res.json({
       isPrepared: true,
-      message: 'Created order successfully',
+      message: "Created order successfully",
     });
   } catch (err) {
     console.log(err);
@@ -200,7 +200,7 @@ app.post('/orders', async (req, res) => {
     } catch {}
 
     const status = err.statusCode || 500;
-    const message = err.message || 'Unknown error occured';
+    const message = err.message || "Unknown error occured";
 
     console.log(message);
     res.status(200).json({
@@ -211,17 +211,17 @@ app.post('/orders', async (req, res) => {
   }
 });
 
-app.post('/orders/finish', async (req, res) => {
+app.post("/orders/finish", async (req, res) => {
   const oType = req.body.operationType;
   const tName = req.body.transactionName;
 
   try {
-    if (oType.toLowerCase() == 'commit') {
+    if (oType.toLowerCase() == "commit") {
       await dbHelper.queryDb(`XA COMMIT '${tName}';`);
-    } else if (oType.toLowerCase() == 'rollback') {
+    } else if (oType.toLowerCase() == "rollback") {
       await dbHelper.queryDb(`XA ROLLBACK '${tName}';`);
     } else {
-      throw new Error('Unknown transaction type');
+      throw new Error("Unknown transaction type");
     }
 
     res.status(200).json({
@@ -230,7 +230,7 @@ app.post('/orders/finish', async (req, res) => {
     });
   } catch (err) {
     const status = err.statusCode || 500;
-    const message = err.message || 'Unknown error occured';
+    const message = err.message || "Unknown error occured";
 
     console.log(message);
     res.status(200).json({

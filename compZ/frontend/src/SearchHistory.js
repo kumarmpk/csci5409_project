@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import axios from "axios";
 import errMsg from "./errormessages";
+import CONST from "./constants";
 
 class SearchHistory extends Component {
   constructor(props) {
@@ -11,8 +12,10 @@ class SearchHistory extends Component {
   }
 
   async componentDidMount() {
+    let url = CONST.COMP_Z_URL + `searchhistory`;
+
     await axios
-      .get(`https://compzbackend-bzedu2xpga-uc.a.run.app/api/searchhistory`)
+      .get(url)
       .then((res) => {
         this.setState({
           searchHistory: res.data,

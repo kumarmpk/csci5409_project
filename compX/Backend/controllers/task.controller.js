@@ -1,6 +1,6 @@
-const { Op } = require('sequelize');
-const { validationResult } = require('express-validator');
-const Task = require('../models/task');
+const { Op } = require("sequelize");
+const { validationResult } = require("express-validator");
+const Task = require("../models/task");
 
 exports.getTasks = (req, res, next) => {
   Task.findAll()
@@ -63,13 +63,11 @@ exports.getTaskByName = (req, res, next) => {
 
   Task.findAll({
     where: {
-      jobName: {
-        [Op.like]: '%' + jobName + '%',
-      },
+      jobName: jobName,
     },
   })
     .then((tasks) => {
-      if (tasks === undefined || tasks.length == 0) {
+      if (!tasks || tasks.length == 0) {
         const error = new Error(`Job with jobName: ${jobName} does not exist`);
         error.statusCode = 204;
         throw error;
@@ -100,12 +98,12 @@ exports.createTask = (req, res, next) => {
   Task.create({ jobName: jobName, partId: partID, qty: qty })
     .then(() => {
       res.status(201).json({
-        message: 'New job was successfully created',
+        message: "New job was successfully created",
         result: { jobName: jobName, partId: partID, qty: qty },
       });
     })
     .catch((err) => {
-      if (err.original.sqlMessage.includes('Duplicate entry')) {
+      if (err.original.sqlMessage.includes("Duplicate entry")) {
         err.message = `Job with jobName: ${jobName} and partID: ${partID} already exists`;
         err.statusCode = 409;
       }
@@ -145,7 +143,7 @@ exports.updateTask = (req, res, next) => {
         throw error;
       }
 
-      const message = 'Job has been updated successfully';
+      const message = "Job has been updated successfully";
 
       res.status(200).json({
         message: message,
@@ -184,7 +182,7 @@ exports.deleteTask = (req, res, next) => {
         throw error;
       } else {
         res.status(200).send({
-          message: 'Job has been delete successfully',
+          message: "Job has been delete successfully",
         });
       }
     })

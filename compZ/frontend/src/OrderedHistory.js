@@ -55,17 +55,18 @@ class OrderedHistory extends Component {
                 </tr>
               </thead>
               <tbody>
-                {this.state.searchHistory.map((data) => {
-                  return (
-                    <tr key={Math.random()}>
-                      <th>{data.jobName}</th>
-                      <td>{data.partName}</td>
-                      <td>{data.qty}</td>
-                      <td>{data.date}</td>
-                      <td>{data.time}</td>
-                    </tr>
-                  );
-                })}
+                {this.state.orderedHistory &&
+                  this.state.orderedHistory.map((data) => {
+                    return (
+                      <tr key={Math.random()}>
+                        <th>{data.jobName}</th>
+                        <td>{data.partName}</td>
+                        <td>{data.qty}</td>
+                        <td>{data.date}</td>
+                        <td>{data.time}</td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
