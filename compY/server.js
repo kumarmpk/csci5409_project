@@ -1,7 +1,7 @@
-const express = require('express');
-const path = require('path');
-const cors = require('cors');
-const mysql = require('mysql');
+const express = require("express");
+const path = require("path");
+const cors = require("cors");
+const mysql = require("mysql");
 
 const app = express();
 const port = process.env.PORT || 5001;
@@ -12,11 +12,11 @@ app.use(express.json());
 app.use(express.static(__dirname + "/build/"));
 
 const db = mysql.createConnection({
-  host: 'groupassignmentsdb.cibsusss4zqs.us-east-1.rds.amazonaws.com',
-  user: 'team_db',
-  password: '4A98d8Gx',
+  host: "groupassignmentsdb.cibsusss4zqs.us-east-1.rds.amazonaws.com",
+  user: "team_db",
+  password: "4A98d8Gx",
   port: 3306,
-  database: 'partcorp',
+  database: "partcorp",
 });
 
 db.connect((err) => {
@@ -37,8 +37,8 @@ function queryDb(query) {
   });
 }
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname + '/build/index.html'));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname + "/build/index.html"));
 });
 
 app.get("/parts", (req, res) => {
@@ -228,6 +228,7 @@ app.post("/orders", async (req, res) => {
 });
 
 app.post("/orders/finish", async (req, res) => {
+  console.log("1");
   const oType = req.body.operationType;
   const tName = req.body.transactionName;
 
@@ -239,12 +240,13 @@ app.post("/orders/finish", async (req, res) => {
     } else {
       throw new Error("Unknown transaction type");
     }
-
+    console.log("2");
     res.status(200).json({
       operationSuccessful: true,
       message: `Operation ${oType} is successful`,
     });
   } catch (err) {
+    console.log("err", err);
     const status = err.statusCode || 500;
     const message = err.message || "Unknown error occured";
 

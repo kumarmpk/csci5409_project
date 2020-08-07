@@ -157,7 +157,7 @@ class OrderPage extends Component {
   }
 
   async updateOrderDetailsinZ(requestDetails, resZ) {
-    let compzURL = CONST.COMP_Z_URL + `updateOrder`;
+    let compzURL = CONST.COMP_Z_URL + `updateOrderusing2pc`;
 
     await axios
       .post(compzURL, requestDetails)

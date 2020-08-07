@@ -152,9 +152,9 @@ app.post("/api/updateOrder", (req, res) => {
           .status(500)
           .send(
             " user has already ordered  parts " +
-            orderedPartIds +
-            " for Job " +
-            selectedResults[0].jobName
+              orderedPartIds +
+              " for Job " +
+              selectedResults[0].jobName
           );
       }
     });
@@ -173,14 +173,15 @@ function endTransaction(transactionName, endRes) {
   });
 }
 
-function rollbackTransaction(transactionName, rollRes) {
+function rollbackTransaction(transactionName) {
   let trans_roll_query = `XA rollback '${transactionName}' ;`;
 
   db.query(trans_roll_query, (trans_roll_err, trans_roll_res) => {
     if (trans_roll_err) {
       console.log("trans_roll_err", trans_roll_err);
     } else {
-      rollRes("success");
+      console.log("trans_roll_res", trans_roll_res);
+      console.log("success");
     }
   });
 }
@@ -261,126 +262,210 @@ function PreparerequestDetailsforZ(request, result) {
         selectedResults.forEach((element) => {
           orderedPartIds.push(element.partId);
         });
-        result(" user has already ordered  parts " +
-          orderedPartIds +
-          " for Job " +
-          selectedResults[0].jobName)
+        result(
+          " user has already ordered  parts " +
+            orderedPartIds +
+            " for Job " +
+            selectedResults[0].jobName
+        );
       }
     });
   }
-
-
 }
-
 
 //API created for 2 phase commit
 app.post("/api/updateOrderusing2pc", (req, res) => {
   if (req.body) {
     let request = req.body;
-    let currentstate = ''
-    transactionName = randomString.random(5)
+    let currentstate = "";
+    let transactionName = randomString.random(5);
+    let transactionNameX;
+    let transactionNameY;
+    console.log("1", currentstate);
     startTransaction(transactionName, (startRes) => {
+      console.log("2", currentstate);
       if (startRes === "success") {
-        currentstate= 'transasction started'
-        PreparerequestDetailsforX(request, transactionName, (resultX) => {
-          if (resultX == 'success') {
-            currentstate = 'request sent for preparing X'
-            PreparerequestDetailsforY(request, transactionName, (resultY) => {
-              currentstate = 'request sent for preparing Y'
-              if (resultY == 'success') {
-                currentstate = 'request sent for preparing Z'
-                resultZ = PreparerequestDetailsforZ(request, (results) => {
-                  endTransaction(transactionName,
-                    (endRes) => {
-                      if (endRes == 'success') {
-                        prepareTransaction(transactionName, (prepRes) => {
-                          if (prepRes == 'success') {
-                            commitX = sendCommitToX(transactionName, operationType, (commitResultX) => {
-                              currentstate = 'commit request sent to  X' 
-                              if (commitResultX == 'success')
-                                commitY = sendCommitToY(transactionName, operationType, (commitResultY) => {
-                                  currentstate = 'commit request sent to  Y' 
-                                  if (commitResultY == 'success')
-                                    commitTransaction(transactionName, (commitRes) => {
-                                      currentstate = 'commit started in Z' 
-                                      if (commitRes == 'success') {
-                                        res.send(`commit successful and state is ${current}`)
-                                      }
-                                      else {
-                                        operationType = "rollback";
-                                        sendRollbackRequestToX(transactionName, operationType, (rollbackResult) => {
-                                          sendRollbackRequestToY(transactionName, operationType, (rollbackResult) => {
-                                            rollbackTransaction(transactionName, (rollRes) => {
-                                              res.send('rollback successful')
-                                            });
-                                          })
-                                        })
-                                      }
-                                    })
-                                })
-                            })
-                          }
-                          else {
-                            operationType = "rollback";
-                            sendRollbackRequestToX(transactionName, operationType, (rollbackResult) => {
-                              sendRollbackRequestToY(transactionName, operationType, (rollbackResult) => {
-                                rollbackTransaction(transactionName, (rollRes) => {
-                                  res.send('rollback successful')
-                                });
-                              })
-                            })
-                          }
-                        })
-                      }
-                      else {
-                        operationType = "rollback";
-                        sendRollbackRequestToX(transactionName, operationType, (rollbackResult) => {
-                          sendRollbackRequestToY(transactionName, operationType, (rollbackResult) => {
-                            rollbackTransaction(transactionName, (rollRes) => {
-                              res.send('rollback successful')
-                            });
-                          })
-                        })
-                      }
-                    })
-                })
-              }
-              else {
-                operationType = "rollback";
-                sendRollbackRequestToX(transactionName, operationType, (rollbackResult) => {
-                  sendRollbackRequestToY(transactionName, operationType, (rollbackResult) => {
-                    rollbackTransaction(transactionName, (rollRes) => {
-                      res.send('rollback successful')
-                    });
-                  })
-                })
-              }
-            })
-          }
-          else {
-            operationType = "rollback";
-            sendRollbackRequestToX(transactionName, operationType, (rollbackResult) => {
-              sendRollbackRequestToY(transactionName, operationType, (rollbackResult) => {
-                rollbackTransaction(transactionName, (rollRes) => {
-                  res.send('rollback successful')
+        currentstate = "transasction started";
+        console.log("3", currentstate);
+        transactionNameX = transactionName + "_X";
+        PreparerequestDetailsforX(request, transactionNameX, (resultX) => {
+          console.log("4", currentstate, resultX);
+          if (resultX == "success") {
+            currentstate = "request sent for preparing X";
+            console.log("5", currentstate);
+            transactionNameY = transactionName + "_Y";
+            PreparerequestDetailsforY(request, transactionNameY, (resultY) => {
+              currentstate = "request sent for preparing Y";
+              console.log("6", currentstate);
+              if (resultY == "success") {
+                currentstate = "request sent for preparing Z";
+                console.log("7", currentstate);
+                PreparerequestDetailsforZ(request, (results) => {
+                  console.log("8", currentstate);
+                  endTransaction(transactionName, (endRes) => {
+                    console.log("9", endRes);
+                    if (endRes == "success") {
+                      prepareTransaction(transactionName, (prepRes) => {
+                        console.log("10", prepRes);
+                        if (prepRes == "success") {
+                          let operationType = "commit";
+                          sendCommitToX(
+                            transactionNameX,
+                            operationType,
+                            (commitResultX) => {
+                              currentstate = "commit request sent to  X";
+                              console.log("11", currentstate, commitResultX);
+                              if (commitResultX == "success") {
+                                sendCommitToY(
+                                  transactionNameY,
+                                  operationType,
+                                  (commitResultY) => {
+                                    currentstate = "commit request sent to  Y";
+                                    console.log(
+                                      "12",
+                                      currentstate,
+                                      commitResultY
+                                    );
+                                    if (commitResultY == "success") {
+                                      commitTransaction(
+                                        transactionName,
+                                        (commitRes) => {
+                                          currentstate = "commit started in Z";
+                                          console.log("13", currentstate);
+                                          if (commitRes == "success") {
+                                            res.send(
+                                              `commit successful and state is ${currentstate}`
+                                            );
+                                          } else {
+                                            let resZ;
+                                            let resY;
+                                            let operationType = "rollback";
+                                            sendRollbackRequestToX(
+                                              transactionNameX,
+                                              operationType
+                                            );
+                                            sendRollbackRequestToY(
+                                              transactionNameY,
+                                              operationType
+                                            );
+                                            rollbackTransaction(
+                                              transactionName
+                                            );
+                                            res.send("rollback successful");
+                                          }
+                                        }
+                                      );
+                                    } else {
+                                      let resZ;
+                                      let resY;
+                                      let operationType = "rollback";
+                                      sendRollbackRequestToX(
+                                        transactionNameX,
+                                        operationType
+                                      );
+                                      sendRollbackRequestToY(
+                                        transactionNameY,
+                                        operationType
+                                      );
+                                      rollbackTransaction(transactionName);
+                                      res.send("rollback successful");
+                                    }
+                                  }
+                                );
+                              } else {
+                                let resZ;
+                                let resY;
+                                let operationType = "rollback";
+                                sendRollbackRequestToX(
+                                  transactionNameX,
+                                  operationType
+                                );
+                                sendRollbackRequestToY(
+                                  transactionNameY,
+                                  operationType
+                                );
+                                rollbackTransaction(transactionName);
+                                res.send("rollback successful");
+                              }
+                            }
+                          );
+                        } else {
+                          let resZ;
+                          let resY;
+                          let operationType = "rollback";
+                          sendRollbackRequestToX(
+                            transactionNameX,
+                            operationType
+                          );
+                          sendRollbackRequestToY(
+                            transactionNameY,
+                            operationType
+                          );
+                          rollbackTransaction(transactionName);
+                          res.send("rollback successful");
+                        }
+                      });
+                    } else {
+                      let resZ;
+                      let resY;
+                      let operationType = "rollback";
+                      sendRollbackRequestToX(transactionNameX, operationType);
+                      sendRollbackRequestToY(transactionNameY, operationType);
+                      rollbackTransaction(transactionName);
+                      res.send("rollback successful");
+                    }
+                  });
                 });
-              })
-            })
+              } else {
+                let resZ;
+                let resY;
+                let operationType = "rollback";
+                sendRollbackRequestToX(transactionNameX, operationType);
+                sendRollbackRequestToY(transactionNameY, operationType);
+                rollbackTransaction(transactionName);
+                console.log("failed at yyyyyyyyyyyyyyyyy");
+                res.send("rollback successful");
+              }
+            });
+          } else {
+            let resZ;
+            let resY;
+            let operationType = "rollback";
+            sendRollbackRequestToX(transactionNameX, operationType);
+            sendRollbackRequestToY(transactionNameY, operationType);
+            rollbackTransaction(transactionName);
+            console.log("failed at XXXXXXXXXXXXXX");
+            res.send("rollback successful");
           }
-
-        })
+        });
       }
     });
+  } else {
+    return res.status(500).send("something wrong with the transaction");
   }
-  else {
-    return res.status(500).send('something wrong with the transaction');
+});
+
+app.get("/rollback", async (req, res) => {
+  try {
+    let transactionName = req.query.transName;
+    let operationType = "rollback";
+    let resZ;
+    sendRollbackRequestToX(transactionName, operationType, (resX) => {
+      console.log("resX", resX);
+    });
+
+    sendRollbackRequestToY(transactionName, operationType);
+    rollbackTransaction(transactionName);
+    res.send("rollback successful");
+  } catch (e) {
+    console.log("exception", e);
   }
 });
 
 //To send prepare request for X
 function PreparerequestDetailsforX(request, transactionName, resultX) {
   let orderList = [];
-  result = {}
+  result = {};
   for (var obj of request) {
     orderDetailForX = obj;
     orderList.push({
@@ -397,22 +482,23 @@ function PreparerequestDetailsforX(request, transactionName, resultX) {
   };
 
   axios
-    .post("https://enigmatic-everglades-12100.herokuapp.com/api/orders", requestDetailsForX)
+    .post(
+      "https://enigmatic-everglades-12100.herokuapp.com/api/orders",
+      requestDetailsForX
+    )
     .then((res) => {
+      console.log("PreparerequestDetailsforX res", res.data);
       if (res.data.isPrepared == true) {
-        resultX('success')
+        resultX("success");
+      } else {
+        resultX(res.data.message);
       }
-      else {
-        resultX(res.data.message)
-
-      }
-    }).catch(err => console.log(err.response.data));
-
+    })
+    .catch((err) => console.log("PreparerequestDetailsforX err", err));
 }
 
-
 //To send prepare request for Comp Y
-function PreparerequestDetailsforY(request, transactionName) {
+function PreparerequestDetailsforY(request, transactionName, resultY) {
   let orderList = [];
   for (var obj of request) {
     orderDetailForX = obj;
@@ -429,15 +515,19 @@ function PreparerequestDetailsforY(request, transactionName) {
     transactionName: transactionName,
   };
   axios
-    .post("https://us-central1-testproject-277421.cloudfunctions.net/cloudproject_compY/api/orders", requestDetailsForY)
+    .post(
+      "https://us-central1-testproject-277421.cloudfunctions.net/cloudproject_compY/orders",
+      requestDetailsForY
+    )
     .then((res) => {
+      console.log("PreparerequestDetailsforY res", res.data);
       if (res.data.isPrepared == true) {
-        resultX('success')
+        resultY("success");
+      } else {
+        resultY(res.data.message);
       }
-      else {
-        resultX(res.data.message)
-      }
-    }).catch(err => console.log(err.response.data));;
+    })
+    .catch((err) => console.log("PreparerequestDetailsforY err", err));
 }
 
 //To send commit request to X
@@ -447,14 +537,18 @@ function sendCommitToX(transactionName, operationType, commitResultX) {
     operationType: operationType,
   };
   axios
-    .post("https://enigmatic-everglades-12100.herokuapp.com/api/order/finish", requestDetailsForX)
+    .post(
+      "https://enigmatic-everglades-12100.herokuapp.com/api/orders/finish",
+      requestDetailsForX
+    )
     .then((res) => {
-      if (res.operationSuccessful == true) {
-        commitResultX(res.data.message);
+      if (res.data.operationSuccessful) {
+        commitResultX("success");
       } else {
         commitResultX(res.data.message);
       }
-    }).catch(err => console.log(err.response.data));;
+    })
+    .catch((err) => console.log("sendCommitToX", err.response.data));
 }
 
 //To send commit request to Y
@@ -464,48 +558,70 @@ function sendCommitToY(transactionName, operationType, commitResultY) {
     operationType: operationType,
   };
   axios
-    .post("https://us-central1-testproject-277421.cloudfunctions.net/cloudproject_compY/api/order/finish", requestDetailsForY)
+    .post(
+      "https://us-central1-testproject-277421.cloudfunctions.net/cloudproject_compY/orders/finish",
+      requestDetailsForY
+    )
     .then((res) => {
-      if (res.operationSuccessful == true) {
-        commitResultY(res.data.message);
+      if (res.data.operationSuccessful) {
+        commitResultY("success");
       } else {
         commitResultY(res.data.message);
       }
-    }).catch(err => console.log(err.response.data));;
+    })
+    .catch((err) => console.log(err.response.data));
 }
 
 //TO Send rollback request to X
-function sendRollbackRequestToX(transactionName, operationType, rollbackResponseX) {
+function sendRollbackRequestToX(
+  transactionName,
+  operationType,
+  rollbackResponseX
+) {
   requestDetailsForX = {
     transactionName: transactionName,
     operationType: operationType,
   };
   axios
-    .post("https://enigmatic-everglades-12100.herokuapp.com/api/order/finish", requestDetailsForX)
+    .post(
+      "https://enigmatic-everglades-12100.herokuapp.com/api/orders/finish",
+      requestDetailsForX
+    )
     .then((res) => {
-      if (res.operationSuccessful == true) {
+      console.log("XXX", res.data);
+      if (res.operationSuccessful) {
         rollbackResponseX(res.data.message);
       } else {
         rollbackResponseX(res.data.message);
       }
-    });
+    })
+    .catch((err) => console.log("err XXXX", err.response));
 }
 
 //To send rollback request to Y
-function sendRollbackRequestToY(transactionName, operationType, rollbackResponseY) {
-  requestDetailsForY = {
+function sendRollbackRequestToY(transactionName, operationType) {
+  console.log("1");
+
+  let requestDetailsForY = {
     transactionName: transactionName,
     operationType: operationType,
   };
+
   axios
-    .post("https://us-central1-testproject-277421.cloudfunctions.net/cloudproject_compY/api/order/finish", requestDetailsForY)
+    .post(
+      "https://us-central1-testproject-277421.cloudfunctions.net/cloudproject_compY/orders/finish",
+      //"http://localhost:5001/orders/finish",
+      requestDetailsForY
+    )
     .then((res) => {
-      if (res.operationSuccessful == true) {
-        rollbackResponseY(res.data.message);
+      console.log("YYY", res.data);
+      if (res.operationSuccessful) {
+        console.log(res.data.message);
       } else {
-        rollbackResponseY(res.data.message);
+        console.log(res.data.message);
       }
-    });
+    })
+    .catch((err) => console.log("err YYYY", err));
 }
 
 app.get("/api/getOrderedJobs", (req, res) => {
@@ -528,147 +644,19 @@ app.get("/api/getOrderedJobs", (req, res) => {
   }
 });
 
-//2PC trial
-app.get("/api/2pc", (_req, res) => {
-  let transactionName = "1";
-  let trans_start_query = `XA start '${transactionName}' ;`;
-
-  db.query(trans_start_query, (trans_start_err, trans_start_res) => {
-    if (trans_start_err) {
-      console.log("transaction start err", trans_start_err);
-      return;
+//searching all the jobs present
+app.get("/api/searchhistory", (_req, res) => {
+  let sqlQuery = "Select * from Search order by date desc, time desc limit 10";
+  db.query(sqlQuery, (err, allSearchHistory) => {
+    if (err) {
+      return res
+        .status(404)
+        .send("error occurred while fetching jobs in the database");
     }
-    console.log("transaction start res", trans_start_res);
-
-    let insert_query = "insert into parts values ('11', 'part11', '11');";
-
-    db.query(insert_query, (insert_err, insert_res) => {
-      if (insert_err) {
-        console.log("insert_err", insert_err);
-        endTransaction(transactionName, (endRes) => {
-          if (endRes === "success") {
-            prepareTransaction(transactionName, (prepRes) => {
-              if (prepRes === "success") {
-                rollbackTransaction(transactionName, (commRes) => {
-                  res.send("rolled back success");
-                });
-              }
-            });
-          }
-        });
-      } else {
-        console.log("insert_res", insert_res);
-
-        let select_query = "select * from parts where partId = 11;";
-
-        db.query(select_query, (select_err, select_res) => {
-          if (select_err) {
-            console.log("select_err", select_err);
-            endTransaction(transactionName, (endRes) => {
-              if (endRes === "success") {
-                prepareTransaction(transactionName, (prepRes) => {
-                  if (prepRes === "success") {
-                    rollbackTransaction(transactionName, (commRes) => {
-                      res.send("rolled back success");
-                    });
-                  }
-                });
-              }
-            });
-          } else {
-            console.log("select_res", select_res);
-            if (select_res && select_res.length > 0) {
-              axios
-                .get(
-                  `http://localhost:5000/api/2pc?transName=${transactionName}`
-                )
-                .then((company2_res) => {
-                  console.log("company2_res status", company2_res.status);
-                  console.log("company2_res data", company2_res.data);
-
-                  let company2_trans_name = company2_res.data;
-
-                  endTransaction(transactionName, (endRes) => {
-                    console.log("1");
-                    if (endRes === "success") {
-                      console.log("2");
-                      prepareTransaction(transactionName, (prepRes) => {
-                        console.log("3");
-                        if (prepRes === "success") {
-                          console.log("4");
-                          commitTransaction(transactionName, (commRes) => {
-                            console.log("5");
-                            axios
-                              .get(
-                                `http://localhost:5000/api/2pc_commit?transName=${company2_trans_name}`
-                              )
-                              .then((company2_comm_res) => {
-                                return res.status(200).send("success");
-                              })
-                              .catch((company2_comm_err) => {
-                                return res.status(500).send("failed");
-                              });
-                          });
-                        }
-                      });
-                    }
-                  });
-                })
-                .catch((company2_err) => {
-                  //console.log("company2_err", company2_err);
-                  console.log(
-                    "company2_err status",
-                    company2_err.response.status
-                  );
-                  console.log("company2_err data", company2_err.response.data);
-
-                  let company2_trans_name = company2_err.response.data;
-
-                  endTransaction(transactionName, (endRes) => {
-                    if (endRes === "success") {
-                      prepareTransaction(transactionName, (prepRes) => {
-                        if (prepRes === "success") {
-                          rollbackTransaction(transactionName, (commRes) => {
-                            endTransaction(company2_trans_name, (endRes) => {
-                              if (endRes === "success") {
-                                prepareTransaction(
-                                  company2_trans_name,
-                                  (prepRes) => {
-                                    if (prepRes === "success") {
-                                      commitTransaction(
-                                        company2_trans_name,
-                                        (commRes) => {
-                                          return res.status(500).send("failed");
-                                        }
-                                      );
-                                    }
-                                  }
-                                );
-                              }
-                            });
-                          });
-                        }
-                      });
-                    }
-                  });
-                });
-            } else {
-              endTransaction(transactionName, (endRes) => {
-                if (endRes === "success") {
-                  prepareTransaction(transactionName, (prepRes) => {
-                    if (prepRes === "success") {
-                      rollbackTransaction(transactionName, (commRes) => {
-                        res.send("rolled back success");
-                      });
-                    }
-                  });
-                }
-              });
-            }
-          }
-        });
-      }
-    });
+    if (Object.keys(allSearchHistory).length === 0) {
+      return res.status(404).send("No jobs present in the database");
+    }
+    res.send(JSON.stringify(allSearchHistory, undefined, 4));
   });
 });
 
@@ -676,4 +664,3 @@ app.get("/api/2pc", (_req, res) => {
 app.get("*", (_req, res) => {
   res.status(404).send("Invalid url, please enter valid url path");
 });
-
