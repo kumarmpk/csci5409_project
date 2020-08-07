@@ -3,6 +3,9 @@ import { JobService } from '../../shared/services/job.service';
 import { Subscription } from 'rxjs';
 import { Job } from '../../shared/models/job.model';
 import {Router} from '@angular/router';
+import {PartService} from '../../shared/services/part.service';
+import {first} from 'rxjs/operators';
+import {Part} from '../../shared/models/part.model';
 
 @Component({
   selector: 'app-job-item',
@@ -14,11 +17,13 @@ export class JobItemComponent implements OnInit, OnDestroy {
   query = '';
 
   jobs: Job[] = [];
+
   error = null;
   jobSub: Subscription;
   delSub: Subscription;
 
   constructor(private jobService: JobService,
+              private partService: PartService,
               private router: Router) { }
 
   ngOnInit() {
@@ -34,7 +39,7 @@ export class JobItemComponent implements OnInit, OnDestroy {
 
   onFilter(query: string) {
     this.query = query;
-    this.filteredJobs = this.jobs.filter(i => i.jobName.includes(query));
+    this.filteredJobs = this.jobs.filter(i => i.jobName.toLowerCase().includes(query.toLowerCase()));
   }
 
   onFetchJobs() {

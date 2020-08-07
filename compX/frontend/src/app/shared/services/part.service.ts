@@ -13,6 +13,7 @@ export class PartService {
     dataSource = new BehaviorSubject<Part[]>([]);
     data = this.dataSource.asObservable();
     error = null;
+    partMap = new Map();
 
     baseURL = 'https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/';
 
@@ -24,7 +25,10 @@ export class PartService {
             .get(this.baseURL + 'parts')
             .pipe(
                 map(responseData => {
-                    return plainToClass(Part, responseData) as unknown as Array<Part>;
+                    const items = plainToClass(Part, responseData) as unknown as Array<Part>;
+                    this.partMap.clear();
+                    items.forEach(i => this.partMap.set(i.partId, i.partName));
+                    return items;
                 }),
                 catchError(errorRes => {
                     return throwError(errorRes);

@@ -19,15 +19,15 @@
         <table class="table table-striped">
             <thead>
             <tr>
-                <th>Job name</th>
-                <th>Part ID</th>
+                <th>Job</th>
+                <th>Part</th>
                 <th>Quantity</th>
             </tr>
             </thead>
             <tbody>
                 <tr *ngFor="let job of filteredJobs">
                     <td>{{ job.jobName }}</td>
-                    <td>{{ job.partId }}</td>
+                    <td>{{ partService.partMap.get(job.partId) || job.partId }}</td>
                     <td>{{ job.qty }}</td>
                     <td>
                         <div class="btn btn-danger"
