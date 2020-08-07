@@ -304,7 +304,7 @@ app.post("/api/updateOrderusing2pc", (req, res) => {
                                     commitTransaction(transactionName, (commitRes) => {
                                       currentstate = 'commit started in Z' 
                                       if (commitRes == 'success') {
-                                        res.send(`commit successful and state is ${currentstate}`)
+                                        res.send(`commit successful and state is ${current}`)
                                       }
                                       else {
                                         operationType = "rollback";
@@ -676,3 +676,4 @@ app.get("/api/2pc", (_req, res) => {
 app.get("*", (_req, res) => {
   res.status(404).send("Invalid url, please enter valid url path");
 });
+
