@@ -1,8 +1,7 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const dbHelper = require('./database/db.helper');
-const db = require('./database/db');
+const mysql = require('mysql');
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -12,12 +11,31 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(__dirname + '/build/'));
 
+const db = mysql.createConnection({
+  host: 'groupassignmentsdb.cibsusss4zqs.us-east-1.rds.amazonaws.com',
+  user: 'team_db',
+  password: '4A98d8Gx',
+  port: 3306,
+  database: 'partcorp',
+});
+
 db.connect((err) => {
   if (err) {
     throw err;
   }
   console.log('MySql Connected');
 });
+
+function queryDb(query) {
+  return new Promise(function (resolve, reject) {
+    db.query(query, function (err, results, fields) {
+      if (err) {
+        return reject(err);
+      }
+      resolve(results);
+    });
+  });
+}
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname + '/build/index.html'));
@@ -117,8 +135,7 @@ async function createOrder(item) {
 
   let query = `INSERT INTO PartOrders (jobName, partId, userId, qty) VALUES ('${jobName}', ${partID}, '${userId}', ${qty})`;
 
-  return dbHelper
-    .queryDb(query)
+  return queryDb(query)
     .then((result) => {
       return 'Success';
     })
@@ -136,8 +153,7 @@ async function checkParts(item) {
 
   let query = `SELECT * FROM Parts WHERE partId = ${partID}`;
 
-  return dbHelper
-    .queryDb(query)
+  return queryDb(query)
     .then((parts) => {
       // eslint-disable-next-line eqeqeq
       if (parts === undefined || parts.length == 0) {
@@ -152,7 +168,7 @@ async function checkParts(item) {
       const dif = part.qoh - qty;
       if (dif >= 0) {
         let query = `UPDATE Parts SET partName = '${part.partName}', qoh = ${dif} WHERE partId = ${partID}`;
-        return dbHelper.queryDb(query);
+        return queryDb(query);
       } else {
         const error = new Error(`The current storage of parts is too low.`);
         error.statusCode = 500;
@@ -177,15 +193,15 @@ app.post('/orders', async (req, res) => {
   const orderItems = req.body.order;
 
   try {
-    await dbHelper.queryDb(`XA START '${tName}';`);
+    await queryDb(`XA START '${tName}';`);
 
     for (var i = 0; i < orderItems.length; i++) {
       await checkParts(orderItems[i]);
       await createOrder(orderItems[i]);
     }
 
-    await dbHelper.queryDb(`XA END '${tName}';`);
-    await dbHelper.queryDb(`XA PREPARE '${tName}';`);
+    await queryDb(`XA END '${tName}';`);
+    await queryDb(`XA PREPARE '${tName}';`);
 
     res.json({
       isPrepared: true,
@@ -194,9 +210,9 @@ app.post('/orders', async (req, res) => {
   } catch (err) {
     console.log(err);
     try {
-      await dbHelper.queryDb(`XA END '${tName}';`);
-      await dbHelper.queryDb(`XA PREPARE '${tName}';`);
-      await dbHelper.queryDb(`XA ROLLBACK '${tName}';`);
+      await queryDb(`XA END '${tName}';`);
+      await queryDb(`XA PREPARE '${tName}';`);
+      await queryDb(`XA ROLLBACK '${tName}';`);
     } catch {}
 
     const status = err.statusCode || 500;
@@ -217,9 +233,9 @@ app.post('/orders/finish', async (req, res) => {
 
   try {
     if (oType.toLowerCase() == 'commit') {
-      await dbHelper.queryDb(`XA COMMIT '${tName}';`);
+      await queryDb(`XA COMMIT '${tName}';`);
     } else if (oType.toLowerCase() == 'rollback') {
-      await dbHelper.queryDb(`XA ROLLBACK '${tName}';`);
+      await queryDb(`XA ROLLBACK '${tName}';`);
     } else {
       throw new Error('Unknown transaction type');
     }
