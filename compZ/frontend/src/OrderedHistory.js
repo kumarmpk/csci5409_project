@@ -1,21 +1,32 @@
 import React, { Component } from "react";
 import axios from "axios";
 import errMsg from "./errormessages";
+import CONST from "./constants";
 
-class SearchHistory extends Component {
+class OrderedHistory extends Component {
   constructor(props) {
     super(props);
+
+    let userId = localStorage.userId;
+
+    if (!userId) {
+      return this.props.history.push("/NotFound");
+    }
+
     this.state = {
-      searchHistory: [],
+      orderedHistory: [],
+      userId: userId,
     };
   }
 
   async componentDidMount() {
+    let url = CONST.COMP_Z_URL + `getOrderedJobs?userId=${this.state.userId}`;
+
     await axios
-      .get(`https://compzbackend-bzedu2xpga-uc.a.run.app/api/searchhistory`)
+      .get(url)
       .then((res) => {
         this.setState({
-          searchHistory: res.data,
+          orderedHistory: res.data,
         });
       })
       .catch((err) => {
@@ -36,9 +47,11 @@ class SearchHistory extends Component {
             <table className="table table-hover">
               <thead className="thead">
                 <tr>
-                  <th>Jobname</th>
-                  <th>Date</th>
-                  <th>Time</th>
+                  <th>Job Name</th>
+                  <th>Part Name</th>
+                  <th>Quantity</th>
+                  <th>Ordered Date</th>
+                  <th>Ordered Time</th>
                 </tr>
               </thead>
               <tbody>
@@ -46,6 +59,8 @@ class SearchHistory extends Component {
                   return (
                     <tr key={Math.random()}>
                       <th>{data.jobName}</th>
+                      <td>{data.partName}</td>
+                      <td>{data.qty}</td>
                       <td>{data.date}</td>
                       <td>{data.time}</td>
                     </tr>
@@ -60,4 +75,4 @@ class SearchHistory extends Component {
   }
 }
 
-export default SearchHistory;
+export default OrderedHistory;

@@ -206,29 +206,17 @@ class OrderPage extends Component {
         if (ord === 200 && requestDetails && requestDetails.length) {
           this.checkOrderUser(requestDetails, (resCheck) => {
             if (resCheck) {
-              this.updateOrderDetailsinY(requestDetails, (resy) => {
-                if (resy === 2) {
-                  this.updateOrderDetailsinZ(requestDetails, (resz) => {
-                    if (resz === 200) {
-                      this.updateOrderDetailsinX(requestDetails, (resx) => {
-                        if (resx === 1) {
-                          this.setState({
-                            loading: false,
-                            modalFlag: true,
-                            modalMsg:
-                              "The order has been successfully placed and updated in company X and Y",
-                            modalRoute: "1",
-                          });
-                        } else {
-                          this.errorRes(resx);
-                        }
-                      });
-                    } else {
-                      this.errorRes(resz);
-                    }
+              this.updateOrderDetailsinZ(requestDetails, (resz) => {
+                if (resz === 200) {
+                  this.setState({
+                    loading: false,
+                    modalFlag: true,
+                    modalMsg:
+                      "The order has been successfully placed and updated in company X and Y",
+                    modalRoute: "1",
                   });
                 } else {
-                  this.errorRes(resy);
+                  this.errorRes(resz);
                 }
               });
             } else {
@@ -239,71 +227,8 @@ class OrderPage extends Component {
           this.errorRes("5");
         }
       });
-    } catch (e) {}
-  }
-
-  async updateOrderDetailsinX(requestDetails, resx) {
-    let requestObj = {};
-
-    for (requestObj of requestDetails) {
-      await axios
-        .post(
-          `https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX/order`,
-          requestObj
-        )
-        .then((res) => {
-          if (res.data) {
-            if (res.data.errorMessage) {
-              if (res.data.errorMessage === "2") {
-                this.setState({
-                  errorMsg: errMsg["8"],
-                  loading: false,
-                  modalFlag: true,
-                  modalMsg: errMsg["8"],
-                });
-                return;
-              }
-            }
-          }
-          resx(1);
-        })
-        .catch((err) => {
-          if (err.response) {
-            this.setState({
-              errorMsg: err.response.data.error,
-              loading: false,
-            });
-          }
-        });
-    }
-  }
-
-  async updateOrderDetailsinY(requestDetails, resy) {
-    let requestObj = {};
-
-    for (requestObj of requestDetails) {
-      await axios
-        .post(
-          "https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/order",
-          requestObj
-        )
-        .then((res) => {
-          if (res.status !== 200) {
-            this.setState({
-              errorMsg: errMsg["4"],
-            });
-            return;
-          }
-          resy(2);
-        })
-        .catch((err) => {
-          console.log(err);
-          if (err && err.response && err.response.data) {
-            resy(err.response.data);
-          } else {
-            resy(4);
-          }
-        });
+    } catch (e) {
+      this.errorRes("5");
     }
   }
 
