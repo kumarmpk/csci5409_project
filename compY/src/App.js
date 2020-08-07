@@ -38,7 +38,7 @@ class App extends Component {
   getAllParts = async () => {
     await axios
       .get(
-        "https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/parts"
+        "https://us-central1-testproject-277421.cloudfunctions.net/cloudproject_compY/parts"
       )
       .then((res) => {
         this.setState({
@@ -50,7 +50,7 @@ class App extends Component {
   getOrderDetail = async () => {
     await axios
       .get(
-        "https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/order"
+        "https://us-central1-testproject-277421.cloudfunctions.net/cloudproject_compY/order"
       )
       .then((res) => {
         this.setState({
