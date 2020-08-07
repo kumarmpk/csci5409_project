@@ -5,7 +5,6 @@ const mySql = require("mysql");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const randomString = require('@supercharge/strings')
-const axios = require("axios")
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
@@ -302,7 +301,7 @@ function PreparerequestDetailsforX(request,transactionName)
     transactionName: transactionName
   }
  
-  await axios
+   axios
     .post(
       "http://localhost:5000/api/orders",
       requestDetailsForX
@@ -334,7 +333,7 @@ function PreparerequestDetailsforY(request,transactionName)
     order: orderList,
     transactionName: transactionName
   }
-  await axios
+   axios
     .post(
       "http://localhost:5001/api/orders",
       requestDetailsForY
@@ -355,7 +354,7 @@ function sendCommitToX(transactionName,operationType)
     transactionName:transactionName,
     operationType: operationType
   }
-  await axios
+   axios
   .post(
     "http://localhost:5000/api/order/finish",
     requestDetailsForX
@@ -377,7 +376,7 @@ function sendCommitToX(transactionName,operationType)
     transactionName:transactionName,
     operationType: operationType
   }
-  await axios
+   axios
   .post(
     "http://localhost:5001/api/order/finish",
     requestDetailsForY
@@ -400,7 +399,7 @@ function sendRollbackRequestToX(transactionName,operationType)
     transactionName:transactionName,
     operationType: operationType
   }
-  await axios
+   axios
   .post(
     "http://localhost:5001/api/order/finish",
     requestDetailsForY
@@ -422,7 +421,7 @@ function sendRollbackRequestToY(transactionName,operationType)
     transactionName:transactionName,
     operationType: operationType
   }
-  await axios
+   axios
   .post(
     "http://localhost:5001/api/order/finish",
     requestDetailsForY
