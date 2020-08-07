@@ -1,6 +1,6 @@
 const { validationResult } = require('express-validator');
 const db = require('../database/db');
-const Order = require('../models/Order');
+const Order = require('../models/order');
 const Task = require('../models/task');
 
 exports.getOrders = (req, res, next) => {

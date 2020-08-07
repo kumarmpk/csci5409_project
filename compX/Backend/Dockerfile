@@ -1,7 +1,7 @@
 FROM node:12-alpine
-WORKDIR /src/taskCorp
+WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm install
 COPY . .
-CMD ["npm", "start"]
 EXPOSE 5000
+CMD ["npm", "start"]
