@@ -2,7 +2,6 @@ const express = require("express");
 const path = require("path");
 const mysql = require("mysql");
 const cors = require("cors");
-const axios = require("axios");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -115,74 +114,84 @@ app.get("/order", (req, res) => {
   });
 });
 
+// helper method
+
+async function createOrder(item) {
+  const jobName = item.jobName;
+  const partID = item.partId;
+  const userId = item.userId;
+  const qty = item.qty;
+
+  let sql = "INSERT INTO partordersY Values (?,?,?,?)";
+  let values = [jobName, partID, userId, qty];
+
+  await db.query(sql, values, async (err, res) => {
+    if (err) {
+      throw err;
+    }
+  });
+}
+
+async function checkParts(item) {
+  const partID = item.partId;
+  const qty = item.qty;
+  let sql = `SELECT * FROM parts WHERE partId = ${Number(partID)}`;
+  await db.query(sql, async (err, res) => {
+    if (err) {
+      throw err;
+    }
+    if (res[0].qoh - Number(qty) >= 0) {
+      let sql = "UPDATE parts SET partName = ?, qoh = ? where partId = ?";
+      let values = [res[0].partName, res[0].qoh - Number(qty), Number(partID)];
+
+      await db.query(sql, values, (err, res) => {
+        if (err) {
+          throw err;
+        }
+      });
+      return true;
+    } else {
+      await db.query(`XA END '${tName}';`);
+      await db.query(`XA PREPARE '${tName}';`);
+      await db.query(`XA ROLLBACK '${tName}';`);
+      return false;
+    }
+  });
+}
+
 app.post("/order", async (req, result) => {
   // need start XA transaction here
 
   const tName = req.body.transactionName;
+  const orderItems = req.body.order;
 
   try {
     await db.query(`XA START '${tName}';`);
+    let index;
+    for (var i = 0; i < orderItems.length; i++) {
+      console.log(await checkParts(orderItems[i]));
 
-    let sql = "INSERT INTO partordersY Values (?,?,?,?)";
-    let values = [
-      req.body.jobName,
-      Number(req.body.partId),
-      req.body.userId,
-      Number(req.body.qty),
-    ];
+      await createOrder(orderItems[i]);
+      index = i;
+    }
 
-    let sql_part = `SELECT * FROM parts WHERE partId = ${Number(
-      req.body.partId
-    )}`;
-
-    await db.query(sql_part, async (err, res) => {
-      if (err) {
-        throw err;
-      }
-      if (res[0].qoh - Number(req.body.qty) >= 0) {
-        let sql_update =
-          "UPDATE parts SET partName = ?, qoh = ? where partId = ?";
-        let values_update = [
-          res[0].partName,
-          res[0].qoh - Number(req.body.qty),
-          Number(req.body.partId),
-        ];
-
-        await db.query(sql_update, values_update, (err, res) => {
-          if (err) {
-            throw err;
-          }
-        });
-
-        await db.query(sql, values, async (err, res) => {
-          if (err) {
-            throw err;
-          }
-        });
-
-        await db.query(`XA END '${tName}';`);
-        await db.query(`XA PREPARE '${tName}';`);
-
-        result.send(
-          JSON.stringify({
-            isPrepared: true,
-            message: "Created order successfully",
-          })
-        );
-      } else {
-        try {
-          await db.query(`XA END '${tName}';`);
-          await db.query(`XA PREPARE '${tName}';`);
-          await db.query(`XA ROLLBACK '${tName}';`);
-        } catch {}
-
-        result.send(
-          JSON.stringify({
-            isPrepared: false,
-          })
-        );
-      }
-    });
+    if (index == orderItems.length - 1) {
+      await db.query(`XA END '${tName}';`);
+      await db.query(`XA PREPARE '${tName}';`);
+      result.send(
+        JSON.stringify({
+          isPrepared: true,
+          message: "Created order successfully",
+        })
+      );
+    } else {
+      result.send(
+        JSON.stringify({
+          isPrepared: false,
+          message: "Part not succificient",
+        })
+      );
+    }
   } catch (error) {
     try {
       await db.query(`XA END '${tName}';`);
@@ -190,13 +199,10 @@ app.post("/order", async (req, result) => {
       await db.query(`XA ROLLBACK '${tName}';`);
     } catch {}
 
-    console.log(error);
-
     const status = error.statusCode || 500;
     const message = error.message || "Unknown error occured";
 
-    console.log(message);
-    result.send(
+    return result.send(
       JSON.stringify({
         statusCode: status,
         isPrepared: false,
@@ -219,18 +225,23 @@ app.post("/finishOrder", async (req, result) => {
       throw new Error("Unknown transaction type");
     }
 
-    result.send(
+    return result.send(
       JSON.stringify({
         operationSuccessful: true,
         message: `Operation ${oType} is successfully`,
       })
     );
   } catch (error) {
+    try {
+      await db.query(`XA END '${tName}';`);
+      await db.query(`XA PREPARE '${tName}';`);
+      await db.query(`XA ROLLBACK '${tName}';`);
+    } catch {}
     const status = error.statusCode || 500;
     const message = error.message || "Unknown error occured";
 
     console.log(message);
-    result.send(
+    return result.send(
       JSON.stringify({
         statusCode: status,
         operationSuccessful: false,
