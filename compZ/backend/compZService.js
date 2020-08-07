@@ -276,15 +276,19 @@ function PreparerequestDetailsforZ(request, result) {
 //API created for 2 phase commit
 app.post("/api/updateOrderusing2pc", (req, res) => {
   if (req.body) {
-
     let request = req.body;
+    let currentstate = ''
     transactionName = randomString.random(5)
     startTransaction(transactionName, (startRes) => {
       if (startRes === "success") {
+        currentstate= 'transasction started'
         PreparerequestDetailsforX(request, transactionName, (resultX) => {
           if (resultX == 'success') {
+            currentstate = 'request sent for preparing X'
             PreparerequestDetailsforY(request, transactionName, (resultY) => {
+              currentstate = 'request sent for preparing Y'
               if (resultY == 'success') {
+                currentstate = 'request sent for preparing Z'
                 resultZ = PreparerequestDetailsforZ(request, (results) => {
                   endTransaction(transactionName,
                     (endRes) => {
@@ -292,19 +296,22 @@ app.post("/api/updateOrderusing2pc", (req, res) => {
                         prepareTransaction(transactionName, (prepRes) => {
                           if (prepRes == 'success') {
                             commitX = sendCommitToX(transactionName, operationType, (commitResultX) => {
+                              currentstate = 'commit request sent to  X' 
                               if (commitResultX == 'success')
                                 commitY = sendCommitToY(transactionName, operationType, (commitResultY) => {
+                                  currentstate = 'commit request sent to  Y' 
                                   if (commitResultY == 'success')
                                     commitTransaction(transactionName, (commitRes) => {
+                                      currentstate = 'commit started in Z' 
                                       if (commitRes == 'success') {
-                                        console.log('commited')
+                                        res.send(`commit successful and state is ${currentstate}`)
                                       }
                                       else {
                                         operationType = "rollback";
                                         sendRollbackRequestToX(transactionName, operationType, (rollbackResult) => {
                                           sendRollbackRequestToY(transactionName, operationType, (rollbackResult) => {
                                             rollbackTransaction(transactionName, (rollRes) => {
-                                              console.log('rollback success')
+                                              res.send('rollback successful')
                                             });
                                           })
                                         })
@@ -318,7 +325,7 @@ app.post("/api/updateOrderusing2pc", (req, res) => {
                             sendRollbackRequestToX(transactionName, operationType, (rollbackResult) => {
                               sendRollbackRequestToY(transactionName, operationType, (rollbackResult) => {
                                 rollbackTransaction(transactionName, (rollRes) => {
-                                  console.log('rollback success')
+                                  res.send('rollback successful')
                                 });
                               })
                             })
@@ -330,7 +337,7 @@ app.post("/api/updateOrderusing2pc", (req, res) => {
                         sendRollbackRequestToX(transactionName, operationType, (rollbackResult) => {
                           sendRollbackRequestToY(transactionName, operationType, (rollbackResult) => {
                             rollbackTransaction(transactionName, (rollRes) => {
-                              console.log('rollback success')
+                              res.send('rollback successful')
                             });
                           })
                         })
@@ -343,7 +350,7 @@ app.post("/api/updateOrderusing2pc", (req, res) => {
                 sendRollbackRequestToX(transactionName, operationType, (rollbackResult) => {
                   sendRollbackRequestToY(transactionName, operationType, (rollbackResult) => {
                     rollbackTransaction(transactionName, (rollRes) => {
-                      console.log('rollback success')
+                      res.send('rollback successful')
                     });
                   })
                 })
@@ -355,7 +362,7 @@ app.post("/api/updateOrderusing2pc", (req, res) => {
             sendRollbackRequestToX(transactionName, operationType, (rollbackResult) => {
               sendRollbackRequestToY(transactionName, operationType, (rollbackResult) => {
                 rollbackTransaction(transactionName, (rollRes) => {
-                  console.log('rollback success')
+                  res.send('rollback successful')
                 });
               })
             })
