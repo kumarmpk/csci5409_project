@@ -53,6 +53,7 @@ class Search extends Component {
             this.setState({
               errorMsg: errMsg["10"],
               loading: false,
+              jobpart: [],
             });
           }
         } else if (res.data.statusCode === 204) {
