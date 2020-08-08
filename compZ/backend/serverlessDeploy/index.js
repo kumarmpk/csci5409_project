@@ -1,4 +1,5 @@
 const express = require("express");
+const functions = require('firebase-functions')
 const bodyParser = require("body-parser");
 const app = express();
 const mySql = require("mysql");
@@ -9,6 +10,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 const axios = require("axios");
+
 
 var db = mySql.createConnection({
   host: "groupassignmentsdb.cibsusss4zqs.us-east-1.rds.amazonaws.com",
@@ -25,7 +27,7 @@ db.connect((err) => {
   console.log("MySql Connected");
 });
 
-port = process.env.Port || 4000;
+port = 4000;
 app.listen(port, () => {
   console.log(`listening on ${port}`);
 });
@@ -504,7 +506,7 @@ function PreparerequestDetailsforY(request, transactionName, resultY) {
     orderList.push({
       jobName: obj.jobName,
       partId: obj.partId,
-      userid: obj.userId,
+      userId: obj.userId,
       qty: obj.qty,
     });
   }
@@ -609,7 +611,6 @@ function sendRollbackRequestToY(transactionName, operationType) {
   axios
     .post(
       "https://us-central1-testproject-277421.cloudfunctions.net/cloudproject_compY/orders/finish",
-      //"http://localhost:5001/orders/finish",
       requestDetailsForY
     )
     .then((res) => {
@@ -664,3 +665,4 @@ app.get("*", (_req, res) => {
   res.status(404).send("Invalid url, please enter valid url path");
 });
 
+exports.companyz=  functions.https.onRequest(app);
