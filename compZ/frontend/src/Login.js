@@ -66,6 +66,8 @@ class Login extends Component {
           }
         })
         .catch((err) => {
+          console.log(err);
+          console.log(err.response);
           if (err && err.response && err.response.data) {
             this.setState({
               errorMsg: err.response.data,
