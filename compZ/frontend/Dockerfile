@@ -4,8 +4,8 @@ WORKDIR /app
 
 COPY . /app
 
-RUN npm install
+RUN yarn global add serve
 
-CMD npm start
+CMD serve -s build
 
-EXPOSE 3000
+EXPOSE 5000

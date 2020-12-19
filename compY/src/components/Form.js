@@ -17,7 +17,7 @@ class Form extends Component {
     if (usage === "create" && partId !== "" && partName !== "" && qoh !== "") {
       await axios
         .post(
-          "https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/parts/create",
+          "https://us-central1-testproject-277421.cloudfunctions.net/cloudproject_compY/parts/create",
           this.state
         )
         .then((res) => {
@@ -30,7 +30,7 @@ class Form extends Component {
     if (usage === "update") {
       await axios
         .put(
-          "https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/parts/update",
+          "https://us-central1-testproject-277421.cloudfunctions.net/cloudproject_compY/parts/update",
           this.state
         )
         .then((res) => {

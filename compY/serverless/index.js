@@ -1,15 +1,15 @@
 const express = require("express");
-const path = require("path");
+//const path = require("path");
 const cors = require("cors");
 const mysql = require("mysql");
-
+const functions = require("firebase-functions");
 const app = express();
-const port = process.env.PORT || 5001;
+const port = 5001;
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static(__dirname + "/build/"));
+//app.use(express.static(__dirname + "/build/"));
 
 const db = mysql.createConnection({
   host: "groupassignmentsdb.cibsusss4zqs.us-east-1.rds.amazonaws.com",
@@ -37,9 +37,9 @@ function queryDb(query) {
   });
 }
 
-app.get("/", (req, res) => {
+/* app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname + "/build/index.html"));
-});
+}); */
 
 app.get("/parts", (req, res) => {
   let sql = "SELECT * FROM Parts";
@@ -228,7 +228,6 @@ app.post("/orders", async (req, res) => {
 });
 
 app.post("/orders/finish", async (req, res) => {
-  console.log("1");
   const oType = req.body.operationType;
   const tName = req.body.transactionName;
 
@@ -240,13 +239,12 @@ app.post("/orders/finish", async (req, res) => {
     } else {
       throw new Error("Unknown transaction type");
     }
-    console.log("2");
+
     res.status(200).json({
       operationSuccessful: true,
       message: `Operation ${oType} is successful`,
     });
   } catch (err) {
-    console.log("err", err);
     const status = err.statusCode || 500;
     const message = err.message || "Unknown error occured";
 
@@ -262,3 +260,5 @@ app.post("/orders/finish", async (req, res) => {
 app.listen(port, () => {
   console.log(`Server is runing on port: ${port}`);
 });
+
+exports.cloudproject_compY = functions.https.onRequest(app);

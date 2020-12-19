@@ -3,6 +3,7 @@ import axios from "axios";
 import errMsg from "./errormessages";
 import { Modal, Button } from "react-bootstrap";
 import { withRouter } from "react-router-dom";
+import CONST from "./constants";
 
 class OrderPage extends Component {
   constructor(props) {
@@ -30,12 +31,12 @@ class OrderPage extends Component {
   async getJobDetails(jobRes) {
     let jobName = this.state.jobName;
 
+    let compxURL = CONST.COMP_X_URL + `jobList?jobName=${jobName}`;
+
     await axios
-      .get(
-        `https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX?jobName=${jobName}`
-      )
+      .get(compxURL)
       .then((res) => {
-        let jobs = res.data;
+        let jobs = res.data.result;
         let obj = {};
         let partIdList = [];
 
@@ -55,6 +56,9 @@ class OrderPage extends Component {
         return jobRes(1);
       })
       .catch((err) => {
+        console.log(err);
+        console.log(err.response);
+
         this.setState({
           loading: false,
           errorMsg: errMsg["5"],
@@ -69,16 +73,17 @@ class OrderPage extends Component {
 
     if (partIdList && partIdList.length) {
       for (let partId of partIdList) {
+        let compyURL = CONST.COMP_Y_URL + `parts/${partId}`;
         await axios
-          .get(
-            `https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/parts/${partId}`
-          )
-          .then((res) => {
-            if (Object.keys(res).length !== 0) {
+          .get(compyURL)
+          .then((response) => {
+            let res = response.data;
+
+            if (Object.keys(res[0]).length !== 0) {
               let jobpartObj = jobparts.find(
                 (c) => c.partId === parseInt(partId)
               );
-              let partObj = res.data[0];
+              let partObj = res[0];
               jobpartObj.partName = partObj.partName;
               jobpartObj.avlQty = partObj.qoh;
               jobpartList.push(jobpartObj);
@@ -89,6 +94,8 @@ class OrderPage extends Component {
             });
           })
           .catch((err) => {
+            console.log(err);
+            console.log(err.response);
             this.setState({
               errorMsg: errMsg["4"],
               loading: false,
@@ -148,14 +155,21 @@ class OrderPage extends Component {
   }
 
   async updateOrderDetailsinZ(requestDetails, resZ) {
+    let compzURL = CONST.COMP_Z_URL + `updateOrderusing2pc`;
+
     await axios
-      .post(
-        "https://compzbackend-bzedu2xpga-uc.a.run.app/api/updateOrder",
-        requestDetails
-      )
+      .post(compzURL, requestDetails)
       .then((res) => {
-        if (res.status === 200) {
+        console.log("res", res);
+
+        if (
+          res.status === 200 &&
+          res.data.includes("commit") &&
+          !res.data.includes("rollback")
+        ) {
           return resZ(200);
+        } else {
+          resZ("6");
         }
       })
       .catch((err) => {
@@ -178,15 +192,12 @@ class OrderPage extends Component {
   }
 
   async checkOrderUser(requestDetails, resCheck) {
+    let compzURL = CONST.COMP_Z_URL + `getOrder`;
+
     await axios
-      .post(
-        "https://compzbackend-bzedu2xpga-uc.a.run.app/api/getOrder",
-        requestDetails
-      )
+      .post(compzURL, requestDetails)
       .then((res) => {
-        console.log("res", res);
         if (res.data) {
-          console.log("res data", res.data);
           resCheck(res.data.length === 0);
         } else {
           resCheck(false);
@@ -206,29 +217,17 @@ class OrderPage extends Component {
         if (ord === 200 && requestDetails && requestDetails.length) {
           this.checkOrderUser(requestDetails, (resCheck) => {
             if (resCheck) {
-              this.updateOrderDetailsinY(requestDetails, (resy) => {
-                if (resy === 2) {
-                  this.updateOrderDetailsinZ(requestDetails, (resz) => {
-                    if (resz === 200) {
-                      this.updateOrderDetailsinX(requestDetails, (resx) => {
-                        if (resx === 1) {
-                          this.setState({
-                            loading: false,
-                            modalFlag: true,
-                            modalMsg:
-                              "The order has been successfully placed and updated in company X and Y",
-                            modalRoute: "1",
-                          });
-                        } else {
-                          this.errorRes(resx);
-                        }
-                      });
-                    } else {
-                      this.errorRes(resz);
-                    }
+              this.updateOrderDetailsinZ(requestDetails, (resz) => {
+                if (resz === 200) {
+                  this.setState({
+                    loading: false,
+                    modalFlag: true,
+                    modalMsg:
+                      "The order has been successfully placed and updated in company X and Y",
+                    modalRoute: "1",
                   });
                 } else {
-                  this.errorRes(resy);
+                  this.errorRes(resz);
                 }
               });
             } else {
@@ -239,71 +238,8 @@ class OrderPage extends Component {
           this.errorRes("5");
         }
       });
-    } catch (e) {}
-  }
-
-  async updateOrderDetailsinX(requestDetails, resx) {
-    let requestObj = {};
-
-    for (requestObj of requestDetails) {
-      await axios
-        .post(
-          `https://qvysii6xyi.execute-api.us-east-1.amazonaws.com/companyX/order`,
-          requestObj
-        )
-        .then((res) => {
-          if (res.data) {
-            if (res.data.errorMessage) {
-              if (res.data.errorMessage === "2") {
-                this.setState({
-                  errorMsg: errMsg["8"],
-                  loading: false,
-                  modalFlag: true,
-                  modalMsg: errMsg["8"],
-                });
-                return;
-              }
-            }
-          }
-          resx(1);
-        })
-        .catch((err) => {
-          if (err.response) {
-            this.setState({
-              errorMsg: err.response.data.error,
-              loading: false,
-            });
-          }
-        });
-    }
-  }
-
-  async updateOrderDetailsinY(requestDetails, resy) {
-    let requestObj = {};
-
-    for (requestObj of requestDetails) {
-      await axios
-        .post(
-          "https://us-central1-cloudprojects-279901.cloudfunctions.net/companyy/order",
-          requestObj
-        )
-        .then((res) => {
-          if (res.status !== 200) {
-            this.setState({
-              errorMsg: errMsg["4"],
-            });
-            return;
-          }
-          resy(2);
-        })
-        .catch((err) => {
-          console.log(err);
-          if (err && err.response && err.response.data) {
-            resy(err.response.data);
-          } else {
-            resy(4);
-          }
-        });
+    } catch (e) {
+      this.errorRes("5");
     }
   }
 

@@ -17,7 +17,7 @@ export class JobService {
     private dataSource = new BehaviorSubject<Job[]>([]);
     data = this.dataSource.asObservable();
 
-    baseURL = 'http://localhost:5000/api';
+    baseURL = 'https://enigmatic-everglades-12100.herokuapp.com/api';
 
     constructor(private http: HttpClient, private partService: PartService) {
     }
